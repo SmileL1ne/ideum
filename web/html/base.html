@@ -1,0 +1,26 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{template "title" .}} - Idearoom</title>
+</head>
+
+<body>
+    <header>
+        <h1><a href="/">Idearoom</a></h1>
+    </header>
+    {{template "nav" .}}
+    <main>
+        {{template "main" .}}
+    </main>
+    <footer>
+        Contact us - <a href="https://01.alem.school/git/msarvaro">msarvaro</a> or
+        <a href="https://01.alem.school/git/nmagau">nmagau</a>
+    </footer>
+</body>
+
+</html>
+{{end}}

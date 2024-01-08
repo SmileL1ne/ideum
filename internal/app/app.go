@@ -28,12 +28,14 @@ func Run(cfg *config.Config) {
 	// Usecases
 	postUseCase := usecase.New(sqlrepo.New(db))
 
+	// Server creation
 	server := &http.Server{
 		Addr:     "127.0.0.1" + cfg.Http.Addr,
 		Handler:  h.NewRouter(logger, postUseCase),
 		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
+	// Starting the server
 	logger.Info("starting the server", slog.String("addr", cfg.Addr))
 	err = server.ListenAndServe()
 	logger.Error(err.Error())
