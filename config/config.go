@@ -35,7 +35,7 @@ func NewConfig() *Config {
 			Version: "1.0.0",
 		},
 		Http{
-			Addr:      ":7000",
+			Addr:      ":5000",
 			StaticDir: "./web/static",
 		},
 		Sqlite{

@@ -18,12 +18,14 @@ type routes struct {
 }
 
 func (r routes) home(w http.ResponseWriter, req *http.Request) {
-	info := entity.Post{
-		Title: "naaaaaaaaaaaaaaaaaaah",
-	}
+	info := entity.Post{}
+
 	err := r.p.MakeNewPost(info)
 	if err != nil {
 		panic(err)
 	}
-	w.Write([]byte(info.Title))
+
+	data := r.newTemplateData(req)
+
+	r.render(w, req, http.StatusOK, "./web/html/pages/home.html", data)
 }

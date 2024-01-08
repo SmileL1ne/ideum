@@ -20,3 +20,5 @@ func (uc *PostsUseCase) MakeNewPost(p entity.Post) error {
 	}
 	return nil
 }
+
+// func (uc *PostsUseCase) GetAllPosts() ([]entity.Post, error)
