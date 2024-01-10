@@ -7,5 +7,5 @@ type Post struct {
 	Content  string
 	Likes    int
 	Dislikes int
-	userID   int // Foreign key
+	UserID   int // Foreign key
 }

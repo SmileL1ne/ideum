@@ -1,7 +1,7 @@
 package http
 
 import (
-	"forum/internal/usecase"
+	"forum/internal/service"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -9,12 +9,12 @@ import (
 )
 
 type routes struct {
-	p         *usecase.PostsUseCase
+	p         service.PostService
 	l         *slog.Logger
 	tempCache map[string]*template.Template
 }
 
-func NewRouter(l *slog.Logger, p *usecase.PostsUseCase) http.Handler {
+func NewRouter(l *slog.Logger, p service.PostService) http.Handler {
 	router := http.NewServeMux()
 
 	tempCache, err := newTemplateCache()

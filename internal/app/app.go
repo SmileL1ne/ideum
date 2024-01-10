@@ -3,8 +3,8 @@ package app
 import (
 	"database/sql"
 	"forum/config"
-	"forum/internal/sqlrepo"
-	"forum/internal/usecase"
+	postRepository "forum/internal/repository/post"
+	postService "forum/internal/service/post"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,6 +13,10 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+/*
+	TODO: Add graceful shutdown
+*/
 
 func Run(cfg *config.Config) {
 	// Logger init
@@ -25,13 +29,13 @@ func Run(cfg *config.Config) {
 		os.Exit(1)
 	}
 
-	// Usecases
-	postUseCase := usecase.New(sqlrepo.New(db))
+	// Services
+	postservice := postService.New(postRepository.New(db))
 
 	// Server creation
 	server := &http.Server{
 		Addr:     "127.0.0.1" + cfg.Http.Addr,
-		Handler:  h.NewRouter(logger, postUseCase),
+		Handler:  h.NewRouter(logger, postservice),
 		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
