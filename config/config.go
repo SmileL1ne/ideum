@@ -39,7 +39,7 @@ func NewConfig() *Config {
 			StaticDir: "./web/static",
 		},
 		Sqlite{
-			Dsn: "file:./ex.db?cache=shared&mode=rwc",
+			Dsn: "file:./forum.db?cache=shared&mode=rwc",
 		},
 	}
 	return cfg
