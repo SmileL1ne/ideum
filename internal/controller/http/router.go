@@ -9,12 +9,12 @@ import (
 )
 
 type routes struct {
-	p         service.PostService
+	s         *service.Service
 	l         *slog.Logger
 	tempCache map[string]*template.Template
 }
 
-func NewRouter(l *slog.Logger, p service.PostService) http.Handler {
+func NewRouter(l *slog.Logger, s *service.Service) http.Handler {
 	router := http.NewServeMux()
 
 	tempCache, err := newTemplateCache()
@@ -25,7 +25,7 @@ func NewRouter(l *slog.Logger, p service.PostService) http.Handler {
 
 	r := &routes{
 		l:         l,
-		p:         p,
+		s:         s,
 		tempCache: tempCache,
 	}
 

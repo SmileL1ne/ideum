@@ -3,13 +3,13 @@ package app
 import (
 	"database/sql"
 	"forum/config"
-	postRepository "forum/internal/repository/post"
-	postService "forum/internal/service/post"
 	"log/slog"
 	"net/http"
 	"os"
 
 	h "forum/internal/controller/http"
+	"forum/internal/repository"
+	"forum/internal/service"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -29,13 +29,14 @@ func Run(cfg *config.Config) {
 		os.Exit(1)
 	}
 
-	// Services
-	postservice := postService.New(postRepository.New(db))
+	// Service
+	r := repository.New(db)
+	s := service.New(r)
 
 	// Server creation
 	server := &http.Server{
 		Addr:     "127.0.0.1" + cfg.Http.Addr,
-		Handler:  h.NewRouter(logger, postservice),
+		Handler:  h.NewRouter(logger, s),
 		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 

@@ -1,12 +1,16 @@
 package repository
 
-import "forum/internal/entity"
-
-type (
-
-	// TODO: Add new methods related to post manipulation (delete, update post)
-	PostRepository interface {
-		SavePost(p entity.Post) error
-		// RetrieveAllPosts() ([]entity.Post, error)
-	}
+import (
+	"database/sql"
+	"forum/internal/repository/posts"
 )
+
+type Repository struct {
+	Posts posts.PostRepository
+}
+
+func New(db *sql.DB) *Repository {
+	return &Repository{
+		Posts: posts.NewPostRepo(db),
+	}
+}

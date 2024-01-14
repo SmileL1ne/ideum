@@ -13,7 +13,7 @@ import (
 func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 	info := entity.Post{}
 
-	err := r.p.SavePost(info)
+	err := r.s.Post.SavePost(info)
 	if err != nil {
 		panic(err)
 	}
