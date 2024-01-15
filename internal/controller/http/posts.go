@@ -1,24 +1,23 @@
 package http
 
 import (
-	"forum/internal/entity"
 	"net/http"
 )
 
 /*
 	TODO:
-	- Finish home handler
+	- Implement all handlers
+	- For post create add method check - if post -> redirect to postCreatePost handler
 */
 
-func (r *routes) home(w http.ResponseWriter, req *http.Request) {
-	info := entity.Post{}
+func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte("Display particular post"))
+}
 
-	err := r.s.Post.SavePost(info)
-	if err != nil {
-		panic(err)
-	}
+func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte("Display new post creation page"))
+}
 
-	data := r.newTemplateData(req)
-
-	r.render(w, req, http.StatusOK, "home.html", data)
+func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte("Create a new post"))
 }

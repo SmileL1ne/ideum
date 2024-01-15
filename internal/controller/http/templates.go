@@ -1,7 +1,9 @@
 package http
 
 import (
+	"forum/web"
 	"html/template"
+	"io/fs"
 	"path/filepath"
 )
 
@@ -11,7 +13,7 @@ type templateData struct {
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	pages, err := filepath.Glob("./web/html/pages/*.html")
+	pages, err := fs.Glob(web.Files, "html/pages/*.html")
 	if err != nil {
 		return nil, err
 	}
@@ -20,12 +22,12 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		name := filepath.Base(page)
 
 		files := []string{
-			"./web/html/base.html",
-			"./web/html/partials/nav.html",
+			"html/base.html",
+			"html/partials/nav.html",
 			page,
 		}
 
-		ts, err := template.ParseFiles(files...)
+		ts, err := template.ParseFS(web.Files, files...)
 		if err != nil {
 			return nil, err
 		}
