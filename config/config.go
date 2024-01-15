@@ -7,7 +7,7 @@ type (
 	Config struct {
 		App
 		Http
-		Sqlite
+		Database
 	}
 
 	// Information about the app
@@ -22,8 +22,8 @@ type (
 		StaticDir string
 	}
 
-	Sqlite struct {
-		Dsn string
+	Database struct {
+		DSN string
 	}
 )
 
@@ -38,8 +38,8 @@ func NewConfig() *Config {
 			Addr:      ":5000",
 			StaticDir: "./web/static",
 		},
-		Sqlite{
-			Dsn: "file:./forum.db?cache=shared&mode=rwc",
+		Database{
+			DSN: "file:./internal/database/rabbit.db?cache=shared&mode=rwc",
 		},
 	}
 	return cfg

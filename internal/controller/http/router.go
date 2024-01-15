@@ -11,7 +11,6 @@ import (
 /*
 	TODO:
 	- Checkout comments in each registered handlers
-	- Add static handler
 	-- Add middlewares
 */
 
@@ -36,7 +35,7 @@ func NewRouter(l *slog.Logger, s *service.Service) http.Handler {
 		tempCache: tempCache,
 	}
 
-	router.HandleFunc("/static/", fileServer.ServeHTTP) // Add static handler
+	router.HandleFunc("/static/", fileServer.ServeHTTP)
 
 	router.HandleFunc("/", r.home)                   // Should be GET method
 	router.HandleFunc("/posts/view", r.postView)     // Should be GET method
