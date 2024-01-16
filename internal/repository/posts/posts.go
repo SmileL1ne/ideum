@@ -2,6 +2,7 @@ package posts
 
 import (
 	"database/sql"
+	"errors"
 	"forum/internal/entity"
 )
 
@@ -22,7 +23,6 @@ func NewPostRepo(db *sql.DB) *postRepository {
 	}
 }
 
-// TODO: Implement this method
 func (r *postRepository) SavePost(p entity.Post) (int, error) {
 	stmt := `INSERT INTO posts (title, content, created) VALUES (?, ?, datetime('now', 'utc', '+12 hours'))`
 
@@ -40,7 +40,17 @@ func (r *postRepository) SavePost(p entity.Post) (int, error) {
 }
 
 func (r *postRepository) GetPost(postId int) (entity.Post, error) {
-	return entity.Post{}, nil
+	stmt := `SELECT * FROM posts WHERE id=?`
+
+	post := entity.Post{}
+	if err := r.DB.QueryRow(stmt, postId).Scan(&post.Id, &post.Title, &post.Content, &post.Created); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entity.Post{}, entity.ErrNoRecord
+		}
+		return entity.Post{}, err
+	}
+
+	return post, nil
 }
 
 func (r *postRepository) GetAllPosts() ([]entity.Post, error) {

@@ -30,6 +30,27 @@ func (r *routes) clientError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
+func (r *routes) notFound(w http.ResponseWriter) {
+	r.clientError(w, http.StatusNotFound)
+}
+
+func (r *routes) badRequest(w http.ResponseWriter) {
+	r.clientError(w, http.StatusBadRequest)
+}
+
+func (r *routes) identifyStatus(w http.ResponseWriter, req *http.Request, status int, err error) {
+	switch {
+	case status >= 500:
+		r.serverError(w, req, err)
+	case status >= 400:
+		r.clientError(w, status)
+	default:
+		r.l.Error("Unknown status")
+		r.clientError(w, status)
+	}
+}
+
+// Render templates
 func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, page string, data templateData) {
 	tmpl, ok := r.tempCache[page]
 	if !ok {

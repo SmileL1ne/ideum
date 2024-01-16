@@ -13,6 +13,14 @@ import (
 var fileServer = http.FileServer(http.FS(web.Files))
 
 func (r *routes) home(w http.ResponseWriter, req *http.Request) {
+	if req.URL.Path != "/" {
+		r.clientError(w, http.StatusNotFound)
+		return
+	}
+	if req.Method != http.MethodGet {
+		r.clientError(w, http.StatusNotFound)
+		return
+	}
 
 	data := r.newTemplateData(req)
 

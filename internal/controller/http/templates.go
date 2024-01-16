@@ -1,6 +1,7 @@
 package http
 
 import (
+	"forum/internal/entity"
 	"forum/web"
 	"html/template"
 	"io/fs"
@@ -8,6 +9,7 @@ import (
 )
 
 type templateData struct {
+	Post entity.Post
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

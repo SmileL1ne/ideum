@@ -1,0 +1,12 @@
+{{define "title"}} Post #{{.Post.Id}}{{end}}
+
+{{define "main"}}
+    <div class="post">
+        <div style="background-color: bisque;">
+            <h2>{{.Post.Title}}</h2>
+        </div>
+        <div style="background-color: beige;">
+            <pre>{{.Post.Content}}</pre>
+        </div>
+    </div>
+{{end}}

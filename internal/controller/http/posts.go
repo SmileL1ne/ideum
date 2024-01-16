@@ -8,12 +8,28 @@ import (
 
 /*
 	TODO:
-	- for postCreateForm - add userID for foreign key (when creating links between tables)
+	- Check comments in methods
+	- For postCreateForm - add userID for foreign key (when creating links between tables)
 	- For post create add method check - if post -> redirect to postCreatePost handler
 */
 
 func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte("Display particular post"))
+	if req.Method != http.MethodGet {
+		r.clientError(w, http.StatusNotFound)
+		return
+	}
+
+	id := req.URL.Query().Get("id")
+	post, status, err := r.service.Post.GetPost(id)
+	if status != http.StatusOK {
+		r.identifyStatus(w, req, status, err)
+		return
+	}
+
+	data := r.newTemplateData(req)
+	data.Post = post
+
+	r.render(w, req, http.StatusOK, "view.html", data)
 }
 
 func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
@@ -25,7 +41,9 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	w.Write([]byte("Display new post creation page"))
+	data := r.newTemplateData(req) // Empty template data (the original struct has no fields)
+
+	r.render(w, req, http.StatusOK, "create.html", data)
 }
 
 func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
@@ -34,13 +52,20 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	title := "Black matter bubbles"
-	content := "I suggest there should be black matter bubbles..."
-	// userId := 10
+	if err := req.ParseForm(); err != nil {
+		r.clientError(w, http.StatusBadRequest)
+		return
+	}
 
-	id, err := r.s.Post.SavePost(entity.Post{Title: title, Content: content})
-	if err != nil {
-		r.serverError(w, req, err)
+	form := req.PostForm
+
+	title := form.Get("title")
+	content := form.Get("content")
+	// Add user id here
+
+	id, status, err := r.service.Post.SavePost(entity.Post{Title: title, Content: content})
+	if status != http.StatusOK {
+		r.identifyStatus(w, req, status, err)
 		return
 	}
 
