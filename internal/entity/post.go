@@ -9,5 +9,5 @@ type Post struct {
 	Title   string
 	Content string
 	Created time.Time
-	UserID  int // Foreign key
+	// UserID  int // Foreign key
 }

@@ -38,6 +38,10 @@ func (r *routes) badRequest(w http.ResponseWriter) {
 	r.clientError(w, http.StatusBadRequest)
 }
 
+func (r *routes) methodNotAllowed(w http.ResponseWriter) {
+	r.clientError(w, http.StatusMethodNotAllowed)
+}
+
 func (r *routes) identifyStatus(w http.ResponseWriter, req *http.Request, status int, err error) {
 	switch {
 	case status >= 500:

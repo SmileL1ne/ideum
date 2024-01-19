@@ -1,6 +1,18 @@
-{{define "title"}} Home {{end}}
+{{define "title"}} Ideum {{end}}
 
 {{define "main"}}
     <h2>Recent posts</h2>
-    <p>Nothing to see yet!</p>
+    {{if .Posts}}
+        <div>
+            {{range .Posts}}
+                <a href="/post/view" + {{.ID}}></a>
+                <div style="border: 1px solid black; padding: 5px;">
+                    <h4>{{.Title}}</h4>
+                    <pre>{{.Content}}</pre>
+                </div>
+            {{end}}
+        </div>
+    {{else}}
+        <p>Nothing to see yet!</p>     
+    {{end}}
 {{end}}

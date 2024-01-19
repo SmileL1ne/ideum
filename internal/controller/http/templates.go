@@ -9,7 +9,8 @@ import (
 )
 
 type templateData struct {
-	Post entity.Post
+	Posts []entity.Post
+	Post  entity.Post
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

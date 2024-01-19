@@ -63,5 +63,5 @@ func (ps *postService) GetPost(postId string) (entity.Post, int, error) {
 }
 
 func (uc *postService) GetAllPosts() ([]entity.Post, error) {
-	return nil, nil
+	return uc.postRepo.GetAllPosts()
 }

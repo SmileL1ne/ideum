@@ -15,7 +15,7 @@ import (
 
 func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.clientError(w, http.StatusNotFound)
+		r.notFound(w)
 		return
 	}
 
@@ -37,7 +37,7 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		r.postCreatePost(w, req)
 		return
 	} else if req.Method != http.MethodGet {
-		r.clientError(w, http.StatusMethodNotAllowed)
+		r.methodNotAllowed(w)
 		return
 	}
 
@@ -48,12 +48,12 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.clientError(w, http.StatusMethodNotAllowed)
+		r.methodNotAllowed(w)
 		return
 	}
 
 	if err := req.ParseForm(); err != nil {
-		r.clientError(w, http.StatusBadRequest)
+		r.badRequest(w)
 		return
 	}
 
@@ -61,7 +61,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	title := form.Get("title")
 	content := form.Get("content")
-	// Add user id here
+	// Add user id here (foreign key)
 
 	id, status, err := r.service.Post.SavePost(entity.Post{Title: title, Content: content})
 	if status != http.StatusOK {
