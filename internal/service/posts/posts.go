@@ -15,7 +15,7 @@ TODO:
 - Add postID validation in GetPost method
 */
 type PostService interface {
-	SavePost(entity.Post) (int, int, error)
+	SavePost(*entity.PostCreateForm) (int, int, error)
 	GetPost(postId string) (entity.Post, int, error)
 	GetAllPosts() ([]entity.Post, error)
 }
@@ -31,14 +31,16 @@ func NewPostsService(r posts.PostRepository) *postService {
 	}
 }
 
-func (ps *postService) SavePost(p entity.Post) (int, int, error) {
-	id, err := ps.postRepo.SavePost(p)
+func (ps *postService) SavePost(p *entity.PostCreateForm) (int, int, error) {
+	if !isRightPost(p) {
+		return 0, http.StatusUnprocessableEntity, nil
+	}
 
-	// Post validation here
-
+	id, err := ps.postRepo.SavePost(*p)
 	if err != nil {
 		return 0, http.StatusInternalServerError, err
 	}
+
 	return id, http.StatusOK, nil
 }
 

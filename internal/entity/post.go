@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"forum/internal/service/validator"
+	"time"
+)
 
 // TODO: Add database related metatags
 
@@ -10,4 +13,10 @@ type Post struct {
 	Content string
 	Created time.Time
 	// UserID  int // Foreign key
+}
+
+type PostCreateForm struct {
+	Title   string
+	Content string
+	validator.Validator
 }

@@ -11,6 +11,7 @@ import (
 type templateData struct {
 	Posts []entity.Post
 	Post  entity.Post
+	Form  any
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

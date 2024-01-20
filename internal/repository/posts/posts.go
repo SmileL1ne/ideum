@@ -8,7 +8,7 @@ import (
 
 // TODO: Add new methods related to post manipulation (delete, update post)
 type PostRepository interface {
-	SavePost(entity.Post) (int, error)
+	SavePost(entity.PostCreateForm) (int, error)
 	GetPost(postId int) (entity.Post, error)
 	GetAllPosts() ([]entity.Post, error)
 }
@@ -23,7 +23,7 @@ func NewPostRepo(db *sql.DB) *postRepository {
 	}
 }
 
-func (r *postRepository) SavePost(p entity.Post) (int, error) {
+func (r *postRepository) SavePost(p entity.PostCreateForm) (int, error) {
 	query := `INSERT INTO posts (title, content, created) VALUES ($1, $2, datetime('now', 'utc', '+12 hours'))`
 
 	result, err := r.DB.Exec(query, p.Title, p.Content)
@@ -33,7 +33,7 @@ func (r *postRepository) SavePost(p entity.Post) (int, error) {
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	return int(id), nil
