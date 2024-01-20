@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"forum/web"
 	"net/http"
 )
@@ -29,7 +28,6 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 		r.serverError(w, req, err)
 		return
 	}
-	fmt.Println(posts)
 
 	data := r.newTemplateData(req)
 	data.Posts = posts

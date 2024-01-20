@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"forum/internal/entity"
 	"net/http"
+	"strings"
 )
 
 /*
@@ -19,7 +20,13 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id := req.URL.Query().Get("id")
+	urlParts := strings.Split(req.URL.Path, "/")
+	if len(urlParts) != 4 {
+		r.notFound(w)
+		return
+	}
+
+	id := urlParts[len(urlParts)-1]
 	post, status, err := r.service.Post.GetPost(id)
 	if status != http.StatusOK {
 		r.identifyStatus(w, req, status, err)

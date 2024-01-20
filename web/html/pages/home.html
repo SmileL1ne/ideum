@@ -5,11 +5,12 @@
     {{if .Posts}}
         <div>
             {{range .Posts}}
-                <a href="/post/view" + {{.ID}}></a>
-                <div style="border: 1px solid black; padding: 5px;">
-                    <h4>{{.Title}}</h4>
-                    <pre>{{.Content}}</pre>
-                </div>
+                <a href="/post/view/{{.Id}}">
+                    <div style="border: 1px solid black; padding: 5px;">
+                        <h4>{{.Title}}</h4>
+                        <pre>{{.Content}}</pre>
+                    </div>
+                </a>
             {{end}}
         </div>
     {{else}}
