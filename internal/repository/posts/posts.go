@@ -9,8 +9,8 @@ import (
 // TODO: Add new methods related to post manipulation (delete, update post)
 type PostRepository interface {
 	SavePost(entity.PostCreateForm) (int, error)
-	GetPost(postId int) (entity.Post, error)
-	GetAllPosts() ([]entity.Post, error)
+	GetPost(postId int) (entity.PostEntity, error)
+	GetAllPosts() ([]entity.PostEntity, error)
 }
 
 type postRepository struct {
@@ -39,31 +39,31 @@ func (r *postRepository) SavePost(p entity.PostCreateForm) (int, error) {
 	return int(id), nil
 }
 
-func (r *postRepository) GetPost(postId int) (entity.Post, error) {
+func (r *postRepository) GetPost(postId int) (entity.PostEntity, error) {
 	query := `SELECT * FROM posts WHERE id=$1`
 
-	var post entity.Post
+	var post entity.PostEntity
 	if err := r.DB.QueryRow(query, postId).Scan(&post.Id, &post.Title, &post.Content, &post.Created); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return entity.Post{}, entity.ErrNoRecord
+			return entity.PostEntity{}, entity.ErrNoRecord
 		}
-		return entity.Post{}, err
+		return entity.PostEntity{}, err
 	}
 
 	return post, nil
 }
 
-func (r *postRepository) GetAllPosts() ([]entity.Post, error) {
+func (r *postRepository) GetAllPosts() ([]entity.PostEntity, error) {
 	query := `SELECT * FROM posts`
 
-	var posts []entity.Post
+	var posts []entity.PostEntity
 	rows, err := r.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
 
 	for rows.Next() {
-		var post entity.Post
+		var post entity.PostEntity
 		if err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.Created); err != nil {
 			return nil, err
 		}

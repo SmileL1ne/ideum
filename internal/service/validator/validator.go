@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"regexp"
 	"strings"
 	"unicode/utf8"
 )
@@ -40,4 +41,12 @@ func NotBlank(str string) bool {
 
 func MaxChar(str string, n int) bool {
 	return utf8.RuneCountInString(str) <= n
+}
+
+func MinChar(str string, n int) bool {
+	return utf8.RuneCountInString(str) >= n
+}
+
+func Matches(str string, rx *regexp.Regexp) bool {
+	return rx.MatchString(str)
 }

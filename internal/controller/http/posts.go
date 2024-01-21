@@ -56,11 +56,6 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w)
-		return
-	}
-
 	if err := req.ParseForm(); err != nil {
 		r.badRequest(w)
 		return
@@ -80,9 +75,10 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 			data := r.newTemplateData(req)
 			data.Form = p
 			r.render(w, req, http.StatusUnprocessableEntity, "create.html", data)
-			return
+		} else {
+			r.serverError(w, req, err)
 		}
-		r.identifyStatus(w, req, status, err)
+
 		return
 	}
 

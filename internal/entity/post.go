@@ -7,7 +7,7 @@ import (
 
 // TODO: Add database related metatags
 
-type Post struct {
+type PostEntity struct {
 	Id      int
 	Title   string
 	Content string

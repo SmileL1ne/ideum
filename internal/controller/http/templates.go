@@ -9,8 +9,10 @@ import (
 )
 
 type templateData struct {
-	Posts []entity.Post
-	Post  entity.Post
+	Posts []entity.PostEntity
+	Post  entity.PostEntity
+	User  entity.UserEntity
+	Users []entity.UserEntity
 	Form  any
 }
 
