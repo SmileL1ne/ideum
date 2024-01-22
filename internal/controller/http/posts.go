@@ -16,7 +16,7 @@ import (
 
 func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.notFound(w)
+		r.methodNotAllowed(w)
 		return
 	}
 

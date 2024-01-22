@@ -19,3 +19,9 @@ type UserSignupForm struct {
 	Password string
 	validator.Validator
 }
+
+type UserLoginForm struct {
+	Identifier string
+	Password   string
+	validator.Validator
+}

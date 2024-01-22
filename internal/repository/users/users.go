@@ -3,6 +3,7 @@ package users
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"forum/internal/entity"
 
 	"github.com/mattn/go-sqlite3"
@@ -11,7 +12,8 @@ import (
 
 type UserRepository interface {
 	SaveUser(entity.UserSignupForm) (int, error)
-	GetUser(userId int) (entity.UserEntity, error)
+	GetUserByUsername(username string) (*entity.UserEntity, error)
+	GetUserByEmail(email string) (*entity.UserEntity, error)
 	GetAllUsers() ([]entity.UserEntity, error)
 }
 
@@ -53,8 +55,29 @@ func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 	return int(id), nil
 }
 
-func (r *userRepository) GetUser(userId int) (entity.UserEntity, error) {
-	return entity.UserEntity{}, nil
+func (r *userRepository) getUserByField(field, value string) (*entity.UserEntity, error) {
+	u := &entity.UserEntity{}
+
+	query := fmt.Sprintf(`SELECT * FROM users WHERE %s = $1`, field)
+
+	err := r.DB.QueryRow(query, value).Scan(&u.Id, &u.Username, &u.Email, &u.Password, &u.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &entity.UserEntity{}, entity.ErrInvalidCredentials
+		} else {
+			return &entity.UserEntity{}, err
+		}
+	}
+
+	return u, nil
+}
+
+func (r *userRepository) GetUserByEmail(email string) (*entity.UserEntity, error) {
+	return r.getUserByField("email", email)
+}
+
+func (r *userRepository) GetUserByUsername(username string) (*entity.UserEntity, error) {
+	return r.getUserByField("username", username)
 }
 
 func (r *userRepository) GetAllUsers() ([]entity.UserEntity, error) {
