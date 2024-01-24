@@ -6,7 +6,7 @@ import (
 	"forum/internal/service/users"
 )
 
-type Service struct {
+type Service struct { // TODO: rename to 'Services'
 	Post posts.PostService
 	User users.UserService
 }

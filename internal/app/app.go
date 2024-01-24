@@ -3,7 +3,7 @@ package app
 import (
 	"database/sql"
 	"forum/config"
-	"log/slog"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,14 +21,10 @@ import (
 */
 
 func Run(cfg *config.Config) {
-	// Logger init
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-
 	// Database connection
 	db, err := OpenDB(cfg.Database.DSN)
 	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
+		log.Fatalf("Error opening database connection:%v", err)
 	}
 
 	// Service
@@ -37,9 +33,8 @@ func Run(cfg *config.Config) {
 
 	// Server creation
 	server := &http.Server{
-		Addr:     "127.0.0.1" + cfg.Http.Addr,
-		Handler:  h.NewRouter(logger, s),
-		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		Addr:    "127.0.0.1" + cfg.Http.Addr,
+		Handler: h.NewRouter(s),
 	}
 
 	// Graceful shutdown
@@ -48,17 +43,16 @@ func Run(cfg *config.Config) {
 		signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 
 		sig := <-sigCh
-		logger.Info("signal received", "signal", sig.String())
+		log.Printf("signal received:%s", sig.String())
 		db.Close()
 
 		os.Exit(0)
 	}()
 
 	// Starting the server
-	logger.Info("starting the server", slog.String("addr", cfg.Addr))
+	log.Printf("starting the server on address:%s", cfg.Addr)
 	err = server.ListenAndServe()
-	logger.Error(err.Error())
-	os.Exit(1)
+	log.Fatalf("Listen and serve error:%v", err)
 }
 
 func OpenDB(dsn string) (*sql.DB, error) {

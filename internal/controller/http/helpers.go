@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/http"
 	"runtime/debug"
 )
@@ -20,7 +21,7 @@ func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error
 		trace  = string(debug.Stack())
 	)
 
-	r.l.Error(err.Error(), "method", method, "uri", uri, "stack", trace)
+	log.Printf("Server error: method - %s, uri - %s, stack - %s", method, uri, trace)
 	// ERR
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
@@ -49,7 +50,7 @@ func (r *routes) identifyStatus(w http.ResponseWriter, req *http.Request, status
 	case status >= 400:
 		r.clientError(w, status)
 	default:
-		r.l.Error("Unknown status")
+		log.Printf("Client error: unknown status code (below 400)")
 		r.clientError(w, status)
 	}
 }

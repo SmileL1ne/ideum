@@ -3,9 +3,8 @@ package http
 import (
 	"forum/internal/service"
 	"html/template"
-	"log/slog"
+	"log"
 	"net/http"
-	"os"
 )
 
 /*
@@ -16,21 +15,18 @@ import (
 
 type routes struct {
 	service   *service.Service
-	l         *slog.Logger
 	tempCache map[string]*template.Template
 }
 
-func NewRouter(l *slog.Logger, s *service.Service) http.Handler {
+func NewRouter(s *service.Service) http.Handler {
 	router := http.NewServeMux()
 
 	tempCache, err := newTemplateCache()
 	if err != nil {
-		l.Error(err.Error())
-		os.Exit(1)
+		log.Fatalf("Error creating cached templates:%v", err)
 	}
 
 	r := &routes{
-		l:         l,
 		service:   s,
 		tempCache: tempCache,
 	}
