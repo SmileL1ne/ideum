@@ -2,6 +2,7 @@ package http
 
 import (
 	"forum/internal/service"
+	"forum/pkg/sesm"
 	"html/template"
 	"log"
 	"net/http"
@@ -18,7 +19,7 @@ type routes struct {
 	tempCache map[string]*template.Template
 }
 
-func NewRouter(s *service.Service) http.Handler {
+func NewRouter(s *service.Service, sesm *sesm.SessionManager) http.Handler {
 	router := http.NewServeMux()
 
 	tempCache, err := newTemplateCache()

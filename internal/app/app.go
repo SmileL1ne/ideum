@@ -3,6 +3,8 @@ package app
 import (
 	"database/sql"
 	"forum/config"
+	"forum/pkg/sesm"
+	"forum/pkg/sesm/sqlit3store"
 	"log"
 	"net/http"
 	"os"
@@ -17,7 +19,7 @@ import (
 )
 
 /*
-	TODO: Add graceful shutdown
+	TODO:
 */
 
 func Run(cfg *config.Config) {
@@ -31,10 +33,13 @@ func Run(cfg *config.Config) {
 	r := repository.New(db)
 	s := service.New(r)
 
+	sesm := sesm.New()
+	sesm.DB = sqlit3store.New(db)
+
 	// Server creation
 	server := &http.Server{
 		Addr:    "127.0.0.1" + cfg.Http.Addr,
-		Handler: h.NewRouter(s),
+		Handler: h.NewRouter(s, sesm),
 	}
 
 	// Graceful shutdown
@@ -50,7 +55,7 @@ func Run(cfg *config.Config) {
 	}()
 
 	// Starting the server
-	log.Printf("starting the server on address:%s", cfg.Addr)
+	log.Printf("starting the server on address%s", cfg.Addr)
 	err = server.ListenAndServe()
 	log.Fatalf("Listen and serve error:%v", err)
 }

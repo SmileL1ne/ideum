@@ -44,3 +44,6 @@ CREATE TABLE IF NOT EXISTS posts_categories (
     PRIMARY KEY (post_id, category_id)
 );
 
+CREATE TABLE IF NOT EXISTS sessions (
+    token
+);
