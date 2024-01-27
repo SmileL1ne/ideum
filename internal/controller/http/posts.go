@@ -41,10 +41,7 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodPost {
-		r.postCreatePost(w, req)
-		return
-	} else if req.Method != http.MethodGet {
+	if req.Method != http.MethodGet {
 		r.methodNotAllowed(w)
 		return
 	}
@@ -56,6 +53,10 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
 	if err := req.ParseForm(); err != nil {
 		r.badRequest(w)
 		return
@@ -81,6 +82,8 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
+
+	r.sesm.Put(req.Context(), "flash", "Post successfully created!")
 
 	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", id), http.StatusSeeOther)
 }

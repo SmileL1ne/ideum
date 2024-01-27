@@ -3,7 +3,7 @@
 {{define "main"}}
     <h2>New post</h2>
 
-    <form action="/post/create" method="POST">
+    <form action="/post/create/post" method="POST">
         <div>
             <label for="title">Title:</label>
             {{with .Form.FieldErrors.title}}

@@ -7,10 +7,7 @@ import (
 )
 
 func (r *routes) userSignup(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodPost {
-		r.userSignupPost(w, req)
-		return
-	} else if req.Method != http.MethodGet {
+	if req.Method != http.MethodGet {
 		r.methodNotAllowed(w)
 		return
 	}
@@ -21,6 +18,10 @@ func (r *routes) userSignup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
 	if err := req.ParseForm(); err != nil {
 		r.badRequest(w)
 		return
@@ -47,7 +48,9 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Redirect(w, req, "/", http.StatusSeeOther)
+	r.sesm.Put(req.Context(), "flash", "Your signup was successful. Please log in.")
+
+	http.Redirect(w, req, "/user/login", http.StatusSeeOther)
 }
 
 func (r *routes) userLogin(w http.ResponseWriter, req *http.Request) {
@@ -75,7 +78,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	password := form.Get("password")
 
 	u := entity.UserLoginForm{Identifier: identifier, Password: password}
-	_, status, err := r.service.User.Authenticate(&u)
+	id, status, err := r.service.User.Authenticate(&u)
 	if status != http.StatusOK {
 		if status == http.StatusUnprocessableEntity {
 			if errors.Is(err, entity.ErrInvalidCredentials) {
@@ -90,6 +93,14 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 
 		return
 	}
+
+	err = r.sesm.RenewToken(req.Context())
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	r.sesm.Put(req.Context(), "authenticatedUserID", id)
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }

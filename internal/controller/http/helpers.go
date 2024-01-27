@@ -11,7 +11,9 @@ import (
 // TODO: Create error page func that would nicely render error pages (refer - 'ERR')
 
 func (r *routes) newTemplateData(req *http.Request) templateData {
-	return templateData{}
+	return templateData{
+		Flash: r.sesm.PopString(req.Context(), "flash"),
+	}
 }
 
 func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error) {

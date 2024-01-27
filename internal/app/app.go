@@ -20,6 +20,7 @@ import (
 
 /*
 	TODO:
+	1. Session expiry time is UTC, change to UTC + 6
 */
 
 func Run(cfg *config.Config) {
@@ -33,8 +34,9 @@ func Run(cfg *config.Config) {
 	r := repository.New(db)
 	s := service.New(r)
 
+	// Session Manager creation
 	sesm := sesm.New()
-	sesm.DB = sqlit3store.New(db)
+	sesm.Store = sqlit3store.New(db)
 
 	// Server creation
 	server := &http.Server{

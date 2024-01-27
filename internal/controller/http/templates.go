@@ -13,6 +13,7 @@ type templateData struct {
 	Post  entity.PostEntity
 	User  entity.UserEntity
 	Users []entity.UserEntity
+	Flash string
 	Form  any
 }
 

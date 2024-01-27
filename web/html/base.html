@@ -19,6 +19,9 @@
     <hr>
 
     <main>
+        {{with .Flash}}
+            <div style="border: 3px; color: green;">{{.}}</div>
+        {{end}}
         {{template "main" .}}
     </main>
     <hr>

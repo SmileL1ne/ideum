@@ -1,3 +1,5 @@
+-- TODO: Create indexes for each table
+
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     username VARCHAR(255) NOT NULL,
@@ -44,6 +46,9 @@ CREATE TABLE IF NOT EXISTS posts_categories (
     PRIMARY KEY (post_id, category_id)
 );
 
+-- Sessions table
 CREATE TABLE IF NOT EXISTS sessions (
-    token
+    sessionID TEXT NOT NULL PRIMARY KEY,
+    data BLOB NOT NULL,
+    expiry TIMESTAMP(6) NOT NULL
 );

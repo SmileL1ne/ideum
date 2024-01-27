@@ -17,6 +17,7 @@ import (
 type routes struct {
 	service   *service.Service
 	tempCache map[string]*template.Template
+	sesm      *sesm.SessionManager
 }
 
 func NewRouter(s *service.Service, sesm *sesm.SessionManager) http.Handler {
@@ -30,16 +31,21 @@ func NewRouter(s *service.Service, sesm *sesm.SessionManager) http.Handler {
 	r := &routes{
 		service:   s,
 		tempCache: tempCache,
+		sesm:      sesm,
 	}
 
 	router.HandleFunc("/static/", fileServer.ServeHTTP)
 
-	router.HandleFunc("/", r.home)                  // Should be GET method
-	router.HandleFunc("/post/view/", r.postView)    // Should be GET method
-	router.HandleFunc("/post/create", r.postCreate) // Should be GET method and redirect to postCreatePost if method is POST
-	router.HandleFunc("/user/signup", r.userSignup) // Should be GET method and redirect to userSignupPost if method is POST
-	router.HandleFunc("/user/login", r.userLogin)   // Should be GET method and redirect to userLoginPost if method is POST
-	router.HandleFunc("/user/logout", r.userLogout) // Should be POST method
+	router.Handle("/", r.sesm.LoadAndSave(http.HandlerFunc(r.home)))
+
+	router.Handle("/post/view/", r.sesm.LoadAndSave(http.HandlerFunc(r.postView)))
+	router.Handle("/post/create", r.sesm.LoadAndSave(http.HandlerFunc(r.postCreate)))
+	router.Handle("/post/create/post", r.sesm.LoadAndSave(http.HandlerFunc(r.postCreatePost)))
+
+	router.Handle("/user/signup", r.sesm.LoadAndSave(http.HandlerFunc(r.userSignup)))
+	router.Handle("/user/signup/post", r.sesm.LoadAndSave(http.HandlerFunc(r.userSignupPost)))
+	router.Handle("/user/login", r.sesm.LoadAndSave(http.HandlerFunc(r.userLogin)))
+	router.Handle("/user/logout", r.sesm.LoadAndSave(http.HandlerFunc(r.userLogout)))
 
 	return router
 }
