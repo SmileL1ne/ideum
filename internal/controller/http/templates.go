@@ -9,12 +9,13 @@ import (
 )
 
 type templateData struct {
-	Posts []entity.PostEntity
-	Post  entity.PostEntity
-	User  entity.UserEntity
-	Users []entity.UserEntity
-	Flash string
-	Form  any
+	Posts           []entity.PostEntity
+	Post            entity.PostEntity
+	User            entity.UserEntity
+	Users           []entity.UserEntity
+	Flash           string
+	Form            any
+	IsAuthenticated bool
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

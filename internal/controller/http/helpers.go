@@ -12,8 +12,13 @@ import (
 
 func (r *routes) newTemplateData(req *http.Request) templateData {
 	return templateData{
-		Flash: r.sesm.PopString(req.Context(), "flash"),
+		Flash:           r.sesm.PopString(req.Context(), "flash"),
+		IsAuthenticated: r.isAuthenticated(req),
 	}
+}
+
+func (r *routes) isAuthenticated(req *http.Request) bool {
+	return r.sesm.Exists(req.Context(), "authenticatedUserID")
 }
 
 func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error) {

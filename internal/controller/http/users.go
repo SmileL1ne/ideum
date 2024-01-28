@@ -101,10 +101,20 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	}
 
 	r.sesm.Put(req.Context(), "authenticatedUserID", id)
+	r.sesm.Put(req.Context(), "flash", "Successfully logged in!")
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
 
 func (r *routes) userLogout(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte("Logout user"))
+	err := r.sesm.RenewToken(req.Context())
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	r.sesm.Remove(req.Context(), "authenticatedUserID")
+	r.sesm.Put(req.Context(), "flash", "You've been logged out successfully!")
+
+	http.Redirect(w, req, "/", http.StatusSeeOther)
 }

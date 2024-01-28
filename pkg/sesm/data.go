@@ -124,6 +124,16 @@ func (sm *SessionManager) PopString(ctx context.Context, key string) string {
 	return str
 }
 
+func (sm *SessionManager) Remove(ctx context.Context, key string) {
+	sd := sm.getSessionDataFromContext(ctx)
+
+	sd.mu.Lock()
+	defer sd.mu.Unlock()
+
+	delete(sd.values, key)
+	sd.status = Modified
+}
+
 func (sm *SessionManager) Pop(ctx context.Context, key string) interface{} {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -138,6 +148,12 @@ func (sm *SessionManager) Pop(ctx context.Context, key string) interface{} {
 	sd.status = Modified
 
 	return val
+}
+
+func (sm *SessionManager) Exists(ctx context.Context, key string) bool {
+	sd := sm.getSessionDataFromContext(ctx)
+	_, ok := sd.values[key]
+	return ok
 }
 
 func (sm *SessionManager) getSessionDataFromContext(ctx context.Context) *sessionData {
