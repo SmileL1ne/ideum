@@ -2,6 +2,7 @@ package http
 
 import (
 	"forum/internal/service"
+	"forum/pkg/mids"
 	"forum/pkg/sesm"
 	"html/template"
 	"log"
@@ -20,6 +21,9 @@ type routes struct {
 	sesm      *sesm.SessionManager
 }
 
+type chain struct {
+}
+
 func NewRouter(s *service.Service, sesm *sesm.SessionManager) http.Handler {
 	router := http.NewServeMux()
 
@@ -36,16 +40,21 @@ func NewRouter(s *service.Service, sesm *sesm.SessionManager) http.Handler {
 
 	router.HandleFunc("/static/", fileServer.ServeHTTP)
 
-	router.Handle("/", r.sesm.LoadAndSave(http.HandlerFunc(r.home)))
+	dynamic := mids.New(sesm.LoadAndSave)
 
-	router.Handle("/post/view/", r.sesm.LoadAndSave(http.HandlerFunc(r.postView)))
-	router.Handle("/post/create", r.sesm.LoadAndSave(http.HandlerFunc(r.postCreate)))
-	router.Handle("/post/create/post", r.sesm.LoadAndSave(http.HandlerFunc(r.postCreatePost)))
+	router.Handle("/", dynamic.Then(http.HandlerFunc(r.home)))
+	router.Handle("/post/view/", dynamic.Then(http.HandlerFunc(r.postView)))
+	router.Handle("/user/signup", dynamic.Then(http.HandlerFunc(r.userSignup)))
+	router.Handle("/user/signup/post", dynamic.Then(http.HandlerFunc(r.userSignupPost)))
+	router.Handle("/user/login", dynamic.Then(http.HandlerFunc(r.userLogin)))
 
-	router.Handle("/user/signup", r.sesm.LoadAndSave(http.HandlerFunc(r.userSignup)))
-	router.Handle("/user/signup/post", r.sesm.LoadAndSave(http.HandlerFunc(r.userSignupPost)))
-	router.Handle("/user/login", r.sesm.LoadAndSave(http.HandlerFunc(r.userLogin)))
-	router.Handle("/user/logout", r.sesm.LoadAndSave(http.HandlerFunc(r.userLogout)))
+	protected := dynamic.Append(r.requireAuthentication)
 
-	return router
+	router.Handle("/post/create", protected.Then(http.HandlerFunc(r.postCreate)))
+	router.Handle("/post/create/post", protected.Then(http.HandlerFunc(r.postCreatePost)))
+	router.Handle("/user/logout", protected.Then(http.HandlerFunc(r.userLogout)))
+
+	standard := mids.New(secureHeaders)
+
+	return standard.Then(router)
 }
