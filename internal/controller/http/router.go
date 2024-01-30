@@ -54,7 +54,7 @@ func NewRouter(s *service.Service, sesm *sesm.SessionManager) http.Handler {
 	router.Handle("/post/create/post", protected.Then(http.HandlerFunc(r.postCreatePost)))
 	router.Handle("/user/logout", protected.Then(http.HandlerFunc(r.userLogout)))
 
-	standard := mids.New(secureHeaders)
+	standard := mids.New(r.recoverPanic, secureHeaders)
 
 	return standard.Then(router)
 }

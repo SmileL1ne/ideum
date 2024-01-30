@@ -1,6 +1,9 @@
 package http
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func (r *routes) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -21,6 +24,19 @@ func secureHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
 		w.Header().Set("X-Frame-Options", "deny")
 		w.Header().Set("X-XSS-Protection", "0")
+
+		next.ServeHTTP(w, req)
+	})
+}
+
+func (r *routes) recoverPanic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				w.Header().Set("Connection", "close")
+				r.serverError(w, req, fmt.Errorf("%s", err))
+			}
+		}()
 
 		next.ServeHTTP(w, req)
 	})
