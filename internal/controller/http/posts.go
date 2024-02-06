@@ -1,17 +1,16 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"forum/internal/entity"
 	"net/http"
-	"strings"
 )
 
 /*
 	TODO:
 	- Check comments in methods
 	- For postCreateForm - add userID for foreign key (when creating links between tables)
-	- For post create add method check - if post -> redirect to postCreatePost handler
 */
 
 func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
@@ -20,22 +19,38 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	urlParts := strings.Split(req.URL.Path, "/")
-	if len(urlParts) != 4 {
+	id := r.getIdFromPath(req, 4)
+	if id == "" {
 		r.notFound(w)
 		return
 	}
 
-	id := urlParts[len(urlParts)-1]
+	post, err := r.service.Post.GetPost(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrNoRecord):
+			r.notFound(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
 
-	post, status, err := r.service.Post.GetPost(id)
-	if status != http.StatusOK {
-		r.identifyStatus(w, req, status, err)
+	commentsForPost, err := r.service.Comment.GetAllCommentsForPost(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidPostId):
+			r.notFound(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
 	data := r.newTemplateData(req)
 	data.Post = post
+	data.Comments = commentsForPost
+	data.Form = entity.CommentCreateForm{}
 
 	r.render(w, req, http.StatusOK, "view.html", data)
 }
@@ -70,16 +85,16 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	p := entity.PostCreateForm{Title: title, Content: content}
 
-	id, status, err := r.service.Post.SavePost(&p)
-	if status != http.StatusOK {
-		if status == http.StatusUnprocessableEntity {
+	id, err := r.service.Post.SavePost(&p)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidFormData):
 			data := r.newTemplateData(req)
 			data.Form = p
 			r.render(w, req, http.StatusUnprocessableEntity, "create.html", data)
-		} else {
+		default:
 			r.serverError(w, req, err)
 		}
-
 		return
 	}
 

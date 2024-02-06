@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserRepository interface {
+type IUserRepository interface {
 	SaveUser(entity.UserSignupForm) (int, error)
 	GetUserByUsername(username string) (*entity.UserEntity, error)
 	GetUserByEmail(email string) (*entity.UserEntity, error)

@@ -7,7 +7,7 @@ import (
 )
 
 // TODO: Add new methods related to post manipulation (delete, update post)
-type PostRepository interface {
+type IPostRepository interface {
 	SavePost(entity.PostCreateForm) (int, error)
 	GetPost(postId int) (entity.PostEntity, error)
 	GetAllPosts() ([]entity.PostEntity, error)
@@ -56,11 +56,12 @@ func (r *postRepository) GetPost(postId int) (entity.PostEntity, error) {
 func (r *postRepository) GetAllPosts() ([]entity.PostEntity, error) {
 	query := `SELECT * FROM posts`
 
-	var posts []entity.PostEntity
 	rows, err := r.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
+
+	var posts []entity.PostEntity
 
 	for rows.Next() {
 		var post entity.PostEntity

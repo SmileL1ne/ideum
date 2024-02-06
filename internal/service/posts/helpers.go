@@ -3,7 +3,7 @@ package posts
 import (
 	"fmt"
 	"forum/internal/entity"
-	"forum/internal/service/validator"
+	"forum/internal/validator"
 )
 
 const (

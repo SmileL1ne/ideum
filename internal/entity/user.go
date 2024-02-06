@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"forum/internal/service/validator"
+	"forum/internal/validator"
 	"time"
 )
 

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
+	"strings"
 )
 
 // TODO: Create error page func that would nicely render error pages (refer - 'ERR')
@@ -28,7 +29,7 @@ func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error
 		trace  = string(debug.Stack())
 	)
 
-	log.Printf("Server error: method - %s, uri - %s, stack - %s", method, uri, trace)
+	log.Printf(err.Error()+" method - %s, uri - %s, stack - %s", method, uri, trace)
 	// ERR
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
@@ -50,6 +51,7 @@ func (r *routes) methodNotAllowed(w http.ResponseWriter) {
 	r.clientError(w, http.StatusMethodNotAllowed)
 }
 
+// identifyStatus accepts http error status and identifies it's error level (server or client)
 func (r *routes) identifyStatus(w http.ResponseWriter, req *http.Request, status int, err error) {
 	switch {
 	case status >= 500:
@@ -62,7 +64,8 @@ func (r *routes) identifyStatus(w http.ResponseWriter, req *http.Request, status
 	}
 }
 
-// Render templates
+// Render templates by retrieving necessary template from template cache. First execute
+// into dummy buffer for any execution error catch (to set appropriate header)
 func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, page string, data templateData) {
 	tmpl, ok := r.tempCache[page]
 	if !ok {
@@ -80,4 +83,13 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 	w.WriteHeader(status)
 
 	buf.WriteTo(w)
+}
+
+func (r *routes) getIdFromPath(req *http.Request, urlPartsNum int) string {
+	urlParts := strings.Split(req.URL.Path, "/")
+	if len(urlParts) != urlPartsNum {
+		return ""
+	}
+
+	return urlParts[len(urlParts)-1]
 }

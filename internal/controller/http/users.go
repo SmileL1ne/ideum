@@ -35,16 +35,16 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 
 	u := entity.UserSignupForm{Username: username, Email: email, Password: password}
 
-	_, status, err := r.service.User.SaveUser(&u)
-	if status != http.StatusOK {
-		if status == http.StatusUnprocessableEntity {
+	_, err := r.service.User.SaveUser(&u) // Put user id in context
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidFormData):
 			data := r.newTemplateData(req)
 			data.Form = u
 			r.render(w, req, http.StatusUnprocessableEntity, "signup.html", data)
-		} else {
+		default:
 			r.serverError(w, req, err)
 		}
-
 		return
 	}
 
@@ -78,19 +78,17 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	password := form.Get("password")
 
 	u := entity.UserLoginForm{Identifier: identifier, Password: password}
-	id, status, err := r.service.User.Authenticate(&u)
-	if status != http.StatusOK {
-		if status == http.StatusUnprocessableEntity {
-			if errors.Is(err, entity.ErrInvalidCredentials) {
-				u.AddNonFieldError("Email or password is incorrect")
-			}
+	id, err := r.service.User.Authenticate(&u)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidCredentials):
+			u.AddNonFieldError("Email or password is incorrect")
 			data := r.newTemplateData(req)
 			data.Form = u
 			r.render(w, req, http.StatusUnprocessableEntity, "login.html", data)
-		} else {
+		default:
 			r.serverError(w, req, err)
 		}
-
 		return
 	}
 

@@ -8,5 +8,32 @@
         <div style="background-color: beige; width: 400px; margin: 0 auto;">
             <p style="text-align: center;">{{.Post.Content}}</p>
         </div>
+
+        {{if .IsAuthenticated}}
+            <form action="/comment/{{.Post.Id}}" method="POST">
+                <div>
+                    <label for="commentContent"></label>
+                    {{with .Form.FieldErrors.commentContent}}
+                    <div style="color: red;">
+                        <label>{{.}}</label>
+                    </div>
+                    {{end}}
+                    <input type="text" name="commentContent" id="commentContent" value="{{.Form.Content}}" placeholder="Nice post!...">
+
+                    <div style="color: green;">
+                        <input type="submit" value="->">
+                    </div>
+                </div>
+            </form>
+        {{end}}
+
+        <div>Comments:</div>
+        <div>
+            {{range .Comments}}
+                <div>
+                    <pre>{{.Content}}</pre>
+                </div>
+            {{end}}
+        </div>
     </div>
 {{end}}

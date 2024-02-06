@@ -4,7 +4,6 @@ import (
 	"errors"
 	"forum/internal/entity"
 	"forum/internal/repository/posts"
-	"net/http"
 	"strconv"
 )
 
@@ -14,54 +13,51 @@ TODO:
 - Add data validation to SavePost method
 - Add postID validation in GetPost method
 */
-type PostService interface {
-	SavePost(*entity.PostCreateForm) (int, int, error)
-	GetPost(postId string) (entity.PostEntity, int, error)
+type IPostService interface {
+	SavePost(*entity.PostCreateForm) (int, error)
+	GetPost(postId string) (entity.PostEntity, error)
 	GetAllPosts() ([]entity.PostEntity, error)
 }
 
 type postService struct {
-	postRepo posts.PostRepository
+	postRepo posts.IPostRepository
 }
 
 // Constructor for post service
-func NewPostsService(r posts.PostRepository) *postService {
+func NewPostsService(r posts.IPostRepository) *postService {
 	return &postService{
 		postRepo: r,
 	}
 }
 
-func (ps *postService) SavePost(p *entity.PostCreateForm) (int, int, error) {
+func (ps *postService) SavePost(p *entity.PostCreateForm) (int, error) {
 	if !isRightPost(p) {
-		return 0, http.StatusUnprocessableEntity, nil
+		return 0, entity.ErrInvalidFormData
 	}
 
 	id, err := ps.postRepo.SavePost(*p)
 	if err != nil {
-		return 0, http.StatusInternalServerError, err
+		return 0, err
 	}
 
-	return id, http.StatusOK, nil
+	return id, nil
 }
 
-func (ps *postService) GetPost(postId string) (entity.PostEntity, int, error) {
-
-	// PostId validation here
-
+func (ps *postService) GetPost(postId string) (entity.PostEntity, error) {
 	id, err := strconv.Atoi(postId)
 	if err != nil {
-		return entity.PostEntity{}, http.StatusBadRequest, err
+		return entity.PostEntity{}, entity.ErrInvalidPostId
 	}
 
 	post, err := ps.postRepo.GetPost(id)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
-			return entity.PostEntity{}, http.StatusNotFound, err
+			return entity.PostEntity{}, err
 		}
-		return entity.PostEntity{}, http.StatusInternalServerError, err
+		return entity.PostEntity{}, err
 	}
 
-	return post, http.StatusOK, nil
+	return post, nil
 }
 
 func (uc *postService) GetAllPosts() ([]entity.PostEntity, error) {

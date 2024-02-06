@@ -11,6 +11,7 @@ import (
 type templateData struct {
 	Posts           []entity.PostEntity
 	Post            entity.PostEntity
+	Comments        []entity.CommentEntity
 	User            entity.UserEntity
 	Users           []entity.UserEntity
 	Flash           string
