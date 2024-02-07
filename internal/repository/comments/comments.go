@@ -46,7 +46,7 @@ func (r *commentRepository) GetAllCommentsForPost(postId int) (*[]entity.Comment
 
 	for rows.Next() {
 		var comment entity.CommentEntity
-		if err := rows.Scan(&comment.Id, &comment.Content, &comment.CreatedAt, &comment.PostId); err != nil {
+		if err := rows.Scan(&comment.Id, &comment.Content, &comment.CreatedAt, &comment.PostID); err != nil {
 			return nil, err
 		}
 		comments = append(comments, comment)

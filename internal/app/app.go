@@ -20,7 +20,6 @@ import (
 
 /*
 	TODO:
-	1. Session expiry time is UTC, change to UTC + 6
 */
 
 func Run(cfg *config.Config) {
@@ -62,6 +61,8 @@ func Run(cfg *config.Config) {
 	log.Fatalf("Listen and serve error:%v", err)
 }
 
+// OpenDB opens connection to the database using standard sql library
+// with given Data Source Name (DSN)
 func OpenDB(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {

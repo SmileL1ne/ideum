@@ -1,3 +1,8 @@
+/*
+    TODO:
+    - Redo eveything here, add and delete necessary foreign keys
+*/
+
 -- Add foreign key to 'posts' table
 ALTER TABLE posts ADD COLUMN user_id INTEGER REFERENCES users(id);
 
