@@ -15,8 +15,8 @@ TODO:
 */
 type IPostService interface {
 	SavePost(*entity.PostCreateForm) (int, error)
-	GetPost(postId string) (entity.PostEntity, error)
-	GetAllPosts() ([]entity.PostEntity, error)
+	GetPost(string) (entity.PostView, error)
+	GetAllPosts() (*[]entity.PostView, error)
 }
 
 type postService struct {
@@ -29,6 +29,8 @@ func NewPostsService(r posts.IPostRepository) *postService {
 		postRepo: r,
 	}
 }
+
+var _ IPostService = (*postService)(nil)
 
 func (ps *postService) SavePost(p *entity.PostCreateForm) (int, error) {
 	if !isRightPost(p) {
@@ -43,23 +45,47 @@ func (ps *postService) SavePost(p *entity.PostCreateForm) (int, error) {
 	return id, nil
 }
 
-func (ps *postService) GetPost(postId string) (entity.PostEntity, error) {
+func (ps *postService) GetPost(postId string) (entity.PostView, error) {
 	id, err := strconv.Atoi(postId)
 	if err != nil {
-		return entity.PostEntity{}, entity.ErrInvalidPostId
+		return entity.PostView{}, entity.ErrInvalidPostId
 	}
 
 	post, err := ps.postRepo.GetPost(id)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
-			return entity.PostEntity{}, err
+			return entity.PostView{}, err
 		}
-		return entity.PostEntity{}, err
+		return entity.PostView{}, err
 	}
 
-	return post, nil
+	pView := entity.PostView{
+		Id:        post.Id,
+		Title:     post.Title,
+		Content:   post.Content,
+		CreatedAt: post.Created,
+	}
+
+	return pView, nil
 }
 
-func (uc *postService) GetAllPosts() ([]entity.PostEntity, error) {
-	return uc.postRepo.GetAllPosts()
+func (uc *postService) GetAllPosts() (*[]entity.PostView, error) {
+	posts, err := uc.postRepo.GetAllPosts()
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert received PostEntity's to PostView's
+	var pViews []entity.PostView
+	for _, p := range *posts {
+		post := entity.PostView{
+			Id:        p.Id,
+			Title:     p.Title,
+			Content:   p.Content,
+			CreatedAt: p.Created,
+		}
+		pViews = append(pViews, post)
+	}
+
+	return &pViews, nil
 }

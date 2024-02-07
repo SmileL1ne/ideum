@@ -99,7 +99,9 @@ func (sm *SessionManager) Commit(ctx context.Context) (string, time.Time, error)
 	return sd.sessionID, expiry, nil
 }
 
-func (sm *SessionManager) WriteSessionCookie(ctx context.Context, w http.ResponseWriter, token string, expiry time.Time) {
+func (sm *SessionManager) WriteSessionCookie(ctx context.Context, w http.ResponseWriter,
+	token string, expiry time.Time) {
+
 	cookie := &http.Cookie{
 		Name:     sm.CookieName,
 		Value:    token,
@@ -107,6 +109,7 @@ func (sm *SessionManager) WriteSessionCookie(ctx context.Context, w http.Respons
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
+		Expires:  expiry,
 	}
 
 	if expiry.IsZero() {

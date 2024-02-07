@@ -12,9 +12,8 @@ import (
 
 type IUserRepository interface {
 	SaveUser(entity.UserSignupForm) (int, error)
-	GetUserByUsername(username string) (*entity.UserEntity, error)
-	GetUserByEmail(email string) (*entity.UserEntity, error)
-	GetAllUsers() ([]entity.UserEntity, error)
+	GetUserByUsername(username string) (entity.UserEntity, error)
+	GetUserByEmail(email string) (entity.UserEntity, error)
 }
 
 type userRepository struct {
@@ -26,6 +25,8 @@ func NewUserRepo(db *sql.DB) *userRepository {
 		DB: db,
 	}
 }
+
+var _ IUserRepository = (*userRepository)(nil)
 
 func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
@@ -55,31 +56,27 @@ func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 	return int(id), nil
 }
 
-func (r *userRepository) getUserByField(field, value string) (*entity.UserEntity, error) {
-	u := &entity.UserEntity{}
+func (r *userRepository) GetUserByEmail(email string) (entity.UserEntity, error) {
+	return r.getUserByField("email", email)
+}
+
+func (r *userRepository) GetUserByUsername(username string) (entity.UserEntity, error) {
+	return r.getUserByField("username", username)
+}
+
+func (r *userRepository) getUserByField(field, value string) (entity.UserEntity, error) {
+	var u entity.UserEntity
 
 	query := fmt.Sprintf(`SELECT * FROM users WHERE %s = $1`, field)
 
 	err := r.DB.QueryRow(query, value).Scan(&u.Id, &u.Username, &u.Email, &u.Password, &u.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return &entity.UserEntity{}, entity.ErrInvalidCredentials
+			return entity.UserEntity{}, entity.ErrInvalidCredentials
 		} else {
-			return &entity.UserEntity{}, err
+			return entity.UserEntity{}, err
 		}
 	}
 
 	return u, nil
-}
-
-func (r *userRepository) GetUserByEmail(email string) (*entity.UserEntity, error) {
-	return r.getUserByField("email", email)
-}
-
-func (r *userRepository) GetUserByUsername(username string) (*entity.UserEntity, error) {
-	return r.getUserByField("username", username)
-}
-
-func (r *userRepository) GetAllUsers() ([]entity.UserEntity, error) {
-	return nil, nil
 }

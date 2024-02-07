@@ -9,7 +9,6 @@ import (
 
 /*
 	TODO:
-	- Check comments in methods
 	- For postCreateForm - add userID for foreign key (when creating links between tables)
 */
 
@@ -36,7 +35,7 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	commentsForPost, err := r.service.Comment.GetAllCommentsForPost(id)
+	comments, err := r.service.Comment.GetAllCommentsForPost(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidPostId):
@@ -47,21 +46,29 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Add comments to received post
+	post.Comments = *comments
+
+	// Create template struct with page related data
 	data := r.newTemplateData(req)
-	data.Post = post
-	data.Comments = commentsForPost
+	data.Models.Post = post
+	data.Models.Comments = *comments
 	data.Form = entity.CommentCreateForm{}
 
 	r.render(w, req, http.StatusOK, "view.html", data)
 }
 
 func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
+	switch {
+	case req.Method == http.MethodPost:
+		r.postCreatePost(w, req)
+		return
+	case req.Method != http.MethodGet:
 		r.methodNotAllowed(w)
 		return
 	}
 
-	data := r.newTemplateData(req) // Empty template data (the original struct has no fields)
+	data := r.newTemplateData(req)
 	data.Form = entity.PostCreateForm{}
 
 	r.render(w, req, http.StatusOK, "create.html", data)
@@ -81,7 +88,10 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	title := form.Get("title")
 	content := form.Get("content")
-	// Add user id here (foreign key)
+	/*
+		TODO:
+		- Add userID here (foreign key)
+	*/
 
 	p := entity.PostCreateForm{Title: title, Content: content}
 
@@ -98,6 +108,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Add flash message to context
 	r.sesm.Put(req.Context(), "flash", "Post successfully created!")
 
 	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", id), http.StatusSeeOther)

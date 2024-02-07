@@ -8,7 +8,7 @@ import (
 
 type ICommentService interface {
 	SaveComment(*entity.CommentCreateForm, string) error
-	GetAllCommentsForPost(string) ([]entity.CommentEntity, error)
+	GetAllCommentsForPost(string) (*[]entity.CommentView, error)
 }
 
 type commentService struct {
@@ -42,11 +42,23 @@ func (cs *commentService) SaveComment(c *entity.CommentCreateForm, postIdStr str
 	return nil
 }
 
-func (cs *commentService) GetAllCommentsForPost(postIdStr string) ([]entity.CommentEntity, error) {
+func (cs *commentService) GetAllCommentsForPost(postIdStr string) (*[]entity.CommentView, error) {
 	postId, err := strconv.Atoi(postIdStr)
 	if err != nil {
 		return nil, entity.ErrInvalidPostId
 	}
 
-	return cs.commentRepo.GetAllCommentsForPost(postId)
+	comments, err := cs.commentRepo.GetAllCommentsForPost(postId)
+
+	// Convert received CommentEntity's to CommentView's
+	var cViews []entity.CommentView
+	for _, c := range *comments {
+		comment := entity.CommentView{
+			Content:   c.Content,
+			CreatedAt: c.CreatedAt,
+		}
+		cViews = append(cViews, comment)
+	}
+
+	return &cViews, nil
 }

@@ -8,14 +8,18 @@ import (
 	"path/filepath"
 )
 
+type Models struct {
+	Posts    []entity.PostView
+	Post     entity.PostView
+	Comments []entity.CommentView
+	// User     entity.UserEntity
+	// Users    []entity.UserEntity
+}
+
 type templateData struct {
-	Posts           []entity.PostEntity
-	Post            entity.PostEntity
-	Comments        []entity.CommentEntity
-	User            entity.UserEntity
-	Users           []entity.UserEntity
+	Models          Models
 	Flash           string
-	Form            any
+	Form            interface{}
 	IsAuthenticated bool
 }
 

@@ -10,7 +10,7 @@ import (
 type IPostRepository interface {
 	SavePost(entity.PostCreateForm) (int, error)
 	GetPost(postId int) (entity.PostEntity, error)
-	GetAllPosts() ([]entity.PostEntity, error)
+	GetAllPosts() (*[]entity.PostEntity, error)
 }
 
 type postRepository struct {
@@ -22,6 +22,8 @@ func NewPostRepo(db *sql.DB) *postRepository {
 		DB: db,
 	}
 }
+
+var _ IPostRepository = (*postRepository)(nil)
 
 func (r *postRepository) SavePost(p entity.PostCreateForm) (int, error) {
 	query := `INSERT INTO posts (title, content, created) VALUES ($1, $2, datetime('now', 'utc', '+12 hours'))`
@@ -53,7 +55,7 @@ func (r *postRepository) GetPost(postId int) (entity.PostEntity, error) {
 	return post, nil
 }
 
-func (r *postRepository) GetAllPosts() ([]entity.PostEntity, error) {
+func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 	query := `SELECT * FROM posts`
 
 	rows, err := r.DB.Query(query)
@@ -75,5 +77,5 @@ func (r *postRepository) GetAllPosts() ([]entity.PostEntity, error) {
 		return nil, err
 	}
 
-	return posts, nil
+	return &posts, nil
 }

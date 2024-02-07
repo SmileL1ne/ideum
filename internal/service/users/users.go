@@ -12,7 +12,6 @@ import (
 type IUserService interface {
 	SaveUser(*entity.UserSignupForm) (int, error)
 	Authenticate(*entity.UserLoginForm) (int, error)
-	GetAllUsers() ([]entity.UserEntity, error)
 }
 
 type userService struct {
@@ -24,6 +23,8 @@ func NewUserService(u users.IUserRepository) *userService {
 		userRepo: u,
 	}
 }
+
+var _ IUserService = (*userService)(nil)
 
 func (us *userService) SaveUser(u *entity.UserSignupForm) (int, error) {
 	if !isRightSignUp(u) {
@@ -48,7 +49,7 @@ func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
 		return 0, entity.ErrInvalidFormData
 	}
 
-	var userFromDB *entity.UserEntity
+	var userFromDB entity.UserEntity
 	var err error
 
 	if validator.Matches(u.Identifier, EmailRX) {
@@ -58,6 +59,7 @@ func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
 	}
 	if err != nil {
 		if errors.Is(err, entity.ErrInvalidCredentials) {
+			u.AddNonFieldError("Email or password is incorrect")
 			return 0, entity.ErrInvalidCredentials
 		} else {
 			return 0, err
@@ -67,6 +69,7 @@ func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(userFromDB.Password), []byte(u.Password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			u.AddNonFieldError("Email or password is incorrect")
 			return 0, entity.ErrInvalidCredentials
 		} else {
 			return 0, err
@@ -74,8 +77,4 @@ func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
 	}
 
 	return userFromDB.Id, nil
-}
-
-func (us *userService) GetAllUsers() ([]entity.UserEntity, error) {
-	return nil, nil
 }

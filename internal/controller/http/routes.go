@@ -45,7 +45,6 @@ func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	router.Handle("/", dynamic.ThenFunc(r.home))
 	router.Handle("/post/view/", dynamic.ThenFunc(r.postView))
 	router.Handle("/user/signup", dynamic.ThenFunc(r.userSignup))
-	router.Handle("/user/signup/POST", dynamic.ThenFunc(r.userSignupPost))
 	router.Handle("/user/login", dynamic.ThenFunc(r.userLogin))
 
 	// Protected appends dynamic middleware chain and used for routes
@@ -53,7 +52,6 @@ func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	protected := dynamic.Append(r.requireAuthentication)
 
 	router.Handle("/post/create", protected.ThenFunc(r.postCreate))
-	router.Handle("/post/create/POST", protected.ThenFunc(r.postCreatePost))
 	router.Handle("/comment/", protected.ThenFunc(r.commentCreatePost))
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
 

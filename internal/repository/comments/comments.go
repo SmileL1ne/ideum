@@ -7,7 +7,7 @@ import (
 
 type ICommentRepository interface {
 	SaveComment(entity.CommentCreateForm, int) error
-	GetAllCommentsForPost(int) ([]entity.CommentEntity, error)
+	GetAllCommentsForPost(int) (*[]entity.CommentEntity, error)
 }
 
 type commentRepository struct {
@@ -30,7 +30,7 @@ func (r *commentRepository) SaveComment(c entity.CommentCreateForm, postId int) 
 	return err
 }
 
-func (r *commentRepository) GetAllCommentsForPost(postId int) ([]entity.CommentEntity, error) {
+func (r *commentRepository) GetAllCommentsForPost(postId int) (*[]entity.CommentEntity, error) {
 	query := `
 		SELECT * 
 		FROM comments
@@ -56,5 +56,5 @@ func (r *commentRepository) GetAllCommentsForPost(postId int) ([]entity.CommentE
 		return nil, err
 	}
 
-	return comments, nil
+	return &comments, nil
 }

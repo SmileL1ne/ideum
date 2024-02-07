@@ -2,18 +2,18 @@
 
 {{define "main"}}
 <h2>Recent posts</h2>
-{{if .Posts}}
-<div>
-    {{range .Posts}}
-    <a href="/post/view/{{.Id}}">
-        <div style="border: 1px solid black; padding: 5px;">
-            <h4>{{.Title}}</h4>
-            <pre>{{.Content}}</pre>
-        </div>
-    </a>
-    {{end}}
-</div>
-{{else}}
-    <p>Nothing to see yet!</p>
+{{if .Models.Posts}}
+    <div>
+        {{range .Models.Posts}}
+            <a href="/post/view/{{.Id}}">
+                <div style="border: 1px solid black; padding: 5px;">
+                    <h4>{{.Title}}</h4>
+                    <pre>{{.Content}}</pre>
+                </div>
+            </a>
+        {{end}}
+    </div>
+    {{else}}
+        <p>Nothing to see yet!</p>
 {{end}}
 {{end}}

@@ -9,7 +9,10 @@ import (
 	"strings"
 )
 
-// TODO: Create error page func that would nicely render error pages (refer - 'ERR')
+/*
+	TODO:
+	- Create error page func that would nicely render error pages (refer - 'ERR')
+*/
 
 func (r *routes) newTemplateData(req *http.Request) templateData {
 	return templateData{
@@ -30,12 +33,16 @@ func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error
 	)
 
 	log.Printf(err.Error()+" method - %s, uri - %s, stack - %s", method, uri, trace)
-	// ERR
+	/*
+		ERR
+	*/
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
 func (r *routes) clientError(w http.ResponseWriter, status int) {
-	// ERR
+	/*
+		ERR
+	*/
 	http.Error(w, http.StatusText(status), status)
 }
 
@@ -51,21 +58,9 @@ func (r *routes) methodNotAllowed(w http.ResponseWriter) {
 	r.clientError(w, http.StatusMethodNotAllowed)
 }
 
-// identifyStatus accepts http error status and identifies it's error level (server or client)
-func (r *routes) identifyStatus(w http.ResponseWriter, req *http.Request, status int, err error) {
-	switch {
-	case status >= 500:
-		r.serverError(w, req, err)
-	case status >= 400:
-		r.clientError(w, status)
-	default:
-		log.Printf("Client error: unknown status code (below 400)")
-		r.clientError(w, status)
-	}
-}
-
-// Render templates by retrieving necessary template from template cache. First execute
-// into dummy buffer for any execution error catch (to set appropriate header)
+// Render templates by retrieving necessary template from template cache.
+//
+// First execute into dummy buffer for any execution error catch (to set appropriate header)
 func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, page string, data templateData) {
 	tmpl, ok := r.tempCache[page]
 	if !ok {
@@ -85,6 +80,10 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 	buf.WriteTo(w)
 }
 
+// getIdFromPath retrieves and returns id from request path.
+//
+// It returns empty string if number of splitted parts doesn't match with
+// given number
 func (r *routes) getIdFromPath(req *http.Request, urlPartsNum int) string {
 	urlParts := strings.Split(req.URL.Path, "/")
 	if len(urlParts) != urlPartsNum {

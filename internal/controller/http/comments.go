@@ -2,6 +2,7 @@ package http
 
 import (
 	"errors"
+	"fmt"
 	"forum/internal/entity"
 	"net/http"
 )
@@ -47,5 +48,5 @@ func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
 	r.sesm.Put(req.Context(), "flash", "Successfully added your comment!")
 
 	// Change this so it redirects either back to post's page or somewhere else
-	http.Redirect(w, req, "/", http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%s", postId), http.StatusSeeOther)
 }

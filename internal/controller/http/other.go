@@ -3,14 +3,22 @@ package http
 import (
 	"forum/web"
 	"net/http"
+	"strings"
 )
 
-/*
-	TODO:
-	1. Static handler for GET "/static/*filepath"
-*/
-
 var fileServer = http.FileServer(http.FS(web.Files))
+
+// prevenetDirListing is a middleware that prevents access to directories
+// in static handler, so only full path to static files would be available
+func (r *routes) preventDirListing(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if strings.HasSuffix(req.URL.Path, "/") || len(req.URL.Path) == 0 {
+			r.notFound(w)
+			return
+		}
+		next.ServeHTTP(w, req)
+	})
+}
 
 func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 	if req.URL.Path != "/" {
@@ -30,7 +38,7 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 	}
 
 	data := r.newTemplateData(req)
-	data.Posts = posts
+	data.Models.Posts = *posts
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }

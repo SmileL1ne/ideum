@@ -7,7 +7,11 @@ import (
 )
 
 func (r *routes) userSignup(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
+	switch {
+	case req.Method == http.MethodPost:
+		r.userSignupPost(w, req)
+		return
+	case req.Method != http.MethodGet:
 		r.methodNotAllowed(w)
 		return
 	}
@@ -18,10 +22,6 @@ func (r *routes) userSignup(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w)
-		return
-	}
 	if err := req.ParseForm(); err != nil {
 		r.badRequest(w)
 		return
@@ -54,10 +54,11 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *routes) userLogin(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodPost {
+	switch {
+	case req.Method == http.MethodPost:
 		r.userLoginPost(w, req)
 		return
-	} else if req.Method != http.MethodGet {
+	case req.Method != http.MethodGet:
 		r.methodNotAllowed(w)
 		return
 	}
@@ -80,9 +81,22 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	u := entity.UserLoginForm{Identifier: identifier, Password: password}
 	id, err := r.service.User.Authenticate(&u)
 	if err != nil {
+		/*
+			Problem: 2 cases are similar (ErrInvalidFormData and ErrInvalidCredentials)
+
+			Solution 1: make common err method and call in both cases
+				(this reduces lines of code (*DRY) )
+
+			Solution 2: create error tree so both errors would be same type and use
+				errors.As method to distinguish that returned err is related to this
+				custom error tree
+		*/
 		switch {
+		case errors.Is(err, entity.ErrInvalidFormData):
+			data := r.newTemplateData(req)
+			data.Form = u
+			r.render(w, req, http.StatusUnprocessableEntity, "login.html", data)
 		case errors.Is(err, entity.ErrInvalidCredentials):
-			u.AddNonFieldError("Email or password is incorrect")
 			data := r.newTemplateData(req)
 			data.Form = u
 			r.render(w, req, http.StatusUnprocessableEntity, "login.html", data)
@@ -92,12 +106,14 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Renew session token whenever user logs in
 	err = r.sesm.RenewToken(req.Context())
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
 
+	// Add auth status and flash message to context
 	r.sesm.Put(req.Context(), "authenticatedUserID", id)
 	r.sesm.Put(req.Context(), "flash", "Successfully logged in!")
 
@@ -105,12 +121,19 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *routes) userLogout(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	// Renew session token whenever user logs out
 	err := r.sesm.RenewToken(req.Context())
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
 
+	// Remove auth status from context and put flash message
 	r.sesm.Remove(req.Context(), "authenticatedUserID")
 	r.sesm.Put(req.Context(), "flash", "You've been logged out successfully!")
 

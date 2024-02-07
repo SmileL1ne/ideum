@@ -1,16 +1,16 @@
-{{define "title"}} Post #{{.Post.Id}}{{end}}
+{{define "title"}} Post #{{.Models.Post.Id}}{{end}}
 
 {{define "main"}}
     <div class="post">
         <div style="background-color: bisque;">
-            <h2>{{.Post.Title}}</h2>
+            <h2>{{.Models.Post.Title}}</h2>
         </div>
         <div style="background-color: beige; width: 400px; margin: 0 auto;">
-            <p style="text-align: center;">{{.Post.Content}}</p>
+            <p style="text-align: center;">{{.Models.Post.Content}}</p>
         </div>
 
         {{if .IsAuthenticated}}
-            <form action="/comment/{{.Post.Id}}" method="POST">
+            <form action="/comment/{{.Models.Post.Id}}" method="POST">
                 <div>
                     <label for="commentContent"></label>
                     {{with .Form.FieldErrors.commentContent}}
@@ -29,7 +29,7 @@
 
         <div>Comments:</div>
         <div>
-            {{range .Comments}}
+            {{range .Models.Comments}}
                 <div>
                     <pre>{{.Content}}</pre>
                 </div>
