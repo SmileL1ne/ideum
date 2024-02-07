@@ -1,4 +1,4 @@
-package http
+package handlers
 
 import (
 	"errors"
@@ -12,22 +12,20 @@ func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
 		r.methodNotAllowed(w)
 		return
 	}
-
 	if err := req.ParseForm(); err != nil {
 		r.badRequest(w)
 		return
 	}
-
 	postId := r.getIdFromPath(req, 3)
 	if postId == "" {
 		r.notFound(w)
 		return
 	}
 
-	form := req.PostForm
-	content := form.Get("commentContent")
-
-	comment := &entity.CommentCreateForm{Content: content}
+	content := req.PostForm.Get("commentContent")
+	comment := &entity.CommentCreateForm{
+		Content: content,
+	}
 
 	err := r.service.Comment.SaveComment(comment, postId)
 	if err != nil {
@@ -45,8 +43,8 @@ func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Add flash message to request's context
 	r.sesm.Put(req.Context(), "flash", "Successfully added your comment!")
 
-	// Change this so it redirects either back to post's page or somewhere else
 	http.Redirect(w, req, fmt.Sprintf("/post/view/%s", postId), http.StatusSeeOther)
 }

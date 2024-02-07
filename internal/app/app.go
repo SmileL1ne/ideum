@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	h "forum/internal/controller/http"
+	"forum/internal/handlers"
 	"forum/internal/repository"
 	"forum/internal/service"
 
@@ -41,7 +41,7 @@ func Run(cfg *config.Config) {
 	// Server creation
 	server := &http.Server{
 		Addr:    "127.0.0.1" + cfg.Http.Addr,
-		Handler: h.NewRouter(s, sesm),
+		Handler: handlers.NewRouter(s, sesm),
 	}
 
 	// Graceful shutdown
