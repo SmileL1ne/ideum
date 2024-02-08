@@ -1,4 +1,4 @@
-package comments
+package comment
 
 import (
 	"fmt"

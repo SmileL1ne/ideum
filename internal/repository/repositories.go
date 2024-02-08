@@ -2,21 +2,21 @@ package repository
 
 import (
 	"database/sql"
-	"forum/internal/repository/comments"
-	"forum/internal/repository/posts"
-	"forum/internal/repository/users"
+	"forum/internal/repository/comment"
+	"forum/internal/repository/post"
+	"forum/internal/repository/user"
 )
 
 type Repositories struct {
-	Posts    posts.IPostRepository
-	Users    users.IUserRepository
-	Comments comments.ICommentRepository
+	Posts    post.IPostRepository
+	Users    user.IUserRepository
+	Comments comment.ICommentRepository
 }
 
 func New(db *sql.DB) *Repositories {
 	return &Repositories{
-		Posts:    posts.NewPostRepo(db),
-		Users:    users.NewUserRepo(db),
-		Comments: comments.NewCommentRepository(db),
+		Posts:    post.NewPostRepo(db),
+		Users:    user.NewUserRepo(db),
+		Comments: comment.NewCommentRepository(db),
 	}
 }

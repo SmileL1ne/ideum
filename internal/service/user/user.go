@@ -1,9 +1,9 @@
-package users
+package user
 
 import (
 	"errors"
 	"forum/internal/entity"
-	"forum/internal/repository/users"
+	"forum/internal/repository/user"
 	"forum/internal/validator"
 
 	"golang.org/x/crypto/bcrypt"
@@ -15,10 +15,10 @@ type IUserService interface {
 }
 
 type userService struct {
-	userRepo users.IUserRepository
+	userRepo user.IUserRepository
 }
 
-func NewUserService(u users.IUserRepository) *userService {
+func NewUserService(u user.IUserRepository) *userService {
 	return &userService{
 		userRepo: u,
 	}

@@ -1,8 +1,8 @@
-package comments
+package comment
 
 import (
 	"forum/internal/entity"
-	"forum/internal/repository/comments"
+	"forum/internal/repository/comment"
 	"strconv"
 )
 
@@ -12,13 +12,13 @@ type ICommentService interface {
 }
 
 type commentService struct {
-	commentRepo comments.ICommentRepository
+	commentRepo comment.ICommentRepository
 }
 
 // This ensures that commentService struct implements ICommentService interface
 var _ ICommentService = (*commentService)(nil)
 
-func NewCommentService(r comments.ICommentRepository) *commentService {
+func NewCommentService(r comment.ICommentRepository) *commentService {
 	return &commentService{
 		commentRepo: r,
 	}

@@ -1,9 +1,9 @@
-package posts
+package post
 
 import (
 	"errors"
 	"forum/internal/entity"
-	"forum/internal/repository/posts"
+	"forum/internal/repository/post"
 	"strconv"
 )
 
@@ -20,11 +20,11 @@ type IPostService interface {
 }
 
 type postService struct {
-	postRepo posts.IPostRepository
+	postRepo post.IPostRepository
 }
 
 // Constructor for post service
-func NewPostsService(r posts.IPostRepository) *postService {
+func NewPostsService(r post.IPostRepository) *postService {
 	return &postService{
 		postRepo: r,
 	}

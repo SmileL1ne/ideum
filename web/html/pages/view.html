@@ -15,7 +15,7 @@
         {{end}}
 
         {{if .IsAuthenticated}}
-            <form action="/comment/{{.Models.Post.Id}}" method="POST">
+            <form action="/post/comment/{{.Models.Post.Id}}" method="POST">
                 <div>
                     <label for="commentContent"></label>
                     {{with .Form.FieldErrors.commentContent}}

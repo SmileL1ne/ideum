@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
+func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		r.methodNotAllowed(w)
 		return
@@ -16,7 +16,7 @@ func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
 		r.badRequest(w)
 		return
 	}
-	postID := r.getIdFromPath(req, 3)
+	postID := r.getIdFromPath(req, 4)
 	if postID == "" {
 		r.notFound(w)
 		return
