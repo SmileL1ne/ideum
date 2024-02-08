@@ -32,7 +32,6 @@ func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidPostId):
 			r.notFound(w)
-			return
 		case errors.Is(err, entity.ErrInvalidFormData):
 			data := r.newTemplateData(req)
 			data.Form = comment

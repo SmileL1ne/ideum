@@ -113,7 +113,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Add auth status and flash message to context
+	// Add authenticated user's id and flash message to session
 	r.sesm.Put(req.Context(), "authenticatedUserID", id)
 	r.sesm.Put(req.Context(), "flash", "Successfully logged in!")
 

@@ -93,9 +93,11 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		- Add userID here (foreign key)
 	*/
 
+	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+
 	p := entity.PostCreateForm{Title: title, Content: content}
 
-	id, err := r.service.Post.SavePost(&p)
+	id, err := r.service.Post.SavePost(&p, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):

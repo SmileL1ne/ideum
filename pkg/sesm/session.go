@@ -24,23 +24,23 @@ func New() *SessionManager {
 }
 
 func (sm *SessionManager) LoadAndSave(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Vary", "Cookie")
 
 		var sessionID string
-		cookie, err := r.Cookie(sm.CookieName)
+		cookie, err := req.Cookie(sm.CookieName)
 		if err == nil {
 			sessionID = cookie.Value
 		}
 
-		ctx, err := sm.Load(r.Context(), sessionID)
+		ctx, err := sm.Load(req.Context(), sessionID)
 		if err != nil {
 			log.Println("LoadAndSave:", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
-		sessionReq := r.WithContext(ctx)
+		sessionReq := req.WithContext(ctx)
 
 		sessionWriter := &sessionWriter{
 			ResponseWriter: w,

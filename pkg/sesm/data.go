@@ -67,7 +67,7 @@ func newSessionData(lifetime time.Duration) *sessionData {
 	return &sessionData{
 		status:     Unmodified,
 		values:     make(map[string]interface{}),
-		expiryTime: time.Now().Add(lifetime).UTC().Add(6 * time.Hour), // Change to UTC + 6
+		expiryTime: time.Now().Add(lifetime).UTC().Add(6 * time.Hour),
 	}
 }
 
@@ -115,6 +115,31 @@ func (sm *SessionManager) Put(ctx context.Context, key string, val interface{}) 
 	sd.mu.Unlock()
 }
 
+// GetInt reads integer value from context by given key, if not value exists by this key
+// or value is not int, it returns zero value
+func (sm *SessionManager) GetInt(ctx context.Context, key string) int {
+	val := sm.Get(ctx, key)
+	num, ok := val.(int)
+	if !ok {
+		return 0
+	}
+
+	return num
+}
+
+func (sm *SessionManager) Get(ctx context.Context, key string) interface{} {
+	sd := sm.getSessionDataFromContext(ctx)
+
+	// No need to use mutex here because the operation is read
+
+	val, exists := sd.values[key]
+	if !exists {
+		return nil
+	}
+
+	return val
+}
+
 func (sm *SessionManager) PopString(ctx context.Context, key string) string {
 	val := sm.Pop(ctx, key)
 	str, ok := val.(string)
@@ -122,16 +147,6 @@ func (sm *SessionManager) PopString(ctx context.Context, key string) string {
 		return ""
 	}
 	return str
-}
-
-func (sm *SessionManager) Remove(ctx context.Context, key string) {
-	sd := sm.getSessionDataFromContext(ctx)
-
-	sd.mu.Lock()
-	defer sd.mu.Unlock()
-
-	delete(sd.values, key)
-	sd.status = Modified
 }
 
 func (sm *SessionManager) Pop(ctx context.Context, key string) interface{} {
@@ -148,6 +163,16 @@ func (sm *SessionManager) Pop(ctx context.Context, key string) interface{} {
 	sd.status = Modified
 
 	return val
+}
+
+func (sm *SessionManager) Remove(ctx context.Context, key string) {
+	sd := sm.getSessionDataFromContext(ctx)
+
+	sd.mu.Lock()
+	defer sd.mu.Unlock()
+
+	delete(sd.values, key)
+	sd.status = Modified
 }
 
 func (sm *SessionManager) Exists(ctx context.Context, key string) bool {
