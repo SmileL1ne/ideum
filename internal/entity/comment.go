@@ -12,6 +12,7 @@ type CommentEntity struct {
 	Content   string
 	CreatedAt time.Time
 	PostID    int
+	Username  string
 	/*
 		TODO:
 		- Add 'Username' field to use when retrieving all comments left by particular user
@@ -22,6 +23,7 @@ type CommentEntity struct {
 // CommentView is returned by services, storing all comment related data that
 // will be outputed to end user
 type CommentView struct {
+	Username  string
 	Content   string
 	CreatedAt time.Time
 }

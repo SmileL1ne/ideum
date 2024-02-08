@@ -32,7 +32,7 @@ func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error
 		trace  = string(debug.Stack())
 	)
 
-	log.Printf(err.Error()+" method - %s, uri - %s, stack - %s", method, uri, trace)
+	log.Printf(err.Error()+"; method - %s, uri - %s, stack - %s", method, uri, trace)
 	/*
 		ERR
 	*/
@@ -44,6 +44,10 @@ func (r *routes) clientError(w http.ResponseWriter, status int) {
 		ERR
 	*/
 	http.Error(w, http.StatusText(status), status)
+}
+
+func (r *routes) unauthorized(w http.ResponseWriter) {
+	r.clientError(w, http.StatusUnauthorized)
 }
 
 func (r *routes) notFound(w http.ResponseWriter) {

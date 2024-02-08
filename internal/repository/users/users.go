@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
+	"strings"
 
 	"github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
@@ -34,15 +35,22 @@ func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 		return 0, err
 	}
 
-	query := `INSERT INTO users (username, email, hashed_password, created) 
+	query := `INSERT INTO users (username, email, hashed_password, created_at) 
 		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))`
 
 	result, err := r.DB.Exec(query, u.Username, u.Email, string(hashedPassword))
 	if err != nil {
-		var sqliteError *sqlite3.Error
+		var sqliteError sqlite3.Error
 		if errors.As(err, &sqliteError) {
-			if sqliteError.Code == 19 {
-				return 0, entity.ErrDuplicateEmail
+			if sqliteError.Code == 19 && strings.Contains(sqliteError.Error(), "UNIQUE constraint failed:") {
+				switch {
+				case strings.Contains(sqliteError.Error(), "users.email"):
+					return 0, entity.ErrDuplicateEmail
+				case strings.Contains(sqliteError.Error(), "users.username"):
+					return 0, entity.ErrDuplicateUsername
+				default:
+					return 0, fmt.Errorf("(repo) SaveUser: unknown field - %v", sqliteError)
+				}
 			}
 		}
 		return 0, err

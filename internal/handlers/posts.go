@@ -94,6 +94,10 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	*/
 
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	if userID == 0 {
+		r.unauthorized(w)
+		return
+	}
 
 	p := entity.PostCreateForm{Title: title, Content: content}
 

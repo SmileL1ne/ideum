@@ -16,5 +16,6 @@ var (
 // User related errors
 var (
 	ErrDuplicateEmail     = errors.New("entity: duplicate email")
+	ErrDuplicateUsername  = errors.New("entity: dupliate username")
 	ErrInvalidCredentials = errors.New("entity: invalid credentials")
 )

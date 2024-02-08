@@ -7,7 +7,9 @@
         {{range .Models.Posts}}
             <a href="/post/view/{{.Id}}">
                 <div style="border: 1px solid black; padding: 5px;">
-                    <h4>{{.Title}}</h4>
+                    <h3>Title: {{.Title}}</h3>
+                    <h4>Author: {{.Username}}</h4>
+                    <h4>Content:</h4>
                     <pre>{{.Content}}</pre>
                 </div>
             </a>

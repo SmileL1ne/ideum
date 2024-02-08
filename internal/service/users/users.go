@@ -33,10 +33,14 @@ func (us *userService) SaveUser(u *entity.UserSignupForm) (int, error) {
 
 	id, err := us.userRepo.SaveUser(*u)
 	if err != nil {
-		if errors.Is(err, entity.ErrDuplicateEmail) {
+		switch {
+		case errors.Is(err, entity.ErrDuplicateEmail):
 			u.AddFieldError("email", "Email address is already in use")
 			return 0, entity.ErrInvalidFormData
-		} else {
+		case errors.Is(err, entity.ErrDuplicateUsername):
+			u.AddFieldError("username", "Username is already in use")
+			return 0, entity.ErrInvalidFormData
+		default:
 			return 0, err
 		}
 	}

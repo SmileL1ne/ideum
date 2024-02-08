@@ -116,7 +116,7 @@ func (sm *SessionManager) Put(ctx context.Context, key string, val interface{}) 
 }
 
 // GetInt reads integer value from context by given key, if not value exists by this key
-// or value is not int, it returns zero value
+// or value is not int - it returns zero value
 func (sm *SessionManager) GetInt(ctx context.Context, key string) int {
 	val := sm.Get(ctx, key)
 	num, ok := val.(int)

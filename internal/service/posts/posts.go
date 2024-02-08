@@ -63,7 +63,8 @@ func (ps *postService) GetPost(postId string) (entity.PostView, error) {
 		Id:        post.Id,
 		Title:     post.Title,
 		Content:   post.Content,
-		CreatedAt: post.Created,
+		CreatedAt: post.CreatedAt,
+		Username:  post.Username,
 	}
 
 	return pView, nil
@@ -82,7 +83,8 @@ func (uc *postService) GetAllPosts() (*[]entity.PostView, error) {
 			Id:        p.Id,
 			Title:     p.Title,
 			Content:   p.Content,
-			CreatedAt: p.Created,
+			CreatedAt: p.CreatedAt,
+			Username:  p.Username,
 		}
 		pViews = append(pViews, post)
 	}

@@ -16,8 +16,8 @@ func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
 		r.badRequest(w)
 		return
 	}
-	postId := r.getIdFromPath(req, 3)
-	if postId == "" {
+	postID := r.getIdFromPath(req, 3)
+	if postID == "" {
 		r.notFound(w)
 		return
 	}
@@ -27,7 +27,13 @@ func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
 		Content: content,
 	}
 
-	err := r.service.Comment.SaveComment(comment, postId)
+	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	if userID == 0 {
+		r.unauthorized(w)
+		return
+	}
+
+	err := r.service.Comment.SaveComment(comment, postID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidPostId):
@@ -45,5 +51,5 @@ func (r *routes) commentCreatePost(w http.ResponseWriter, req *http.Request) {
 	// Add flash message to request's context
 	r.sesm.Put(req.Context(), "flash", "Successfully added your comment!")
 
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%s", postId), http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%s", postID), http.StatusSeeOther)
 }

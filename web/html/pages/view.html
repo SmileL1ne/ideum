@@ -2,12 +2,17 @@
 
 {{define "main"}}
     <div class="post">
-        <div style="background-color: bisque;">
-            <h2>{{.Models.Post.Title}}</h2>
-        </div>
-        <div style="background-color: beige; width: 400px; margin: 0 auto;">
-            <p style="text-align: center;">{{.Models.Post.Content}}</p>
-        </div>
+
+        {{with .Models.Post}}
+            <div style="background-color: bisque;">
+                <h2>Title: {{.Title}}</h2>
+                <h3>Author: {{.Username}}</h3>
+            </div>
+            <div style="background-color: beige; width: 400px; margin: 0 auto;">
+                <h3>Content:</h3>
+                <p style="text-align: center;">{{.Content}}</p>
+            </div>
+        {{end}}
 
         {{if .IsAuthenticated}}
             <form action="/comment/{{.Models.Post.Id}}" method="POST">
@@ -30,6 +35,7 @@
         <div>Comments:</div>
         <div>
             {{range .Models.Comments}}
+                <h3>{{.Username}}</h3>
                 <div>
                     <pre>{{.Content}}</pre>
                 </div>

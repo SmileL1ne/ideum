@@ -7,14 +7,15 @@ import (
 
 // PostEntity is returned to services from repositories for business logic purposes
 type PostEntity struct {
-	Id      int
-	Title   string
-	Content string
-	Created time.Time
+	Id        int
+	Title     string
+	Content   string
+	CreatedAt time.Time
 	/*
 		TODO: Add UserID foreign key to retrieve posts related to user with that id
 	*/
-	// UserID  int
+	UserID   int
+	Username string
 }
 
 // PostView is returned to handlers from service and outputed in pages
@@ -23,6 +24,7 @@ type PostView struct {
 	Title     string
 	Content   string
 	CreatedAt time.Time
+	Username  string
 	Comments  []CommentView
 }
 
