@@ -11,11 +11,10 @@ type PostEntity struct {
 	Title     string
 	Content   string
 	CreatedAt time.Time
-	/*
-		TODO: Add UserID foreign key to retrieve posts related to user with that id
-	*/
-	UserID   int
-	Username string
+	UserID    int
+	Username  string
+	Likes     int
+	Dislikes  int
 }
 
 // PostView is returned to handlers from service and outputed in pages
@@ -26,6 +25,8 @@ type PostView struct {
 	CreatedAt time.Time
 	Username  string
 	Comments  []CommentView
+	Likes     int
+	Dislikes  int
 }
 
 // PostCreateForm is accepted by services and repos. Services accept pointer only for
