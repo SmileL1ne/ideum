@@ -60,7 +60,7 @@ func (ps *postService) GetPost(postId string) (entity.PostView, error) {
 	}
 
 	pView := entity.PostView{
-		Id:        post.Id,
+		Id:        post.ID,
 		Title:     post.Title,
 		Content:   post.Content,
 		CreatedAt: post.CreatedAt,
@@ -80,7 +80,7 @@ func (uc *postService) GetAllPosts() (*[]entity.PostView, error) {
 	var pViews []entity.PostView
 	for _, p := range *posts {
 		post := entity.PostView{
-			Id:        p.Id,
+			Id:        p.ID,
 			Title:     p.Title,
 			Content:   p.Content,
 			CreatedAt: p.CreatedAt,

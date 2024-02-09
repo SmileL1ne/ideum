@@ -35,15 +35,15 @@ func (r *postRepository) SavePost(p entity.PostCreateForm, userID int) (int, err
 		return 0, err
 	}
 
-	id, err := result.LastInsertId()
+	postID, err := result.LastInsertId()
 	if err != nil {
 		return 0, err
 	}
 
-	return int(id), nil
+	return int(postID), nil
 }
 
-func (r *postRepository) GetPost(postId int) (entity.PostEntity, error) {
+func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username  
 		FROM posts p
@@ -53,7 +53,7 @@ func (r *postRepository) GetPost(postId int) (entity.PostEntity, error) {
 		`
 
 	var post entity.PostEntity
-	if err := r.DB.QueryRow(query, postId).Scan(&post.Id, &post.Title, &post.Content,
+	if err := r.DB.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content,
 		&post.CreatedAt, &post.Username); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.PostEntity{}, entity.ErrNoRecord
@@ -81,7 +81,7 @@ func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 
 	for rows.Next() {
 		var post entity.PostEntity
-		if err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.CreatedAt, &post.Username); err != nil {
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.Username); err != nil {
 			return nil, err
 		}
 		posts = append(posts, post)

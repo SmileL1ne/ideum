@@ -12,6 +12,14 @@
                 <h3>Content:</h3>
                 <p style="text-align: center;">{{.Content}}</p>
             </div>
+            <div>
+                <form action="/post/like/{{.Id}}" method="POST">
+                    <input type="submit" value="Like">
+                </form>
+                <form action="/post/dislike/{{.Id}}" method="POST">
+                    <input type="submit" value="Dislike">
+                </form>
+            </div>
         {{end}}
 
         {{if .IsAuthenticated}}

@@ -7,7 +7,7 @@ import (
 
 // PostEntity is returned to services from repositories for business logic purposes
 type PostEntity struct {
-	Id        int
+	ID        int
 	Title     string
 	Content   string
 	CreatedAt time.Time
