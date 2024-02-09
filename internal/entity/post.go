@@ -19,7 +19,7 @@ type PostEntity struct {
 
 // PostView is returned to handlers from service and outputed in pages
 type PostView struct {
-	Id        int
+	ID        int
 	Title     string
 	Content   string
 	CreatedAt time.Time

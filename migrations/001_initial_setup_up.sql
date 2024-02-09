@@ -36,9 +36,10 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 
 -- REWORK
-CREATE TABLE IF NOT EXISTS comment_likes (
+CREATE TABLE IF NOT EXISTS comment_reactions (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    is_like BOOLEAN NOT NULL
+    is_like BOOLEAN NOT NULL,
+    created_at DATETIME NOT NULL
 );
 
 -- REWORK

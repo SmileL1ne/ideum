@@ -1,4 +1,4 @@
-{{define "title"}} Post #{{.Models.Post.Id}}{{end}}
+{{define "title"}} Post #{{.Models.Post.ID}}{{end}}
 
 {{define "main"}}
     <div class="post">
@@ -15,13 +15,13 @@
             <div>
                 <div>
                     <p>Likes:{{.Likes}}</p>
-                    <form action="/post/like/{{.Id}}" method="POST">
+                    <form action="/post/like/{{.ID}}" method="POST">
                         <input type="submit" value="Like">
                     </form>
                 </div>
                 <div>
-                    <p>Likes:{{.Dislikes}}</p>
-                    <form action="/post/dislike/{{.Id}}" method="POST">
+                    <p>Dislikes:{{.Dislikes}}</p>
+                    <form action="/post/dislike/{{.ID}}" method="POST">
                         <input type="submit" value="Dislike">
                     </form>
                 </div>
@@ -29,7 +29,7 @@
         {{end}}
 
         {{if .IsAuthenticated}}
-            <form action="/post/comment/{{.Models.Post.Id}}" method="POST">
+            <form action="/post/comment/{{.Models.Post.ID}}" method="POST">
                 <div>
                     <label for="commentContent"></label>
                     {{with .Form.FieldErrors.commentContent}}
@@ -50,6 +50,18 @@
         <div>
             {{range .Models.Comments}}
                 <h3>{{.Username}}</h3>
+                <div>
+                    <p>Likes:{{.Likes}}</p>
+                    <form action="/post/comment/like/{{.PostID}}/{{.ID}}" method="POST">
+                        <input type="submit" value="Like">
+                    </form>
+                </div>
+                <div>
+                    <p>Dislikes:{{.Dislikes}}</p>
+                    <form action="/post/comment/dislike/{{.PostID}}/{{.ID}}" method="POST">
+                        <input type="submit" value="Dislike">
+                    </form>
+                </div>
                 <div>
                     <pre>{{.Content}}</pre>
                 </div>

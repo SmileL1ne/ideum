@@ -54,9 +54,13 @@ func (cs *commentService) GetAllCommentsForPost(postIDStr string) (*[]entity.Com
 	var cViews []entity.CommentView
 	for _, c := range *comments {
 		comment := entity.CommentView{
+			ID:        c.ID,
 			Username:  c.Username,
 			Content:   c.Content,
 			CreatedAt: c.CreatedAt,
+			PostID:    c.PostID,
+			Likes:     c.Likes,
+			Dislikes:  c.Dislikes,
 		}
 		cViews = append(cViews, comment)
 	}

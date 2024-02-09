@@ -13,6 +13,11 @@ var (
 	ErrInvalidPostId = errors.New("entity: invalid post id")
 )
 
+// Comment related errors
+var (
+	ErrInvalidCommentId = errors.New("entity: invalid comment id")
+)
+
 // User related errors
 var (
 	ErrDuplicateEmail     = errors.New("entity: duplicate email")

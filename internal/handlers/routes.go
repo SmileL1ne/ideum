@@ -43,7 +43,7 @@ func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	dynamic := mids.New(sesm.LoadAndSave)
 
 	router.Handle("/", dynamic.ThenFunc(r.home))
-	router.Handle("/post/view/", dynamic.ThenFunc(r.postView))
+	router.Handle("/post/view/", dynamic.ThenFunc(r.postView)) // postID at the end
 	router.Handle("/user/signup", dynamic.ThenFunc(r.userSignup))
 	router.Handle("/user/login", dynamic.ThenFunc(r.userLogin))
 
@@ -52,9 +52,11 @@ func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	protected := dynamic.Append(r.requireAuthentication)
 
 	router.Handle("/post/create", protected.ThenFunc(r.postCreate))
-	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate)) // postID at the end
-	router.Handle("/post/like/", protected.ThenFunc(r.like))             // postID at the end
-	router.Handle("/post/dislike/", protected.ThenFunc(r.dislike))       // postID at the end
+	router.Handle("/post/like/", protected.ThenFunc(r.postLike))                  // postID at the end
+	router.Handle("/post/dislike/", protected.ThenFunc(r.postDislike))            // postID at the end
+	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))          // postID at the end
+	router.Handle("/post/comment/like/", protected.ThenFunc(r.commentLike))       // postID at the end
+	router.Handle("/post/comment/dislike/", protected.ThenFunc(r.commentDislike)) // postID at the end
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
 
 	// Standard middleware chain applied to router itself -> used in all routes

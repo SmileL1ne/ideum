@@ -7,9 +7,12 @@ import (
 )
 
 type IReactionRepository interface {
-	Exists(int) (bool, error)
-	Add(bool, int, int) error
-	Delete(int, int) error
+	ExistsPost(int) (bool, error)
+	ExistsComment(int) (bool, error)
+	AddPost(bool, int, int) error
+	AddComment(bool, int, int) error
+	DeletePost(int, int) error
+	DeleteComment(int, int) error
 }
 
 type reactionRepository struct {
@@ -24,16 +27,8 @@ func NewReactionRepo(db *sql.DB) *reactionRepository {
 
 var _ IReactionRepository = (*reactionRepository)(nil)
 
-func (r *reactionRepository) Exists(userID int) (bool, error) {
+func (r *reactionRepository) ExistsPost(userID int) (bool, error) {
 	var isLike bool
-
-	// query := `
-	// 	SELECT EXISTS (
-	// 		SELECT true
-	// 		FROM post_reactions
-	// 		WHERE user_id = $1
-	// 	)
-	// `
 
 	query := `
 		SELECT is_like
@@ -52,7 +47,7 @@ func (r *reactionRepository) Exists(userID int) (bool, error) {
 	return isLike, nil
 }
 
-func (r *reactionRepository) Add(isLike bool, postID int, userID int) error {
+func (r *reactionRepository) AddPost(isLike bool, postID int, userID int) error {
 	query := `
 		INSERT INTO post_reactions (post_id, user_id, is_like, created_at)
 		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))
@@ -63,7 +58,7 @@ func (r *reactionRepository) Add(isLike bool, postID int, userID int) error {
 	return err
 }
 
-func (r *reactionRepository) Delete(postID int, userID int) error {
+func (r *reactionRepository) DeletePost(postID int, userID int) error {
 	query := `
 		DELETE
 		FROM post_reactions
@@ -71,6 +66,49 @@ func (r *reactionRepository) Delete(postID int, userID int) error {
 	`
 
 	_, err := r.DB.Exec(query, postID, userID)
+
+	return err
+}
+
+func (r *reactionRepository) ExistsComment(userID int) (bool, error) {
+	var isLike bool
+
+	query := `
+		SELECT is_like
+		FROM comment_reactions
+		WHERE user_id = $1
+	`
+
+	err := r.DB.QueryRow(query, userID).Scan(&isLike)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, entity.ErrNoRecord
+		}
+		return false, err
+	}
+
+	return isLike, nil
+}
+
+func (r *reactionRepository) AddComment(isLike bool, commentID int, userID int) error {
+	query := `
+		INSERT INTO comment_reactions (comment_id, user_id, is_like, created_at)
+		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))
+	`
+
+	_, err := r.DB.Exec(query, commentID, userID, isLike)
+
+	return err
+}
+
+func (r *reactionRepository) DeleteComment(commentID int, userID int) error {
+	query := `
+		DELETE
+		FROM comment_reactions
+		WHERE comment_id = $1 AND user_id = $2
+	`
+
+	_, err := r.DB.Exec(query, commentID, userID)
 
 	return err
 }

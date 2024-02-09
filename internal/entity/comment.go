@@ -8,24 +8,25 @@ import (
 // CommentEntity is returned by repositories, storing all comment related data
 // for business logic
 type CommentEntity struct {
-	Id        int
+	ID        int
 	Content   string
 	CreatedAt time.Time
 	PostID    int
 	Username  string
-	/*
-		TODO:
-		- Add 'Username' field to use when retrieving all comments left by particular user
-	*/
-	//
+	Likes     int
+	Dislikes  int
 }
 
 // CommentView is returned by services, storing all comment related data that
 // will be outputed to end user
 type CommentView struct {
+	ID        int
 	Username  string
 	Content   string
 	CreatedAt time.Time
+	PostID    int
+	Likes     int
+	Dislikes  int
 }
 
 // CommentCreateForm is accepted by services by pointer only for form error messages
