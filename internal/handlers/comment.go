@@ -23,15 +23,21 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	content := req.PostForm.Get("commentContent")
-	comment := &entity.CommentCreateForm{
-		Content: content,
-	}
-
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
 		r.unauthorized(w)
 		return
 	}
+
+	comment := &entity.CommentCreateForm{
+		Content: content,
+	}
+
+	/*
+		TODO:
+		- Add comment_reaction field along with saving post
+		- Make them into one transaction in SaveComment method
+	*/
 
 	err := r.service.Comment.SaveComment(comment, postID, userID)
 	if err != nil {

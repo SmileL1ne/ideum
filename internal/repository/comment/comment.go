@@ -16,7 +16,7 @@ type commentRepository struct {
 
 var _ ICommentRepository = (*commentRepository)(nil)
 
-func NewCommentRepository(db *sql.DB) *commentRepository {
+func NewCommentRepo(db *sql.DB) *commentRepository {
 	return &commentRepository{
 		DB: db,
 	}

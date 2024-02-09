@@ -88,11 +88,6 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	title := form.Get("title")
 	content := form.Get("content")
-	/*
-		TODO:
-		- Add userID here (foreign key)
-	*/
-
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
 		r.unauthorized(w)
@@ -100,6 +95,12 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	}
 
 	p := entity.PostCreateForm{Title: title, Content: content}
+
+	/*
+		TODO:
+		- Add post_reaction field along with saving post
+		- Make them into one transaction in SavePost method
+	*/
 
 	id, err := r.service.Post.SavePost(&p, userID)
 	if err != nil {

@@ -1,6 +1,9 @@
 package handlers
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func (r *routes) like(w http.ResponseWriter, req *http.Request) {
 	switch {
@@ -24,7 +27,13 @@ func (r *routes) like(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := r.service.
+	err := r.service.Reaction.Save(true, postID, userID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%s", postID), http.StatusOK)
 }
 
 func (r *routes) unLike(w http.ResponseWriter, req *http.Request) {

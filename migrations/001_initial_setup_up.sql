@@ -22,9 +22,15 @@ CREATE TABLE IF NOT EXISTS posts (
 );
 
 -- REWORK
-CREATE TABLE IF NOT EXISTS post_likes (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    is_like BOOLEAN NOT NULL
+CREATE TABLE IF NOT EXISTS post_reactions (
+    post_id INT NOT NULL,
+    user_id INT NOT NULL,
+    likes INT NOT NULL,
+    dilikes INT NOT NULL,
+    updated_at DATETIME NOT NULL,
+    PRIMARY KEY (post_id, user_id),
+    FOREIGN KEY (post_id) REFERENCES posts(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- REWORK

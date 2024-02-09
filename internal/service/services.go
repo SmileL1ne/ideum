@@ -4,19 +4,22 @@ import (
 	"forum/internal/repository"
 	"forum/internal/service/comment"
 	"forum/internal/service/post"
+	"forum/internal/service/reaction"
 	"forum/internal/service/user"
 )
 
-type Services struct { // TODO: rename to 'Services'
-	Post    post.IPostService
-	User    user.IUserService
-	Comment comment.ICommentService
+type Services struct {
+	Post     post.IPostService
+	User     user.IUserService
+	Comment  comment.ICommentService
+	Reaction reaction.IReactionService
 }
 
 func New(r *repository.Repositories) *Services {
 	return &Services{
-		Post:    post.NewPostsService(r.Posts),
-		User:    user.NewUserService(r.Users),
-		Comment: comment.NewCommentService(r.Comments),
+		Post:     post.NewPostsService(r.Post),
+		User:     user.NewUserService(r.User),
+		Comment:  comment.NewCommentService(r.Comment),
+		Reaction: reaction.NewReactionService(r.Reaction),
 	}
 }
