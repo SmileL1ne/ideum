@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"forum/internal/entity"
 	"net/http"
 	"strings"
 )
@@ -10,6 +12,7 @@ import (
 	TODO:
 	- Find way to merge these 2 routes into 1, because they have pretty much
 	same body except for like it is true and for dislike - false
+	- Before liking post or comment check if they exist
 */
 
 func (r *routes) postLike(w http.ResponseWriter, req *http.Request) {
@@ -18,9 +21,13 @@ func (r *routes) postLike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	postID := r.getIdFromPath(req, 4)
-	if postID == "" {
-		r.notFound(w)
+	postID, err := r.getIdFromPath(req, 4)
+	if err != nil {
+		if errors.Is(err, entity.ErrInvalidPostId) {
+			r.notFound(w)
+			return
+		}
+		r.badRequest(w)
 		return
 	}
 
@@ -30,9 +37,14 @@ func (r *routes) postLike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := r.service.Reaction.AddOrDeletePost(true, postID, userID)
+	err = r.service.Reaction.AddOrDeletePost(true, postID, userID)
 	if err != nil {
-		r.serverError(w, req, err)
+		switch {
+		case errors.Is(err, entity.ErrInvalidPostId):
+			r.badRequest(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -45,9 +57,13 @@ func (r *routes) postDislike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	postID := r.getIdFromPath(req, 4)
-	if postID == "" {
-		r.notFound(w)
+	postID, err := r.getIdFromPath(req, 4)
+	if err != nil {
+		if errors.Is(err, entity.ErrInvalidPostId) {
+			r.notFound(w)
+			return
+		}
+		r.badRequest(w)
 		return
 	}
 
@@ -57,9 +73,14 @@ func (r *routes) postDislike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := r.service.Reaction.AddOrDeletePost(false, postID, userID)
+	err = r.service.Reaction.AddOrDeletePost(false, postID, userID)
 	if err != nil {
-		r.serverError(w, req, err)
+		switch {
+		case errors.Is(err, entity.ErrInvalidPostId):
+			r.badRequest(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -72,9 +93,13 @@ func (r *routes) commentLike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	commentID := r.getIdFromPath(req, 6)
-	if commentID == "" {
-		r.notFound(w)
+	commentID, err := r.getIdFromPath(req, 6)
+	if err != nil {
+		if errors.Is(err, entity.ErrInvalidCommentId) {
+			r.notFound(w)
+			return
+		}
+		r.badRequest(w)
 		return
 	}
 
@@ -87,9 +112,14 @@ func (r *routes) commentLike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := r.service.Reaction.AddOrDeleteComment(true, commentID, userID)
+	err = r.service.Reaction.AddOrDeleteComment(true, commentID, userID)
 	if err != nil {
-		r.serverError(w, req, err)
+		switch {
+		case errors.Is(err, entity.ErrInvalidCommentId):
+			r.badRequest(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -102,9 +132,13 @@ func (r *routes) commentDislike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	commentID := r.getIdFromPath(req, 6)
-	if commentID == "" {
-		r.notFound(w)
+	commentID, err := r.getIdFromPath(req, 6)
+	if err != nil {
+		if errors.Is(err, entity.ErrInvalidCommentId) {
+			r.notFound(w)
+			return
+		}
+		r.badRequest(w)
 		return
 	}
 
@@ -117,9 +151,14 @@ func (r *routes) commentDislike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := r.service.Reaction.AddOrDeleteComment(false, commentID, userID)
+	err = r.service.Reaction.AddOrDeleteComment(false, commentID, userID)
 	if err != nil {
-		r.serverError(w, req, err)
+		switch {
+		case errors.Is(err, entity.ErrInvalidCommentId):
+			r.badRequest(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 

@@ -7,52 +7,45 @@ import (
 	"net/http"
 )
 
-/*
-	TODO:
-	- For postCreateForm - add userID for foreign key (when creating links between tables)
-*/
-
 func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
 		r.methodNotAllowed(w)
 		return
 	}
 
-	id := r.getIdFromPath(req, 4)
-	if id == "" {
-		r.notFound(w)
-		return
-	}
-
-	post, err := r.service.Post.GetPost(id)
+	postID, err := r.getIdFromPath(req, 4)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrNoRecord):
+		if errors.Is(err, entity.ErrInvalidPostId) {
 			r.notFound(w)
-		default:
-			r.serverError(w, req, err)
+			return
 		}
+		r.badRequest(w)
 		return
 	}
 
-	comments, err := r.service.Comment.GetAllCommentsForPost(id)
+	post, err := r.service.Post.GetPost(postID)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidPostId):
-			r.notFound(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 
-	// Add comments to received post
-	post.Comments = *comments
+	comments, err := r.service.Comment.GetAllCommentsForPost(postID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	tags, err := r.service.Tag.GetAllTagsForPost(postID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
 
 	// Create template struct with page related data
 	data := r.newTemplateData(req)
 	data.Models.Post = post
 	data.Models.Comments = *comments
+	data.Models.Tags = *tags
 	data.Form = entity.CommentCreateForm{}
 
 	r.render(w, req, http.StatusOK, "view.html", data)
@@ -68,7 +61,14 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	tags, err := r.service.Tag.GetAllTags()
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
 	data := r.newTemplateData(req)
+	data.Models.Tags = *tags
 	data.Form = entity.PostCreateForm{}
 
 	r.render(w, req, http.StatusOK, "create.html", data)
@@ -88,6 +88,11 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	title := form.Get("title")
 	content := form.Get("content")
+
+	// Get all selected tags id
+	tags := form["tags"]
+
+	// Get userID from request
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
 		r.unauthorized(w)
@@ -96,7 +101,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	p := entity.PostCreateForm{Title: title, Content: content}
 
-	id, err := r.service.Post.SavePost(&p, userID)
+	id, err := r.service.Post.SavePost(&p, userID, tags)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):

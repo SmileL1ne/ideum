@@ -43,20 +43,20 @@ CREATE TABLE IF NOT EXISTS comment_reactions (
 );
 
 -- REWORK
-CREATE TABLE IF NOT EXISTS categories (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(150) NOT NULL,
-    description TEXT NOT NULL,
-    created DATETIME NOT NULL
+CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER NOT NULL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    created_at DATETIME NOT NULL
 );
 
 -- REWORK
--- Bridge table, connects posts and categories tables
-CREATE TABLE IF NOT EXISTS posts_categories (
+-- Bridge table, connects posts and tags tables
+CREATE TABLE IF NOT EXISTS posts_tags (
     post_id INTEGER REFERENCES posts(id),
-    category_id INTEGER REFERENCES categories(id),
+    tag_id INTEGER REFERENCES tags(id),
+    created_at DATETIME NOT NULL,
 
-    PRIMARY KEY (post_id, category_id)
+    PRIMARY KEY (post_id, tag_id)
 );
 
 -- REWORK

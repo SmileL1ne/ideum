@@ -126,7 +126,7 @@ func (r *routes) userLogout(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Renew session token whenever user logs out
+	// Renew session token whenever user logs out to keep flash message
 	err := r.sesm.RenewToken(req.Context())
 	if err != nil {
 		r.serverError(w, req, err)

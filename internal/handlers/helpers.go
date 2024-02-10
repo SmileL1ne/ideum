@@ -3,9 +3,11 @@ package handlers
 import (
 	"bytes"
 	"fmt"
+	"forum/internal/entity"
 	"log"
 	"net/http"
 	"runtime/debug"
+	"strconv"
 	"strings"
 )
 
@@ -88,11 +90,11 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 //
 // It returns empty string if number of splitted parts doesn't match with
 // given number
-func (r *routes) getIdFromPath(req *http.Request, urlPartsNum int) string {
+func (r *routes) getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
 	urlParts := strings.Split(req.URL.Path, "/")
 	if len(urlParts) != urlPartsNum {
-		return ""
+		return 0, entity.ErrInvalidPostId
 	}
 
-	return urlParts[len(urlParts)-1]
+	return strconv.Atoi(urlParts[len(urlParts)-1])
 }

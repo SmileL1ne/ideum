@@ -3,11 +3,17 @@
 {{define "main"}}
     <div class="post">
 
-        {{with .Models.Post}}
-            <div style="background-color: bisque;">
-                <h2>Title: {{.Title}}</h2>
-                <h3>Author: {{.Username}}</h3>
+        <div style="background-color: bisque;">
+            <h2>Title: {{.Models.Post.Title}}</h2>
+            <h3>Author: {{.Models.Post.Username}}</h3>
+            <div>
+                <h3>Tags:</h3>
+                {{range .Models.Tags}}
+                    <p>{{.Name}}</p>
+                {{end}}
             </div>
+        </div>
+        {{with .Models.Post}}
             <div style="background-color: beige; width: 400px; margin: 0 auto;">
                 <h3>Content:</h3>
                 <p style="text-align: center;">{{.Content}}</p>

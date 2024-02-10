@@ -3,12 +3,11 @@ package comment
 import (
 	"forum/internal/entity"
 	"forum/internal/repository/comment"
-	"strconv"
 )
 
 type ICommentService interface {
-	SaveComment(*entity.CommentCreateForm, string, int) error
-	GetAllCommentsForPost(string) (*[]entity.CommentView, error)
+	SaveComment(*entity.CommentCreateForm, int, int) error
+	GetAllCommentsForPost(int) (*[]entity.CommentView, error)
 }
 
 type commentService struct {
@@ -24,17 +23,12 @@ func NewCommentService(r comment.ICommentRepository) *commentService {
 	}
 }
 
-func (cs *commentService) SaveComment(c *entity.CommentCreateForm, postIDStr string, userID int) error {
-	postID, err := strconv.Atoi(postIDStr)
-	if err != nil {
-		return entity.ErrInvalidPostId
-	}
-
+func (cs *commentService) SaveComment(c *entity.CommentCreateForm, postID int, userID int) error {
 	if !isRightComment(c) {
 		return entity.ErrInvalidFormData
 	}
 
-	err = cs.commentRepo.SaveComment(*c, postID, userID)
+	err := cs.commentRepo.SaveComment(*c, postID, userID)
 	if err != nil {
 		return err
 	}
@@ -42,13 +36,11 @@ func (cs *commentService) SaveComment(c *entity.CommentCreateForm, postIDStr str
 	return nil
 }
 
-func (cs *commentService) GetAllCommentsForPost(postIDStr string) (*[]entity.CommentView, error) {
-	postID, err := strconv.Atoi(postIDStr)
-	if err != nil {
-		return nil, entity.ErrInvalidPostId
-	}
-
+func (cs *commentService) GetAllCommentsForPost(postID int) (*[]entity.CommentView, error) {
 	comments, err := cs.commentRepo.GetAllCommentsForPost(postID)
+	if err != nil {
+		return nil, err
+	}
 
 	// Convert received CommentEntity's to CommentView's
 	var cViews []entity.CommentView

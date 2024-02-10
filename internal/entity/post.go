@@ -24,7 +24,6 @@ type PostView struct {
 	Content   string
 	CreatedAt time.Time
 	Username  string
-	Comments  []CommentView
 	Likes     int
 	Dislikes  int
 }

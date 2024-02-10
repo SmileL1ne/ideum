@@ -8,7 +8,7 @@ import (
 
 // TODO: Add new methods related to post manipulation (delete, update post)
 type IPostRepository interface {
-	SavePost(entity.PostCreateForm, int) (int, error)
+	SavePost(entity.PostCreateForm, int, []int) (int, error)
 	GetPost(int) (entity.PostEntity, error)
 	GetAllPosts() (*[]entity.PostEntity, error)
 }
@@ -25,18 +25,43 @@ func NewPostRepo(db *sql.DB) *postRepository {
 
 var _ IPostRepository = (*postRepository)(nil)
 
-func (r *postRepository) SavePost(p entity.PostCreateForm, userID int) (int, error) {
-	query := `
-		INSERT INTO posts (title, content, user_id, created_at) 
-		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))`
-
-	result, err := r.DB.Exec(query, p.Title, p.Content, userID)
+func (r *postRepository) SavePost(p entity.PostCreateForm, userID int, tagIDs []int) (int, error) {
+	tx, err := r.DB.Begin()
 	if err != nil {
+		return 0, err
+	}
+
+	query1 := `
+		INSERT INTO posts (title, content, user_id, created_at) 
+		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))
+	`
+
+	result, err := tx.Exec(query1, p.Title, p.Content, userID)
+	if err != nil {
+		tx.Rollback()
 		return 0, err
 	}
 
 	postID, err := result.LastInsertId()
 	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	query2 := `
+		INSERT INTO posts_tags (post_id, tag_id, created_at)
+		VALUES ($1, $2, datetime('now', 'utc', '+12 hours'))
+	`
+
+	for _, tagID := range tagIDs {
+		_, err := tx.Exec(query2, postID, tagID)
+		if err != nil {
+			tx.Rollback()
+			return 0, err
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
 		return 0, err
 	}
 

@@ -12,8 +12,7 @@ type Models struct {
 	Posts    []entity.PostView
 	Post     entity.PostView
 	Comments []entity.CommentView
-	// User     entity.UserEntity
-	// Users    []entity.UserEntity
+	Tags     []entity.TagEntity
 }
 
 type templateData struct {

@@ -4,12 +4,11 @@ import (
 	"errors"
 	"forum/internal/entity"
 	"forum/internal/repository/reaction"
-	"strconv"
 )
 
 type IReactionService interface {
-	AddOrDeletePost(bool, string, int) error
-	AddOrDeleteComment(bool, string, int) error
+	AddOrDeletePost(bool, int, int) error
+	AddOrDeleteComment(bool, int, int) error
 }
 
 type reactionService struct {
@@ -24,12 +23,7 @@ func NewReactionService(r reaction.IReactionRepository) *reactionService {
 
 var _ IReactionService = (*reactionService)(nil)
 
-func (rs *reactionService) AddOrDeletePost(isLike bool, postIDStr string, userID int) error {
-	postID, err := strconv.Atoi(postIDStr)
-	if err != nil {
-		return entity.ErrInvalidPostId
-	}
-
+func (rs *reactionService) AddOrDeletePost(isLike bool, postID int, userID int) error {
 	// Check if reaction by user exists in table, if not it would return
 	// entity.ErrNoRecord error, otherwise it would return reaction left by
 	// that user
@@ -58,12 +52,7 @@ func (rs *reactionService) AddOrDeletePost(isLike bool, postIDStr string, userID
 }
 
 // Same principle to reactions handling in posts
-func (rs *reactionService) AddOrDeleteComment(isLike bool, commentIDStr string, userID int) error {
-	commentID, err := strconv.Atoi(commentIDStr)
-	if err != nil {
-		return entity.ErrInvalidCommentId
-	}
-
+func (rs *reactionService) AddOrDeleteComment(isLike bool, commentID int, userID int) error {
 	isLikeDB, err := rs.reactsRepo.ExistsComment(userID)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {

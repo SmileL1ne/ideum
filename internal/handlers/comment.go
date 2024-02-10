@@ -16,9 +16,14 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		r.badRequest(w)
 		return
 	}
-	postID := r.getIdFromPath(req, 4)
-	if postID == "" {
-		r.notFound(w)
+
+	postID, err := r.getIdFromPath(req, 4)
+	if err != nil {
+		if errors.Is(err, entity.ErrInvalidPostId) {
+			r.notFound(w)
+			return
+		}
+		r.badRequest(w)
 		return
 	}
 
@@ -33,7 +38,7 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		Content: content,
 	}
 
-	err := r.service.Comment.SaveComment(comment, postID, userID)
+	err = r.service.Comment.SaveComment(comment, postID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidPostId):

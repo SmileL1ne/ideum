@@ -14,8 +14,8 @@ TODO:
 - Add postID validation in GetPost method
 */
 type IPostService interface {
-	SavePost(*entity.PostCreateForm, int) (int, error)
-	GetPost(string) (entity.PostView, error)
+	SavePost(*entity.PostCreateForm, int, []string) (int, error)
+	GetPost(int) (entity.PostView, error)
 	GetAllPosts() (*[]entity.PostView, error)
 }
 
@@ -32,12 +32,20 @@ func NewPostsService(r post.IPostRepository) *postService {
 
 var _ IPostService = (*postService)(nil)
 
-func (ps *postService) SavePost(p *entity.PostCreateForm, userID int) (int, error) {
+func (ps *postService) SavePost(p *entity.PostCreateForm, userID int, tags []string) (int, error) {
 	if !isRightPost(p) {
 		return 0, entity.ErrInvalidFormData
 	}
+	var tagIDs []int
+	for _, tagIDStr := range tags {
+		tagID, err := strconv.Atoi(tagIDStr)
+		if err != nil {
+			return 0, entity.ErrInvalidFormData
+		}
+		tagIDs = append(tagIDs, tagID)
+	}
 
-	id, err := ps.postRepo.SavePost(*p, userID)
+	id, err := ps.postRepo.SavePost(*p, userID, tagIDs)
 	if err != nil {
 		return 0, err
 	}
@@ -45,13 +53,8 @@ func (ps *postService) SavePost(p *entity.PostCreateForm, userID int) (int, erro
 	return id, nil
 }
 
-func (ps *postService) GetPost(postId string) (entity.PostView, error) {
-	id, err := strconv.Atoi(postId)
-	if err != nil {
-		return entity.PostView{}, entity.ErrInvalidPostId
-	}
-
-	post, err := ps.postRepo.GetPost(id)
+func (ps *postService) GetPost(postId int) (entity.PostView, error) {
+	post, err := ps.postRepo.GetPost(postId)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
 			return entity.PostView{}, err

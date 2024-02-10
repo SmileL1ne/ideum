@@ -23,6 +23,15 @@
             {{end}}
             <textarea type="text" id="content" name="content" rows="10" cols="50" value="{{.Form.Content}}" placeholder="Love is here..." required></textarea>
         </div>
+
+        <div>
+            <label for="tags">Tags:</label>
+            <select id="tags" name="tags" multiple>
+                {{range .Models.Tags}}
+                    <option value="{{.ID}}">{{.Name}}</option>
+                {{end}}
+            </select>
+        </div>
         
         <div>
             <input type="submit" value="Create">
