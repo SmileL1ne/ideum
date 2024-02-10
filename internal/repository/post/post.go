@@ -93,31 +93,6 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 	return post, nil
 }
 
-func (r *postRepository) getAllPostsByQuery(query string, args ...interface{}) (*[]entity.PostEntity, error) {
-	rows, err := r.DB.Query(query, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	var posts []entity.PostEntity
-
-	for rows.Next() {
-		var post entity.PostEntity
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt,
-			&post.Username, &post.Likes, &post.Dislikes); err != nil {
-
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return &posts, nil
-}
-
 func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username, 
@@ -149,4 +124,29 @@ func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, er
 	`
 
 	return r.getAllPostsByQuery(query, tagID)
+}
+
+func (r *postRepository) getAllPostsByQuery(query string, args ...interface{}) (*[]entity.PostEntity, error) {
+	rows, err := r.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	var posts []entity.PostEntity
+
+	for rows.Next() {
+		var post entity.PostEntity
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt,
+			&post.Username, &post.Likes, &post.Dislikes); err != nil {
+
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &posts, nil
 }

@@ -82,22 +82,7 @@ func (pc *postService) GetAllPosts() (*[]entity.PostView, error) {
 		return nil, err
 	}
 
-	// Convert received PostEntity's to PostView's
-	var pViews []entity.PostView
-	for _, p := range *posts {
-		post := entity.PostView{
-			ID:        p.ID,
-			Title:     p.Title,
-			Content:   p.Content,
-			CreatedAt: p.CreatedAt,
-			Username:  p.Username,
-			Likes:     p.Likes,
-			Dislikes:  p.Dislikes,
-		}
-		pViews = append(pViews, post)
-	}
-
-	return &pViews, nil
+	return pc.convertEntitiesToViews(posts)
 }
 
 func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
@@ -106,6 +91,10 @@ func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error)
 		return nil, err
 	}
 
+	return pc.convertEntitiesToViews(posts)
+}
+
+func (pc *postService) convertEntitiesToViews(posts *[]entity.PostEntity) (*[]entity.PostView, error) {
 	// Convert received PostEntity's to PostView's
 	var pViews []entity.PostView
 	for _, p := range *posts {
