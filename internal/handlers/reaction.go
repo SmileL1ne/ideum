@@ -23,7 +23,7 @@ func (r *routes) postLike(w http.ResponseWriter, req *http.Request) {
 
 	postID, err := r.getIdFromPath(req, 4)
 	if err != nil {
-		if errors.Is(err, entity.ErrInvalidPostId) {
+		if errors.Is(err, entity.ErrInvalidURLPath) {
 			r.notFound(w)
 			return
 		}
@@ -40,7 +40,7 @@ func (r *routes) postLike(w http.ResponseWriter, req *http.Request) {
 	err = r.service.Reaction.AddOrDeletePost(true, postID, userID)
 	if err != nil {
 		switch {
-		case errors.Is(err, entity.ErrInvalidPostId):
+		case errors.Is(err, entity.ErrInvalidURLPath):
 			r.badRequest(w)
 		default:
 			r.serverError(w, req, err)
@@ -59,7 +59,7 @@ func (r *routes) postDislike(w http.ResponseWriter, req *http.Request) {
 
 	postID, err := r.getIdFromPath(req, 4)
 	if err != nil {
-		if errors.Is(err, entity.ErrInvalidPostId) {
+		if errors.Is(err, entity.ErrInvalidURLPath) {
 			r.notFound(w)
 			return
 		}
@@ -76,7 +76,7 @@ func (r *routes) postDislike(w http.ResponseWriter, req *http.Request) {
 	err = r.service.Reaction.AddOrDeletePost(false, postID, userID)
 	if err != nil {
 		switch {
-		case errors.Is(err, entity.ErrInvalidPostId):
+		case errors.Is(err, entity.ErrInvalidURLPath):
 			r.badRequest(w)
 		default:
 			r.serverError(w, req, err)
@@ -95,7 +95,7 @@ func (r *routes) commentLike(w http.ResponseWriter, req *http.Request) {
 
 	commentID, err := r.getIdFromPath(req, 6)
 	if err != nil {
-		if errors.Is(err, entity.ErrInvalidCommentId) {
+		if errors.Is(err, entity.ErrInvalidURLPath) {
 			r.notFound(w)
 			return
 		}
@@ -114,12 +114,7 @@ func (r *routes) commentLike(w http.ResponseWriter, req *http.Request) {
 
 	err = r.service.Reaction.AddOrDeleteComment(true, commentID, userID)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidCommentId):
-			r.badRequest(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -134,7 +129,7 @@ func (r *routes) commentDislike(w http.ResponseWriter, req *http.Request) {
 
 	commentID, err := r.getIdFromPath(req, 6)
 	if err != nil {
-		if errors.Is(err, entity.ErrInvalidCommentId) {
+		if errors.Is(err, entity.ErrInvalidURLPath) {
 			r.notFound(w)
 			return
 		}
@@ -153,12 +148,7 @@ func (r *routes) commentDislike(w http.ResponseWriter, req *http.Request) {
 
 	err = r.service.Reaction.AddOrDeleteComment(false, commentID, userID)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidCommentId):
-			r.badRequest(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 

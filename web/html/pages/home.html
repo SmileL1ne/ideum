@@ -4,6 +4,15 @@
 <h2>Recent posts</h2>
 {{if .Models.Posts}}
     <div>
+        <ul style="text-decoration: none;">
+            {{range .Models.Tags}}
+                <li>
+                    <a href="/sortByTags/{{.ID}}">{{.Name}}</a>
+                </li>
+            {{end}}
+        </ul>
+    </div>
+    <div>
         {{range .Models.Posts}}
             <a href="/post/view/{{.ID}}">
                 <div style="border: 1px solid black; padding: 5px;">

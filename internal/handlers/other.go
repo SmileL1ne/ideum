@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+	"forum/internal/entity"
 	"forum/web"
 	"net/http"
 	"strings"
@@ -37,8 +39,50 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	tags, err := r.service.Tag.GetAllTags()
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
 	data := r.newTemplateData(req)
 	data.Models.Posts = *posts
+	data.Models.Tags = *tags
+
+	r.render(w, req, http.StatusOK, "home.html", data)
+}
+
+func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	tagID, err := r.getIdFromPath(req, 3)
+	if err != nil {
+		if errors.Is(err, entity.ErrInvalidURLPath) {
+			r.notFound(w)
+			return
+		}
+		r.badRequest(w)
+		return
+	}
+
+	posts, err := r.service.Post.GetAllPostsByTagId(tagID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	tags, err := r.service.Tag.GetAllTags()
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	data := r.newTemplateData(req)
+	data.Models.Posts = *posts
+	data.Models.Tags = *tags
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }

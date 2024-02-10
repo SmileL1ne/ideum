@@ -19,7 +19,7 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 
 	postID, err := r.getIdFromPath(req, 4)
 	if err != nil {
-		if errors.Is(err, entity.ErrInvalidPostId) {
+		if errors.Is(err, entity.ErrInvalidURLPath) {
 			r.notFound(w)
 			return
 		}
@@ -41,8 +41,6 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	err = r.service.Comment.SaveComment(comment, postID, userID)
 	if err != nil {
 		switch {
-		case errors.Is(err, entity.ErrInvalidPostId):
-			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidFormData):
 			data := r.newTemplateData(req)
 			data.Form = comment

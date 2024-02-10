@@ -93,7 +93,7 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 func (r *routes) getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
 	urlParts := strings.Split(req.URL.Path, "/")
 	if len(urlParts) != urlPartsNum {
-		return 0, entity.ErrInvalidPostId
+		return 0, entity.ErrInvalidURLPath
 	}
 
 	return strconv.Atoi(urlParts[len(urlParts)-1])

@@ -17,6 +17,7 @@ type IPostService interface {
 	SavePost(*entity.PostCreateForm, int, []string) (int, error)
 	GetPost(int) (entity.PostView, error)
 	GetAllPosts() (*[]entity.PostView, error)
+	GetAllPostsByTagId(int) (*[]entity.PostView, error)
 }
 
 type postService struct {
@@ -75,8 +76,32 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 	return pView, nil
 }
 
-func (uc *postService) GetAllPosts() (*[]entity.PostView, error) {
-	posts, err := uc.postRepo.GetAllPosts()
+func (pc *postService) GetAllPosts() (*[]entity.PostView, error) {
+	posts, err := pc.postRepo.GetAllPosts()
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert received PostEntity's to PostView's
+	var pViews []entity.PostView
+	for _, p := range *posts {
+		post := entity.PostView{
+			ID:        p.ID,
+			Title:     p.Title,
+			Content:   p.Content,
+			CreatedAt: p.CreatedAt,
+			Username:  p.Username,
+			Likes:     p.Likes,
+			Dislikes:  p.Dislikes,
+		}
+		pViews = append(pViews, post)
+	}
+
+	return &pViews, nil
+}
+
+func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
+	posts, err := pc.postRepo.GetAllPostsByTagId(tagID)
 	if err != nil {
 		return nil, err
 	}

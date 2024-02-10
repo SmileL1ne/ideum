@@ -11,6 +11,7 @@ type IPostRepository interface {
 	SavePost(entity.PostCreateForm, int, []int) (int, error)
 	GetPost(int) (entity.PostEntity, error)
 	GetAllPosts() (*[]entity.PostEntity, error)
+	GetAllPostsByTagId(int) (*[]entity.PostEntity, error)
 }
 
 type postRepository struct {
@@ -104,6 +105,46 @@ func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 	`
 
 	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	var posts []entity.PostEntity
+
+	for rows.Next() {
+		var post entity.PostEntity
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt,
+			&post.Username, &post.Likes, &post.Dislikes); err != nil {
+
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &posts, nil
+}
+
+func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, error) {
+	query := `
+		SELECT p.id, p.title, p.content, p.created_at, u.username, 
+			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
+			SUM(CASE WHEN pr.is_like = false THEN 1 ELSE 0 END) as dislikes_count
+		FROM posts p
+		INNER JOIN users u ON p.user_id = u.id
+		LEFT JOIN post_reactions pr ON p.id = pr.post_id
+		WHERE p.id IN (
+			SELECT pt.post_id
+			FROM posts_tags pt
+			WHERE pt.tag_id = $1
+			)
+		GROUP BY p.id
+	`
+
+	rows, err := r.DB.Query(query, tagID)
 	if err != nil {
 		return nil, err
 	}

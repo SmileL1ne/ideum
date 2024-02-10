@@ -10,13 +10,11 @@ var (
 
 // Post related errors
 var (
-	ErrInvalidPostId = errors.New("entity: invalid post id")
+	ErrInvalidURLPath = errors.New("entity: invalid url path")
 )
 
 // Comment related errors
-var (
-	ErrInvalidCommentId = errors.New("entity: invalid comment id")
-)
+var ()
 
 // User related errors
 var (

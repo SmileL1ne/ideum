@@ -15,7 +15,7 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 
 	postID, err := r.getIdFromPath(req, 4)
 	if err != nil {
-		if errors.Is(err, entity.ErrInvalidPostId) {
+		if errors.Is(err, entity.ErrInvalidURLPath) {
 			r.notFound(w)
 			return
 		}
