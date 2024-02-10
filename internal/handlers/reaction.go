@@ -48,7 +48,7 @@ func (r *routes) postLike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%s", postID), http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }
 
 func (r *routes) postDislike(w http.ResponseWriter, req *http.Request) {
@@ -84,7 +84,7 @@ func (r *routes) postDislike(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%s", postID), http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }
 
 func (r *routes) commentLike(w http.ResponseWriter, req *http.Request) {

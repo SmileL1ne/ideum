@@ -54,5 +54,5 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	// Add flash message to request's context
 	r.sesm.Put(req.Context(), "flash", "Successfully added your comment!")
 
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%s", postID), http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }
