@@ -22,6 +22,8 @@ type templateData struct {
 	IsAuthenticated bool
 }
 
+// newTemplateCache initializes all templates and stores them in map
+// in which key is the name of the template and value is parsed template
 func newTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 

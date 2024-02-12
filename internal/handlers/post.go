@@ -41,7 +41,6 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Create template struct with page related data
 	data := r.newTemplateData(req)
 	data.Models.Post = post
 	data.Models.Comments = *comments

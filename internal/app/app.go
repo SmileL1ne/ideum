@@ -18,11 +18,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-/*
-	TODO:
-*/
-
 func Run(cfg *config.Config) {
+
 	// Database connection
 	db, err := OpenDB(cfg.Database.DSN)
 	if err != nil {

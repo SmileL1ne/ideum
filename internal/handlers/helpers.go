@@ -13,7 +13,7 @@ import (
 
 /*
 	TODO:
-	- Create error page func that would nicely render error pages (refer - 'ERR')
+	- Create error page func that would render prettys error pages (refer to 'ERR')
 */
 
 func (r *routes) newTemplateData(req *http.Request) templateData {

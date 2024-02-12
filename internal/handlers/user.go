@@ -81,22 +81,8 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	u := entity.UserLoginForm{Identifier: identifier, Password: password}
 	id, err := r.service.User.Authenticate(&u)
 	if err != nil {
-		/*
-			Problem: 2 cases are similar (ErrInvalidFormData and ErrInvalidCredentials)
-
-			Solution 1: make common err method and call in both cases
-				(this reduces lines of code (*DRY) )
-
-			Solution 2: create error tree so both errors would be same type and use
-				errors.As method to distinguish that returned err is related to this
-				custom error tree
-		*/
 		switch {
-		case errors.Is(err, entity.ErrInvalidFormData):
-			data := r.newTemplateData(req)
-			data.Form = u
-			r.render(w, req, http.StatusUnprocessableEntity, "login.html", data)
-		case errors.Is(err, entity.ErrInvalidCredentials):
+		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrInvalidCredentials):
 			data := r.newTemplateData(req)
 			data.Form = u
 			r.render(w, req, http.StatusUnprocessableEntity, "login.html", data)
