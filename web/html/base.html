@@ -5,31 +5,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/main.css">
-    <title>{{template "title" .}} - Idearoom</title>
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.svg">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/font.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- <script src="/static/js/like.js" defer></script> -->
+    <script src="/static/js/modal.js" defer></script>
+    <title>{{template "title" .}}</title>
 </head>
 
 <body>
-    <header>
-        <h1><a href="/">Idearoom</a></h1>
+    <header class="header">
+
+        <div class="wrapper">
+            <div class="header_wrapper">
+                <!-- logo-->
+                <div class="header_logo">
+                    <a href="/" class="header_logo-link">
+                        <img src="/static/img/svg/logo.svg" alt="Rabbit" class="header_logo-pic">
+                    </a>
+                </div>
+                <!-- log-in button-->
+                {{if .IsAuthenticated}}
+                <form action="/user/logout" method="POST">
+
+                    <button class="logBtn">Log out</button>
+
+                </form>
+                {{else}}
+
+                <button class="Btn logBtn" data-modal="signin">Log in</button>
+
+                {{end}}
+
+            </div>
+        </div>
+
     </header>
 
-    <hr>
+    <!-- <hr>
     {{template "nav" .}}
-    <hr>
+    <hr> -->
+    <div class="wrapper_main">
+        {{template "topics" .}}
 
-    <main>
-        {{with .Flash}}
-            <div style="border: 3px; color: green;">{{.}}</div>
-        {{end}}
-        {{template "main" .}}
-    </main>
-    <hr>
+        <main>
+            {{template "main" .}}
 
-    <footer>
-        Contact us!!! - <a href="https://01.alem.school/git/msarvaro">msarvaro</a> or
-        <a href="https://01.alem.school/git/nmagau">nmagau</a>
-    </footer>
+        </main>
+
+        {{template "userbar" .}}
+        <dialog id="signin" class="Mymodal">
+
+            <div class="wrapper_user-bar">
+                <div class="user-bar">
+
+                    <form action="/user/login" method="POST">
+                        <div class="user-bar-sign-up" id="SignUpP">
+                            <h1>Welcome back!</h1>
+                            <input class="dark-input" type="text" placeholder="Email" name="identifier">
+                            <input class="dark-input" type="text" placeholder="Password" name="password">
+                            <button class="light-button" type="submit">Sign up</button>
+                            <div class="user-bar-line"></div>
+                            <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
+                                    alt="Google_logo">Google</button>
+                            <button class="dark-button" disabled><img src="/static/img/svg/github_logo.svg"
+                                    alt="github_logo">GitHub</button>
+                            <a class="user-bar-link" id="SignUpBtnP" href="#">Don`t have an account?<span> Register
+                                    Now</span> </a>
+                        </div>
+                    </form>
+
+                    <form action="/user/signup/post" method="POST"> <!--TODO fix action path -->
+                        <div class="user-bar-register" id="SignInP">
+                            <h1>Register</h1>
+                            <input class="dark-input" type="text" placeholder="Username" name="username">
+                            <input class="dark-input" type="text" placeholder="Email" name="email">
+                            <input class="dark-input" type="text" placeholder="Password" name="password">
+                            <input class="dark-input" type="text" placeholder="Confirm password">
+                            <button class="light-button" type="submit">Register</button>
+                            <div class="user-bar-line"></div>
+                            <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
+                                    alt="Google_logo">Google</button>
+                            <button class="dark-button" disabled><img src="/static/img/svg/github_logo.svg"
+                                    alt="github_logo">GitHub</button>
+                            <a class="user-bar-link" id="SignInBtnP" href="#">Already have an account? <span>Sign
+                                    up</span>
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <script src="/static/js/register_modal.js"></script>
+        </dialog>
+    </div>
+
 </body>
 
 </html>

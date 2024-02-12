@@ -1,0 +1,18 @@
+{{ define "topics"}}
+<div class="topic-bar">
+
+    <div class="home"> <a href="/" class="topic-link"> <img src="/static/img/svg/home-icon.svg" alt="home-icon"
+                class="home_logo-pic">Home</a> </div>
+
+    <ul id="topic-list">
+        <label>TOPICS</label>
+        {{range .Models.Tags}}
+        <a class="topic-link" href="/sortByTags/{{.ID}}">
+            <li><img src="/static/img/svg/{{ low .Name }}-icon.svg" alt="{{.Name}}-icon"> {{.Name}}</li>
+        </a>
+        {{end}}
+    </ul>
+
+</div>
+
+{{end}}

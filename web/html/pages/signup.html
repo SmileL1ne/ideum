@@ -3,7 +3,7 @@
 {{define "main"}}
     <h2>Signup</h2>
 
-    <form action="/user/signup" method="POST">
+    <form action="/user/signup/post" method="POST">
         <div>
             <label for="username">Username:</label>
             {{with .Form.FieldErrors.username}}

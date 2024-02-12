@@ -50,7 +50,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 
 	r.sesm.Put(req.Context(), "flash", "Your signup was successful. Please log in.")
 
-	http.Redirect(w, req, "/user/login", http.StatusSeeOther)
+	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
 
 func (r *routes) userLogin(w http.ResponseWriter, req *http.Request) {

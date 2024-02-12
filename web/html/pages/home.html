@@ -1,32 +1,59 @@
-{{define "title"}} Ideum {{end}}
+<!-- new -->
+{{define "title"}} Rabbit {{end}}
 
 {{define "main"}}
-<h2>Recent posts</h2>
-{{if .Models.Posts}}
-    <div>
-        <ul style="text-decoration: none;">
-            {{range .Models.Tags}}
-                <li>
-                    <a href="/sortByTags/{{.ID}}">{{.Name}}</a>
-                </li>
-            {{end}}
-        </ul>
-    </div>
-    <div>
-        {{range .Models.Posts}}
-            <a href="/post/view/{{.ID}}">
-                <div style="border: 1px solid black; padding: 5px;">
-                    <h3>Title: {{.Title}}</h3>
-                    <h4>Author: {{.Username}}</h4>
-                    <h4>Likes:{{.Likes}}</h4>
-                    <h4>Dislikes:{{.Dislikes}}</h4>
-                    <h4>Content:</h4>
-                    <pre>{{.Content}}</pre>
+
+<div class="base">
+    <!-- post feed-->
+    <div class="post-feed">
+        <!-- post -->
+        {{if .Models.Posts }}
+        {{range rev .Models.Posts }}
+        <div class="post">
+            <div class="post-content">
+                <div class="post-top-info">
+                    <div class="post-top-user"><img src="static/img/ava/user.png" alt="user-ava">
+                        <p>{{.Username}}</p>
+                        <p class="post-date">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</p>
+                    </div>
+                    <div class="likes-frame">
+                        <button class="like-button" id="like">
+                            <img src="static/img/svg/like-icon.svg" alt="like">{{.Likes}}
+                        </button>
+                        <button class="like-button" id="dislike"><img src="static/img/svg/dislike.svg"
+                                alt="dislike">{{.Dislikes}}
+                        </button>
+                    </div>
                 </div>
-            </a>
+                <div class="post-header">
+                    <a href="/post/view/{{.ID}}">
+                        <h1>{{ .Title}}</h1>
+                    </a>
+                </div>
+                <div class="post-text">
+                    <p>{{.Content}}</p>
+                </div>
+                <!-- <div class="post-img"><img src="/img/sample.png" alt="post-img"></div> -->
+                <div class="post-footer">
+                    <div class="post-comments"><img src="static/img/svg/comment-icon.svg" alt="comment-icon">199
+                        comments
+                    </div>
+                    <div class="post-options">
+                        <img class="Btn" data-modal="edit" src="static/img/svg/edit-icon.svg" alt="edit-icon">
+                        <a href="#" class="Btn" data-modal="delete-modal"><img src="static/img/svg/delete-icon.svg"
+                                alt="delete-icon"></a>
+                        <img src="static/img/svg/report-icon.svg" alt="report-icon">
+                    </div>
+                </div>
+
+            </div>
+        </div>
         {{end}}
-    </div>
-    {{else}}
+        {{else}}
         <p>Nothing to see yet!</p>
-{{end}}
+        {{end}}
+
+    </div>
+
+</div>
 {{end}}
