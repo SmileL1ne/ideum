@@ -27,7 +27,7 @@ func (rs *reactionService) AddOrDeletePost(isLike bool, postID int, userID int) 
 	// Check if reaction by user exists in table, if not it would return
 	// entity.ErrNoRecord error, otherwise it would return reaction left by
 	// that user
-	isLikeDB, err := rs.reactsRepo.ExistsPost(userID)
+	isLikeDB, err := rs.reactsRepo.ExistsPost(userID, postID)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
 			return rs.reactsRepo.AddPost(isLike, postID, userID)
@@ -53,7 +53,7 @@ func (rs *reactionService) AddOrDeletePost(isLike bool, postID int, userID int) 
 
 // Same principle to reactions handling in posts
 func (rs *reactionService) AddOrDeleteComment(isLike bool, commentID int, userID int) error {
-	isLikeDB, err := rs.reactsRepo.ExistsComment(userID)
+	isLikeDB, err := rs.reactsRepo.ExistsComment(userID, commentID)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
 			return rs.reactsRepo.AddComment(isLike, commentID, userID)

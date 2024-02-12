@@ -7,8 +7,8 @@ import (
 )
 
 type IReactionRepository interface {
-	ExistsPost(int) (bool, error)
-	ExistsComment(int) (bool, error)
+	ExistsPost(int, int) (bool, error)
+	ExistsComment(int, int) (bool, error)
 	AddPost(bool, int, int) error
 	AddComment(bool, int, int) error
 	DeletePost(int, int) error
@@ -27,16 +27,16 @@ func NewReactionRepo(db *sql.DB) *reactionRepository {
 
 var _ IReactionRepository = (*reactionRepository)(nil)
 
-func (r *reactionRepository) ExistsPost(userID int) (bool, error) {
+func (r *reactionRepository) ExistsPost(userID int, postID int) (bool, error) {
 	var isLike bool
 
 	query := `
 		SELECT is_like
 		FROM post_reactions
-		WHERE user_id = $1
+		WHERE user_id = $1 AND post_id = $2
 	`
 
-	err := r.DB.QueryRow(query, userID).Scan(&isLike)
+	err := r.DB.QueryRow(query, userID, postID).Scan(&isLike)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, entity.ErrNoRecord
@@ -70,16 +70,16 @@ func (r *reactionRepository) DeletePost(postID int, userID int) error {
 	return err
 }
 
-func (r *reactionRepository) ExistsComment(userID int) (bool, error) {
+func (r *reactionRepository) ExistsComment(userID int, commentID int) (bool, error) {
 	var isLike bool
 
 	query := `
 		SELECT is_like
 		FROM comment_reactions
-		WHERE user_id = $1
+		WHERE user_id = $1 AND comment_id = $2
 	`
 
-	err := r.DB.QueryRow(query, userID).Scan(&isLike)
+	err := r.DB.QueryRow(query, userID, commentID).Scan(&isLike)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return false, entity.ErrNoRecord
