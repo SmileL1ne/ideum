@@ -3,22 +3,18 @@ package sqlit3store
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 )
 
-/*
-	TODO:
-	1. Add background cleanup for expired tokens
-	reference - https://github.com/alexedwards/scs/blob/master/sqlite3store/sqlite3store.go
-*/
-
 type SQLite3Store struct {
 	db *sql.DB
-	// here add stopCleanup chan
 }
 
 func New(db *sql.DB) *SQLite3Store {
-	return &SQLite3Store{db: db}
+	s := &SQLite3Store{db: db}
+	go s.startCleanup(5 * time.Minute)
+	return s
 }
 
 func (s *SQLite3Store) StoreFind(ctx context.Context, sessionID string) ([]byte, bool, error) {
@@ -48,5 +44,23 @@ func (s *SQLite3Store) StoreCommit(ctx context.Context, sessionID string, b []by
 
 func (s *SQLite3Store) StoreDelete(ctx context.Context, sessionID string) error {
 	_, err := s.db.ExecContext(ctx, "DELETE FROM sessions WHERE session_id = $1", sessionID)
+	return err
+}
+
+func (s *SQLite3Store) startCleanup(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	for {
+		select {
+		case <-ticker.C:
+			err := s.deleteExpired()
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+}
+
+func (s *SQLite3Store) deleteExpired() error {
+	_, err := s.db.Exec("DELETE FROM sessions WHERE expiry < datetime('now', 'utc', '+12 hours')")
 	return err
 }
