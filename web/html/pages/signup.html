@@ -6,31 +6,16 @@
     <form action="/user/signup" method="POST">
         <div>
             <label for="username">Username:</label>
-            {{with .Form.FieldErrors.username}}
-                <div style="color: red;">
-                    <label>{{.}}</label>
-                </div>
-            {{end}}
-            <input type="text" id="username" name="username" value="{{.Form.Username}}">
+            <input type="text" id="username" name="username" placeholder="Nah">
         </div>
         
         <div>
             <label for="email">Email:</label>
-            {{with .Form.FieldErrors.email}}
-                <div style="color: red;">
-                    <label>{{.}}</label>
-                </div>
-            {{end}}
-            <input type="text" id="email" name="email" value="{{.Form.Email}}">
+            <input type="text" id="email" name="email" placeholder="nah@gmail.com">
         </div>
     
         <div>
             <label for="password">Password:</label>
-            {{with .Form.FieldErrors.password}}
-                <div style="color: red;">
-                    <label>{{.}}</label>
-                </div>
-            {{end}}
             <input type="password" id="password" name="password">
         </div>
 

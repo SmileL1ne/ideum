@@ -8,7 +8,7 @@
             <h3>Author: {{.Models.Post.Username}}</h3>
             <div>
                 <h3>Tags:</h3>
-                {{range .Models.Tags}}
+                {{range .Models.Post.PostTags}}
                     <p>{{.Name}}</p>
                 {{end}}
             </div>
@@ -38,12 +38,7 @@
             <form action="/post/comment/{{.Models.Post.ID}}" method="POST">
                 <div>
                     <label for="commentContent"></label>
-                    {{with .Form.FieldErrors.commentContent}}
-                    <div style="color: red;">
-                        <label>{{.}}</label>
-                    </div>
-                    {{end}}
-                    <input type="text" name="commentContent" id="commentContent" value="{{.Form.Content}}" placeholder="Nice post!...">
+                    <input type="text" name="commentContent" id="commentContent" placeholder="Nice post!...">
 
                     <div style="color: green;">
                         <input type="submit" value="->">

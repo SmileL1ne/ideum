@@ -13,7 +13,7 @@ type SQLite3Store struct {
 
 func New(db *sql.DB) *SQLite3Store {
 	s := &SQLite3Store{db: db}
-	go s.startCleanup(5 * time.Minute)
+	go s.startCleanup(5 * time.Second)
 	return s
 }
 
@@ -61,6 +61,6 @@ func (s *SQLite3Store) startCleanup(interval time.Duration) {
 }
 
 func (s *SQLite3Store) deleteExpired() error {
-	_, err := s.db.Exec("DELETE FROM sessions WHERE expiry < datetime('now', 'utc', '+12 hours')")
+	_, err := s.db.Exec("DELETE FROM sessions WHERE expiry < datetime('now', 'localtime')")
 	return err
 }

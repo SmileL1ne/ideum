@@ -17,7 +17,6 @@ func (r *routes) userSignup(w http.ResponseWriter, req *http.Request) {
 	}
 
 	data := r.newTemplateData(req)
-	data.Form = entity.UserSignupForm{}
 	r.render(w, req, http.StatusOK, "signup.html", data)
 }
 
@@ -39,9 +38,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			data := r.newTemplateData(req)
-			data.Form = u
-			r.render(w, req, http.StatusUnprocessableEntity, "signup.html", data)
+			http.Redirect(w, req, "/user/signup", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
@@ -64,7 +61,6 @@ func (r *routes) userLogin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	data := r.newTemplateData(req)
-	data.Form = entity.UserLoginForm{}
 	r.render(w, req, http.StatusOK, "login.html", data)
 }
 
@@ -83,9 +79,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrInvalidCredentials):
-			data := r.newTemplateData(req)
-			data.Form = u
-			r.render(w, req, http.StatusUnprocessableEntity, "login.html", data)
+			http.Redirect(w, req, "/user/login", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}

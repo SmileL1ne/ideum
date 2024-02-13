@@ -42,9 +42,7 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			data := r.newTemplateData(req)
-			data.Form = comment
-			r.render(w, req, http.StatusUnprocessableEntity, "view.html", data)
+			http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}

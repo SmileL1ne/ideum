@@ -26,6 +26,7 @@ type PostView struct {
 	Username  string
 	Likes     int
 	Dislikes  int
+	PostTags  []TagEntity
 }
 
 // PostCreateForm is accepted by services and repos. Services accept pointer only for

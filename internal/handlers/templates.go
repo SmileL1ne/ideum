@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
+	"strings"
 )
 
 type Models struct {
@@ -18,8 +19,22 @@ type Models struct {
 type templateData struct {
 	Models          Models
 	Flash           string
-	Form            interface{}
 	IsAuthenticated bool
+}
+
+var fm = template.FuncMap{
+	"low": strings.ToLower,
+	"rev": reverse,
+}
+
+// reverse reverses posts slice (to output them by creation time in descending order)
+func reverse(slice []entity.PostView) []entity.PostView {
+	length := len(slice)
+	reversed := make([]entity.PostView, length)
+	for i, v := range slice {
+		reversed[length-i-1] = v
+	}
+	return reversed
 }
 
 // newTemplateCache initializes all templates and stores them in map
@@ -41,7 +56,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 			page,
 		}
 
-		ts, err := template.ParseFS(web.Files, files...)
+		ts, err := template.New("").Funcs(fm).ParseFS(web.Files, files...)
 		if err != nil {
 			return nil, err
 		}

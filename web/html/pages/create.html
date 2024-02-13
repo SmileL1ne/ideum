@@ -6,22 +6,12 @@
     <form action="/post/create" method="POST">
         <div>
             <label for="title">Title:</label>
-            {{with .Form.FieldErrors.title}}
-                <div style="color: red;">
-                    <label>{{.}}</label>
-                </div>
-            {{end}}
-            <input type="text" id="title" name="title" value="{{.Form.Title}}" placeholder="Someone claims that...">
+            <input type="text" id="title" name="title" placeholder="Someone claims that...">
         </div>
 
         <div>
             <label for="content">Content:</label>
-            {{with .Form.FieldErrors.content}}
-                <div style="color: red;">
-                    <label>{{.}}</label>
-                </div>
-            {{end}}
-            <textarea type="text" id="content" name="content" rows="10" cols="50" value="{{.Form.Content}}" placeholder="Love is here..." required></textarea>
+            <textarea type="text" id="content" name="content" rows="10" cols="50" placeholder="Love is here..." required></textarea>
         </div>
 
         <div>

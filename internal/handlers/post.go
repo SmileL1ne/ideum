@@ -35,7 +35,13 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tags, err := r.service.Tag.GetAllTagsForPost(postID)
+	tags, err := r.service.Tag.GetAllTags()
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	postTags, err := r.service.Tag.GetAllTagsForPost(postID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -43,9 +49,9 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 
 	data := r.newTemplateData(req)
 	data.Models.Post = post
+	data.Models.Post.PostTags = *postTags
 	data.Models.Comments = *comments
 	data.Models.Tags = *tags
-	data.Form = entity.CommentCreateForm{}
 
 	r.render(w, req, http.StatusOK, "view.html", data)
 }
@@ -68,7 +74,6 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 
 	data := r.newTemplateData(req)
 	data.Models.Tags = *tags
-	data.Form = entity.PostCreateForm{}
 
 	r.render(w, req, http.StatusOK, "create.html", data)
 }
@@ -104,9 +109,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			data := r.newTemplateData(req)
-			data.Form = p
-			r.render(w, req, http.StatusUnprocessableEntity, "create.html", data)
+			http.Redirect(w, req, "/post/create", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
