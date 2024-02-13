@@ -15,6 +15,7 @@ type PostEntity struct {
 	Username  string
 	Likes     int
 	Dislikes  int
+	PostTags  []TagEntity
 }
 
 // PostView is returned to handlers from service and outputed in pages

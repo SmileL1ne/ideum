@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"forum/internal/entity"
+	"sync"
 )
 
 // TODO: Add new methods related to post manipulation (delete, update post)
@@ -12,6 +13,7 @@ type IPostRepository interface {
 	GetPost(int) (entity.PostEntity, error)
 	GetAllPosts() (*[]entity.PostEntity, error)
 	GetAllPostsByTagId(int) (*[]entity.PostEntity, error)
+	GetTagsForEachPost(*[]entity.PostEntity) (*[]entity.PostEntity, error)
 }
 
 type postRepository struct {
@@ -149,4 +151,48 @@ func (r *postRepository) getAllPostsByQuery(query string, args ...interface{}) (
 	}
 
 	return &posts, nil
+}
+
+func (r *postRepository) GetTagsForEachPost(posts *[]entity.PostEntity) (*[]entity.PostEntity, error) {
+	query := `
+		SELECT t.id, t.name, t.created_at
+		FROM tags t
+		LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+		WHERE pt.post_id = $1
+	`
+
+	var wg sync.WaitGroup
+	wg.Add(len(*posts))
+	errCh := make(chan error, len(*posts))
+
+	for i := 0; i < len(*posts); i++ {
+		go func(p *entity.PostEntity) {
+			defer wg.Done()
+
+			var tags []entity.TagEntity
+			rows, err := r.DB.Query(query, p.ID)
+			if err != nil {
+				errCh <- err
+				return
+			}
+			for rows.Next() {
+				var tag entity.TagEntity
+				if err := rows.Scan(&tag.ID, &tag.Name, &tag.CreatedAt); err != nil {
+					errCh <- err
+					return
+				}
+				tags = append(tags, tag)
+			}
+			p.PostTags = tags
+		}(&(*posts)[i])
+	}
+
+	wg.Wait()
+
+	select {
+	case err := <-errCh:
+		return nil, err
+	default:
+		return posts, nil
+	}
 }
