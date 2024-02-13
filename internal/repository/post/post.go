@@ -7,7 +7,6 @@ import (
 	"sync"
 )
 
-// TODO: Add new methods related to post manipulation (delete, update post)
 type IPostRepository interface {
 	SavePost(entity.PostCreateForm, int, []int) (int, error)
 	GetPost(int) (entity.PostEntity, error)
