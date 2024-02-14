@@ -96,14 +96,15 @@ func (pc *postService) convertEntitiesToViews(posts *[]entity.PostEntity) (*[]en
 	var pViews []entity.PostView
 	for _, p := range *posts {
 		post := entity.PostView{
-			ID:        p.ID,
-			Title:     p.Title,
-			Content:   p.Content,
-			CreatedAt: p.CreatedAt,
-			Username:  p.Username,
-			Likes:     p.Likes,
-			Dislikes:  p.Dislikes,
-			PostTags:  p.PostTags,
+			ID:          p.ID,
+			Title:       p.Title,
+			Content:     p.Content,
+			CreatedAt:   p.CreatedAt,
+			Username:    p.Username,
+			Likes:       p.Likes,
+			Dislikes:    p.Dislikes,
+			PostTags:    p.PostTags,
+			CommentsLen: p.CommentsLen,
 		}
 		pViews = append(pViews, post)
 	}

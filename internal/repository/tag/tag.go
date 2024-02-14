@@ -49,11 +49,8 @@ func (r *tagRepo) GetAllTagsForPost(postID int) (*[]entity.TagEntity, error) {
 	query := `
 		SELECT t.id, t.name, t.created_at
 		FROM tags t
-		WHERE t.id IN 
-			(SELECT pt.tag_id
-			FROM posts_tags pt
-			WHERE pt.post_id = $1
-			)
+		LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+		WHERE pt.post_id = $1
 	`
 
 	rows, err := r.DB.Query(query, postID)
