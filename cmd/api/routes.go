@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"forum/internal/service"

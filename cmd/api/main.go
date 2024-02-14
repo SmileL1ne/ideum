@@ -1,4 +1,4 @@
-package app
+package main
 
 import (
 	"database/sql"
@@ -11,14 +11,15 @@ import (
 	"os/signal"
 	"syscall"
 
-	"forum/internal/handlers"
 	"forum/internal/repository"
 	"forum/internal/service"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func Run(cfg *config.Config) {
+func main() {
+	// Parse config
+	cfg := config.NewConfig()
 
 	// Database connection
 	db, err := OpenDB(cfg.Database.DSN)
@@ -37,7 +38,7 @@ func Run(cfg *config.Config) {
 	// Server creation
 	server := &http.Server{
 		Addr:    "127.0.0.1" + cfg.Http.Addr,
-		Handler: handlers.NewRouter(s, sesm),
+		Handler: NewRouter(s, sesm),
 	}
 
 	// Graceful shutdown
