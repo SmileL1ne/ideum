@@ -21,4 +21,5 @@ var (
 	ErrDuplicateEmail     = errors.New("entity: duplicate email")
 	ErrDuplicateUsername  = errors.New("entity: dupliate username")
 	ErrInvalidCredentials = errors.New("entity: invalid credentials")
+	ErrInvalidUserID      = errors.New("entity: non-existent user id")
 )

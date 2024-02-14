@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"forum/internal/entity"
 	"log"
@@ -97,4 +98,17 @@ func (r *routes) getIdFromPath(req *http.Request, urlPartsNum int) (int, error) 
 	}
 
 	return strconv.Atoi(urlParts[len(urlParts)-1])
+}
+
+func (r *routes) getUsername(req *http.Request) (string, error) {
+	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	if userID == 0 {
+		return "", entity.ErrInvalidUserID
+	}
+
+	username, err := r.service.User.GetUsernameByID(userID)
+	if errors.Is(err, entity.ErrInvalidCredentials) {
+		return "", entity.ErrInvalidUserID
+	}
+	return username, err
 }

@@ -1,72 +1,120 @@
 {{define "title"}} Post #{{.Models.Post.ID}}{{end}}
 
 {{define "main"}}
-    <div class="post">
 
-        <div style="background-color: bisque;">
-            <h2>Title: {{.Models.Post.Title}}</h2>
-            <h3>Author: {{.Models.Post.Username}}</h3>
-            <div>
-                <h3>Tags:</h3>
-                {{range .Models.Post.PostTags}}
-                    <p>{{.Name}}</p>
-                {{end}}
-            </div>
-        </div>
-        {{with .Models.Post}}
-            <div style="background-color: beige; width: 400px; margin: 0 auto;">
-                <h3>Content:</h3>
-                <p style="text-align: center;">{{.Content}}</p>
-            </div>
-            <div>
-                <div>
-                    <p>Likes:{{.Likes}}</p>
-                    <form action="/post/like/{{.ID}}" method="POST">
-                        <input type="submit" value="Like">
-                    </form>
+<div class="base">
+    <!-- post feed-->
+    <div class="post-feed">
+        <!-- post -->
+        <div class="post">
+            <div class="post-content">
+                <div class="post-top-info">
+
+                    <div class="post-top-user"><img src="/static/img/ava/user.png" alt="user-ava">
+                        <p>{{.Models.Post.Username}}</p>
+                        <p class="post-date">{{.Models.Post.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
+                    </div>
+
+                    <div class="likes-frame">
+                        <form action="/post/like/{{.Models.Post.ID}}" method="POST">
+                            <button class="like-button" id="like">
+                                <img src="/static/img/svg/like-icon.svg" alt="like">{{.Models.Post.Likes}}
+                            </button>
+                        </form>
+
+                        <form action="/post/dislike/{{.Models.Post.ID}}" method="POST">
+                            <button class="like-button" id="dislike"><img src="/static/img/svg/dislike.svg"
+                                    alt="dislike">{{.Models.Post.Dislikes}}
+                            </button>
+                        </form>
+
+
+                    </div>
+
                 </div>
-                <div>
-                    <p>Dislikes:{{.Dislikes}}</p>
-                    <form action="/post/dislike/{{.ID}}" method="POST">
-                        <input type="submit" value="Dislike">
-                    </form>
+
+                <div class="post-header">
+                    <a href="#">
+                        <h1>{{.Models.Post.Title}}</h1>
+                    </a>
                 </div>
-            </div>
-        {{end}}
+                <div class="post-text">
+                    <p>{{ .Models.Post.Content }}</p>
+                </div>
+                <div class="likes-frame post-tags">
+                    {{range .Models.Post.PostTags}}
+                    <button class="like-button tag" disabled >{{ .Name}} </button>
+                    {{end}}
+                </div>
+                <!-- <div class="post-img"><img src="/static/img/sample.png" alt="post-img">
+                    
+                </div> -->
 
-        {{if .IsAuthenticated}}
-            <form action="/post/comment/{{.Models.Post.ID}}" method="POST">
-                <div>
-                    <label for="commentContent"></label>
-                    <input type="text" name="commentContent" id="commentContent" placeholder="Nice post!...">
-
-                    <div style="color: green;">
-                        <input type="submit" value="->">
+                <div class="post-footer">
+                    <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">199
+                        comments
+                    </div>
+                    <div class="post-options">
+                        <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
+                        <a href="/"><img src="/static/img/svg/delete-icon.svg" alt="delete-icon"></a>
+                        <img src="/static/img/svg/report-icon.svg" alt="report-icon">
                     </div>
                 </div>
-            </form>
+
+            </div>
+        </div>
+        <!-- comments -->
+        {{range .Models.Comments}}
+        <div class="post">
+            <div class="post-content">
+                <div class="post-top-info">
+
+                    <div class="post-top-user">
+                        <p>{{.Username}}</p>
+                        <p class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
+                    </div>
+
+                    <div class="likes-frame">
+                        <form action="/post/comment/like/{{.PostID}}/{{.ID}}" method="POST">
+                            <button class="like-button" id="like">
+                                <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
+                            </button>
+                        </form>
+
+                        <form action="/post/comment/dislike/{{.PostID}}/{{.ID}}" method="POST">
+                            <button class="like-button" id="dislike"><img src="/static/img/svg/dislike.svg"
+                                    alt="dislike">{{.Dislikes}}
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <div class="post-text">
+                    <p>{{.Content}}</p>
+                </div>
+
+            </div>
+        </div>
         {{end}}
 
-        <div>Comments:</div>
-        <div>
-            {{range .Models.Comments}}
-                <h3>{{.Username}}</h3>
-                <div>
-                    <p>Likes:{{.Likes}}</p>
-                    <form action="/post/comment/like/{{.PostID}}/{{.ID}}" method="POST">
-                        <input type="submit" value="Like">
-                    </form>
-                </div>
-                <div>
-                    <p>Dislikes:{{.Dislikes}}</p>
-                    <form action="/post/comment/dislike/{{.PostID}}/{{.ID}}" method="POST">
-                        <input type="submit" value="Dislike">
-                    </form>
-                </div>
-                <div>
-                    <pre>{{.Content}}</pre>
-                </div>
-            {{end}}
+        <!-- Leave Your comment -->
+        {{if .IsAuthenticated}}
+        <div class="feed-message-wrapper">
+            <div class="comment-frame">
+
+                <form action="/post/comment/{{.Models.Post.ID}}" method="POST">
+                    <textarea class="white-text-area" name="commentContent" id="usercomment" type="text" minlength="3"
+                        maxlength="256" spellcheck="false" required></textarea>
+                    <button class="light-button">Leave Comment</button>
+                </form>
+            </div>
+
         </div>
+        {{end}}
+
     </div>
+
+</div>
+
 {{end}}

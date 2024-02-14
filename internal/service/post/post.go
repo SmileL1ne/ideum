@@ -7,12 +7,6 @@ import (
 	"strconv"
 )
 
-/*
-TODO:
-- Add new methods related to post manipulation (delete, update post)
-- Add data validation to SavePost method
-- Add postID validation in GetPost method
-*/
 type IPostService interface {
 	SavePost(*entity.PostCreateForm, int, []string) (int, error)
 	GetPost(int) (entity.PostView, error)

@@ -18,6 +18,7 @@ type Models struct {
 
 type templateData struct {
 	Models          Models
+	Username        string
 	Flash           string
 	IsAuthenticated bool
 }
@@ -53,6 +54,8 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		files := []string{
 			"html/base.html",
 			"html/partials/nav.html",
+			"html/partials/topics.html",
+			"html/partials/userbar.html",
 			page,
 		}
 

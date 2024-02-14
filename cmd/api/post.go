@@ -47,11 +47,23 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	username, err := r.getUsername(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
 	data := r.newTemplateData(req)
 	data.Models.Post = post
 	data.Models.Post.PostTags = *postTags
 	data.Models.Comments = *comments
 	data.Models.Tags = *tags
+	data.Username = username
 
 	r.render(w, req, http.StatusOK, "view.html", data)
 }
@@ -72,8 +84,20 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	username, err := r.getUsername(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
 	data := r.newTemplateData(req)
 	data.Models.Tags = *tags
+	data.Username = username
 
 	r.render(w, req, http.StatusOK, "create.html", data)
 }

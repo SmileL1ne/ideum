@@ -6,20 +6,6 @@ import (
 	"net/http"
 )
 
-func (r *routes) userSignup(w http.ResponseWriter, req *http.Request) {
-	switch {
-	case req.Method == http.MethodPost:
-		r.userSignupPost(w, req)
-		return
-	case req.Method != http.MethodGet:
-		r.methodNotAllowed(w)
-		return
-	}
-
-	data := r.newTemplateData(req)
-	r.render(w, req, http.StatusOK, "signup.html", data)
-}
-
 func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	if err := req.ParseForm(); err != nil {
 		r.badRequest(w)
@@ -47,21 +33,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 
 	r.sesm.Put(req.Context(), "flash", "Your signup was successful. Please log in.")
 
-	http.Redirect(w, req, "/user/login", http.StatusSeeOther)
-}
-
-func (r *routes) userLogin(w http.ResponseWriter, req *http.Request) {
-	switch {
-	case req.Method == http.MethodPost:
-		r.userLoginPost(w, req)
-		return
-	case req.Method != http.MethodGet:
-		r.methodNotAllowed(w)
-		return
-	}
-
-	data := r.newTemplateData(req)
-	r.render(w, req, http.StatusOK, "login.html", data)
+	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
 
 func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {

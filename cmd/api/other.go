@@ -45,9 +45,21 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	username, err := r.getUsername(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
 	data := r.newTemplateData(req)
 	data.Models.Posts = *posts
 	data.Models.Tags = *tags
+	data.Username = username
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }
@@ -80,9 +92,21 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	username, err := r.getUsername(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
 	data := r.newTemplateData(req)
 	data.Models.Posts = *posts
 	data.Models.Tags = *tags
+	data.Username = username
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }

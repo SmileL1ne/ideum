@@ -15,6 +15,7 @@ type IUserRepository interface {
 	SaveUser(entity.UserSignupForm) (int, error)
 	GetUserByUsername(username string) (entity.UserEntity, error)
 	GetUserByEmail(email string) (entity.UserEntity, error)
+	GetUsernameByID(userID int) (string, error)
 }
 
 type userRepository struct {
@@ -72,7 +73,12 @@ func (r *userRepository) GetUserByUsername(username string) (entity.UserEntity, 
 	return r.getUserByField("username", username)
 }
 
-func (r *userRepository) getUserByField(field, value string) (entity.UserEntity, error) {
+func (r *userRepository) GetUsernameByID(userID int) (string, error) {
+	user, err := r.getUserByField("id", userID)
+	return user.Username, err
+}
+
+func (r *userRepository) getUserByField(field string, value interface{}) (entity.UserEntity, error) {
 	var u entity.UserEntity
 
 	query := fmt.Sprintf(`SELECT * FROM users WHERE %s = $1`, field)
@@ -81,9 +87,8 @@ func (r *userRepository) getUserByField(field, value string) (entity.UserEntity,
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.UserEntity{}, entity.ErrInvalidCredentials
-		} else {
-			return entity.UserEntity{}, err
 		}
+		return entity.UserEntity{}, err
 	}
 
 	return u, nil
