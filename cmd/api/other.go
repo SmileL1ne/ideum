@@ -35,13 +35,8 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 	}
 
 	username, err := r.getUsername(req)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
+	if err != nil && !errors.Is(err, entity.ErrInvalidUserID) {
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -71,6 +66,12 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	username, err := r.getUsername(req)
+	if err != nil && !errors.Is(err, entity.ErrInvalidUserID) {
+		r.serverError(w, req, err)
+		return
+	}
+
 	tagID, err := getIdFromPath(req, 3)
 	if err != nil {
 		switch {
@@ -80,17 +81,6 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		case errors.Is(err, entity.ErrInvalidPathID):
 			log.Print("sortedByTag: invalid id in request path")
 			r.badRequest(w)
-		}
-		return
-	}
-
-	username, err := r.getUsername(req)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
 		}
 		return
 	}

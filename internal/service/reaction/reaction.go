@@ -37,15 +37,15 @@ func (rs *reactionService) AddOrDeletePost(reaction string, postID int, userID i
 	// Check if reaction by user exists in table, if not it would return
 	// entity.ErrNoRecord error, otherwise it would return reaction left by
 	// that user
-	isLikeDB, err := rs.reactsRepo.ExistsPost(userID, postID)
+	isLikeDB, err := rs.reactsRepo.ExistsPostReaction(userID, postID)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
-			return rs.reactsRepo.AddPost(isLike, postID, userID)
+			return rs.reactsRepo.AddPostReaction(isLike, postID, userID)
 		}
 		return err
 	}
 
-	err = rs.reactsRepo.DeletePost(postID, userID)
+	err = rs.reactsRepo.DeletePostReaction(postID, userID)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (rs *reactionService) AddOrDeletePost(reaction string, postID int, userID i
 	if isLike == isLikeDB {
 		return err
 	} else {
-		return rs.reactsRepo.AddPost(isLike, postID, userID)
+		return rs.reactsRepo.AddPostReaction(isLike, postID, userID)
 	}
 }
 
@@ -73,15 +73,15 @@ func (rs *reactionService) AddOrDeleteComment(reaction string, commentID int, us
 		return entity.ErrInvalidURLPath
 	}
 
-	isLikeDB, err := rs.reactsRepo.ExistsComment(userID, commentID)
+	isLikeDB, err := rs.reactsRepo.ExistsCommentReaction(userID, commentID)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
-			return rs.reactsRepo.AddComment(isLike, commentID, userID)
+			return rs.reactsRepo.AddCommentReaction(isLike, commentID, userID)
 		}
 		return err
 	}
 
-	err = rs.reactsRepo.DeleteComment(commentID, userID)
+	err = rs.reactsRepo.DeleteCommentReaction(commentID, userID)
 	if err != nil {
 		return err
 	}
@@ -89,6 +89,6 @@ func (rs *reactionService) AddOrDeleteComment(reaction string, commentID int, us
 	if isLike == isLikeDB {
 		return err
 	} else {
-		return rs.reactsRepo.AddComment(isLike, commentID, userID)
+		return rs.reactsRepo.AddCommentReaction(isLike, commentID, userID)
 	}
 }
