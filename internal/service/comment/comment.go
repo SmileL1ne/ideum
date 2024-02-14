@@ -8,6 +8,7 @@ import (
 type ICommentService interface {
 	SaveComment(*entity.CommentCreateForm, int, int) error
 	GetAllCommentsForPost(int) (*[]entity.CommentView, error)
+	ExistsComment(int) (bool, error)
 }
 
 type commentService struct {
@@ -58,4 +59,8 @@ func (cs *commentService) GetAllCommentsForPost(postID int) (*[]entity.CommentVi
 	}
 
 	return &cViews, nil
+}
+
+func (cs *commentService) ExistsComment(commentID int) (bool, error) {
+	return cs.commentRepo.ExistsComment(commentID)
 }

@@ -15,13 +15,8 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	}
 
 	username, err := r.getUsername(req)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
+	if err != nil && !errors.Is(err, entity.ErrInvalidUserID) {
+		r.serverError(w, req, err)
 		return
 	}
 

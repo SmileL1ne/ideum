@@ -8,6 +8,7 @@ import (
 type ICommentRepository interface {
 	SaveComment(entity.CommentCreateForm, int, int) error
 	GetAllCommentsForPost(int) (*[]entity.CommentEntity, error)
+	ExistsComment(int) (bool, error)
 }
 
 type commentRepository struct {
@@ -67,4 +68,19 @@ func (r *commentRepository) GetAllCommentsForPost(postID int) (*[]entity.Comment
 	}
 
 	return &comments, nil
+}
+
+func (r *commentRepository) ExistsComment(commentID int) (bool, error) {
+	var exists bool
+
+	query := `
+		SELECT EXISTS(
+			SELECT true
+			FROM comments
+			WHERE id = $1
+		)
+	`
+
+	err := r.DB.QueryRow(query, commentID).Scan(&exists)
+	return exists, err
 }

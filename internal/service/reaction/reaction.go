@@ -7,8 +7,8 @@ import (
 )
 
 type IReactionService interface {
-	AddOrDeletePost(string, int, int) error
-	AddOrDeleteComment(string, int, int) error
+	SetPostReaction(string, int, int) error
+	SetCommentReaction(string, int, int) error
 }
 
 type reactionService struct {
@@ -23,7 +23,7 @@ func NewReactionService(r reaction.IReactionRepository) *reactionService {
 
 var _ IReactionService = (*reactionService)(nil)
 
-func (rs *reactionService) AddOrDeletePost(reaction string, postID int, userID int) error {
+func (rs *reactionService) SetPostReaction(reaction string, postID int, userID int) error {
 	var isLike bool
 	switch reaction {
 	case "like":
@@ -62,7 +62,7 @@ func (rs *reactionService) AddOrDeletePost(reaction string, postID int, userID i
 }
 
 // Same principle to reactions handling in posts
-func (rs *reactionService) AddOrDeleteComment(reaction string, commentID int, userID int) error {
+func (rs *reactionService) SetCommentReaction(reaction string, commentID int, userID int) error {
 	var isLike bool
 	switch reaction {
 	case "like":

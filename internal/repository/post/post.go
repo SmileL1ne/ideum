@@ -13,6 +13,7 @@ type IPostRepository interface {
 	GetAllPosts() (*[]entity.PostEntity, error)
 	GetAllPostsByTagId(int) (*[]entity.PostEntity, error)
 	GetTagsForEachPost(*[]entity.PostEntity) (*[]entity.PostEntity, error)
+	ExistsPost(int) (bool, error)
 }
 
 type postRepository struct {
@@ -194,4 +195,19 @@ func (r *postRepository) GetTagsForEachPost(posts *[]entity.PostEntity) (*[]enti
 	default:
 		return posts, nil
 	}
+}
+
+func (r *postRepository) ExistsPost(postID int) (bool, error) {
+	var exists bool
+
+	query := `
+		SELECT EXISTS(
+			SELECT true
+			FROM posts
+			WHERE id = $1
+		)
+	`
+
+	err := r.DB.QueryRow(query, postID).Scan(&exists)
+	return exists, err
 }

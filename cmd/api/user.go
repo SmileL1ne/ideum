@@ -8,6 +8,10 @@ import (
 )
 
 func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
 	if err := req.ParseForm(); err != nil {
 		r.badRequest(w)
 		return
@@ -39,6 +43,11 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+
 	if err := req.ParseForm(); err != nil {
 		log.Print("userLoginPost: invalid form fill (parse error)")
 		r.badRequest(w)

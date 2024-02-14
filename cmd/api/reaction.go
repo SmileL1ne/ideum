@@ -21,6 +21,13 @@ func (r *routes) postReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	reaction := req.URL.Query().Get("reaction")
+	if reaction == "" {
+		log.Print("postReaction: invalid query parameter - reaction")
+		r.badRequest(w)
+		return
+	}
+
 	postID, err := getIdFromPath(req, 4)
 	if err != nil {
 		switch {
@@ -34,18 +41,22 @@ func (r *routes) postReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	reaction := req.URL.Query().Get("reaction")
-	if reaction == "" {
-		log.Print("postReaction: invalid query parameter - reaction")
-		r.badRequest(w)
+	isPostExists, err := r.service.Post.ExistsPost(postID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+	if !isPostExists {
+		log.Printf("postReaction: no post with id - %d", postID)
+		r.notFound(w)
 		return
 	}
 
-	err = r.service.Reaction.AddOrDeletePost(reaction, postID, userID)
+	err = r.service.Reaction.SetPostReaction(reaction, postID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Printf("postReaction: invalid query parameter - %s", reaction)
+			log.Printf("postReaction: invalid query parameter - '%s'", reaction)
 			r.badRequest(w)
 		default:
 			r.serverError(w, req, err)
@@ -82,6 +93,17 @@ func (r *routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	isCommentExists, err := r.service.Comment.ExistsComment(commentID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+	if !isCommentExists {
+		log.Printf("commentReaction: no comment with id - %d", commentID)
+		r.notFound(w)
+		return
+	}
+
 	urls := strings.Split(req.URL.Path, "/")
 	postID, isValid := getValidID(urls[len(urls)-2])
 	if !isValid {
@@ -96,11 +118,11 @@ func (r *routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = r.service.Reaction.AddOrDeleteComment(reaction, commentID, userID)
+	err = r.service.Reaction.SetCommentReaction(reaction, commentID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Printf("postReaction: invalid query parameter - %s", reaction)
+			log.Printf("postReaction: invalid query parameter - '%s'", reaction)
 			r.badRequest(w)
 		default:
 			r.serverError(w, req, err)

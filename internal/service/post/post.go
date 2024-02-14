@@ -12,6 +12,7 @@ type IPostService interface {
 	GetPost(int) (entity.PostView, error)
 	GetAllPosts() (*[]entity.PostView, error)
 	GetAllPostsByTagId(int) (*[]entity.PostView, error)
+	ExistsPost(int) (bool, error)
 }
 
 type postService struct {
@@ -108,4 +109,8 @@ func (pc *postService) convertEntitiesToViews(posts *[]entity.PostEntity) (*[]en
 	}
 
 	return &pViews, nil
+}
+
+func (pc *postService) ExistsPost(postID int) (bool, error) {
+	return pc.postRepo.ExistsPost(postID)
 }
