@@ -7,8 +7,8 @@ import (
 )
 
 type IReactionService interface {
-	AddOrDeletePost(bool, int, int) error
-	AddOrDeleteComment(bool, int, int) error
+	AddOrDeletePost(string, int, int) error
+	AddOrDeleteComment(string, int, int) error
 }
 
 type reactionService struct {
@@ -23,7 +23,17 @@ func NewReactionService(r reaction.IReactionRepository) *reactionService {
 
 var _ IReactionService = (*reactionService)(nil)
 
-func (rs *reactionService) AddOrDeletePost(isLike bool, postID int, userID int) error {
+func (rs *reactionService) AddOrDeletePost(reaction string, postID int, userID int) error {
+	var isLike bool
+	switch reaction {
+	case "like":
+		isLike = true
+	case "dislike":
+		isLike = false
+	default:
+		return entity.ErrInvalidURLPath
+	}
+
 	// Check if reaction by user exists in table, if not it would return
 	// entity.ErrNoRecord error, otherwise it would return reaction left by
 	// that user
@@ -52,7 +62,17 @@ func (rs *reactionService) AddOrDeletePost(isLike bool, postID int, userID int) 
 }
 
 // Same principle to reactions handling in posts
-func (rs *reactionService) AddOrDeleteComment(isLike bool, commentID int, userID int) error {
+func (rs *reactionService) AddOrDeleteComment(reaction string, commentID int, userID int) error {
+	var isLike bool
+	switch reaction {
+	case "like":
+		isLike = true
+	case "dislike":
+		isLike = false
+	default:
+		return entity.ErrInvalidURLPath
+	}
+
 	isLikeDB, err := rs.reactsRepo.ExistsComment(userID, commentID)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {

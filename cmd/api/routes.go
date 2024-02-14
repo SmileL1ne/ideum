@@ -52,11 +52,9 @@ func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	protected := dynamic.Append(r.requireAuthentication)
 
 	router.Handle("/post/create", protected.ThenFunc(r.postCreate))
-	router.Handle("/post/like/", protected.ThenFunc(r.postLike))                  // postID at the end
-	router.Handle("/post/dislike/", protected.ThenFunc(r.postDislike))            // postID at the end
-	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))          // postID at the end
-	router.Handle("/post/comment/like/", protected.ThenFunc(r.commentLike))       // postID at the end
-	router.Handle("/post/comment/dislike/", protected.ThenFunc(r.commentDislike)) // postID at the end
+	router.Handle("/post/reaction/", protected.ThenFunc(r.postReaction))            // postID at the end
+	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))            // postID at the end
+	router.Handle("/post/comment/reaction/", protected.ThenFunc(r.commentReaction)) // postID at the end
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
 
 	// Standard middleware chain applied to router itself -> used in all routes

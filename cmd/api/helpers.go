@@ -87,19 +87,7 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 	buf.WriteTo(w)
 }
 
-// getIdFromPath retrieves and returns id from request path.
-//
-// It returns empty string if number of splitted parts doesn't match with
-// given number
-func (r *routes) getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
-	urlParts := strings.Split(req.URL.Path, "/")
-	if len(urlParts) != urlPartsNum {
-		return 0, entity.ErrInvalidURLPath
-	}
-
-	return strconv.Atoi(urlParts[len(urlParts)-1])
-}
-
+// getUsername retrieves username by user id from request context
 func (r *routes) getUsername(req *http.Request) (string, error) {
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
@@ -111,4 +99,31 @@ func (r *routes) getUsername(req *http.Request) (string, error) {
 		return "", entity.ErrInvalidUserID
 	}
 	return username, err
+}
+
+// getIdFromPath retrieves and returns id from request path.
+//
+// It returns empty string if number of splitted parts doesn't match with
+// given number
+func getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
+	urlParts := strings.Split(req.URL.Path, "/")
+	if len(urlParts) != urlPartsNum {
+		return 0, entity.ErrInvalidURLPath
+	}
+
+	id, isValid := getValidID(urlParts[len(urlParts)-1])
+	if !isValid {
+		return 0, entity.ErrInvalidPathID
+	}
+
+	return id, nil
+}
+
+// getValidID parses string id to int and checks if it is valid
+func getValidID(idStr string) (int, bool) {
+	id, _ := strconv.Atoi(idStr)
+	if id <= 0 {
+		return 0, false
+	}
+	return id, true
 }

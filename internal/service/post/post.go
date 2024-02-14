@@ -52,7 +52,7 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 	post, err := ps.postRepo.GetPost(postId)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
-			return entity.PostView{}, err
+			return entity.PostView{}, entity.ErrInvalidPostID
 		}
 		return entity.PostView{}, err
 	}

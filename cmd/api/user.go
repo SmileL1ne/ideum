@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"forum/internal/entity"
+	"log"
 	"net/http"
 )
 
@@ -24,6 +25,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
+			log.Print("userSignupPost: invalid form fill")
 			http.Redirect(w, req, "/user/signup", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
@@ -38,6 +40,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	if err := req.ParseForm(); err != nil {
+		log.Print("userLoginPost: invalid form fill (parse error)")
 		r.badRequest(w)
 		return
 	}
@@ -51,6 +54,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrInvalidCredentials):
+			log.Print("userSignupPost: invalid form fill")
 			http.Redirect(w, req, "/user/login", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)

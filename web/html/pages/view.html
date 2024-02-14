@@ -16,13 +16,13 @@
                     </div>
 
                     <div class="likes-frame">
-                        <form action="/post/like/{{.Models.Post.ID}}" method="POST">
+                        <form action="/post/reaction/{{.Models.Post.ID}}?reaction=like" method="POST">
                             <button class="like-button" id="like">
                                 <img src="/static/img/svg/like-icon.svg" alt="like">{{.Models.Post.Likes}}
                             </button>
                         </form>
 
-                        <form action="/post/dislike/{{.Models.Post.ID}}" method="POST">
+                        <form action="/post/reaction/{{.Models.Post.ID}}?reaction=dislike" method="POST">
                             <button class="like-button" id="dislike"><img src="/static/img/svg/dislike.svg"
                                     alt="dislike">{{.Models.Post.Dislikes}}
                             </button>
@@ -75,13 +75,13 @@
                     </div>
 
                     <div class="likes-frame">
-                        <form action="/post/comment/like/{{.PostID}}/{{.ID}}" method="POST">
+                        <form action="/post/comment/reaction/{{.PostID}}/{{.ID}}?reaction=like" method="POST">
                             <button class="like-button" id="like">
                                 <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
                             </button>
                         </form>
 
-                        <form action="/post/comment/dislike/{{.PostID}}/{{.ID}}" method="POST">
+                        <form action="/post/comment/reaction/{{.PostID}}/{{.ID}}?reaction=dislike" method="POST">
                             <button class="like-button" id="dislike"><img src="/static/img/svg/dislike.svg"
                                     alt="dislike">{{.Dislikes}}
                             </button>

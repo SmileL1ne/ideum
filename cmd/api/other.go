@@ -4,6 +4,7 @@ import (
 	"errors"
 	"forum/internal/entity"
 	"forum/web"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -33,6 +34,17 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	username, err := r.getUsername(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
 	posts, err := r.service.Post.GetAllPosts()
 	if err != nil {
 		r.serverError(w, req, err)
@@ -42,17 +54,6 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 	tags, err := r.service.Tag.GetAllTags()
 	if err != nil {
 		r.serverError(w, req, err)
-		return
-	}
-
-	username, err := r.getUsername(req)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
 		return
 	}
 
@@ -70,13 +71,27 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tagID, err := r.getIdFromPath(req, 3)
+	tagID, err := getIdFromPath(req, 3)
 	if err != nil {
-		if errors.Is(err, entity.ErrInvalidURLPath) {
+		switch {
+		case errors.Is(err, entity.ErrInvalidURLPath):
+			log.Print("sortedByTag: invalid url path")
 			r.notFound(w)
-			return
+		case errors.Is(err, entity.ErrInvalidPathID):
+			log.Print("sortedByTag: invalid id in request path")
+			r.badRequest(w)
 		}
-		r.badRequest(w)
+		return
+	}
+
+	username, err := r.getUsername(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -89,17 +104,6 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 	tags, err := r.service.Tag.GetAllTags()
 	if err != nil {
 		r.serverError(w, req, err)
-		return
-	}
-
-	username, err := r.getUsername(req)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
 		return
 	}
 

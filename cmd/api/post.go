@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
+	"log"
 	"net/http"
 )
 
@@ -13,19 +14,39 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	postID, err := r.getIdFromPath(req, 4)
+	username, err := r.getUsername(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrInvalidURLPath) {
-			r.notFound(w)
-			return
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
 		}
-		r.badRequest(w)
+		return
+	}
+
+	postID, err := getIdFromPath(req, 4)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidURLPath):
+			log.Print("postView: invalid url path")
+			r.notFound(w)
+		case errors.Is(err, entity.ErrInvalidPathID):
+			log.Print("postView: invalid id in request path")
+			r.badRequest(w)
+		}
 		return
 	}
 
 	post, err := r.service.Post.GetPost(postID)
 	if err != nil {
-		r.serverError(w, req, err)
+		switch {
+		case errors.Is(err, entity.ErrInvalidPostID):
+			log.Print("postView: invalid post id")
+			r.notFound(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -44,17 +65,6 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	postTags, err := r.service.Tag.GetAllTagsForPost(postID)
 	if err != nil {
 		r.serverError(w, req, err)
-		return
-	}
-
-	username, err := r.getUsername(req)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
 		return
 	}
 
@@ -78,20 +88,21 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tags, err := r.service.Tag.GetAllTags()
-	if err != nil {
-		r.serverError(w, req, err)
-		return
-	}
-
 	username, err := r.getUsername(req)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidUserID):
+			log.Print("postCreate: invalid user id")
 			r.unauthorized(w)
 		default:
 			r.serverError(w, req, err)
 		}
+		return
+	}
+
+	tags, err := r.service.Tag.GetAllTags()
+	if err != nil {
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -108,6 +119,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if err := req.ParseForm(); err != nil {
+		log.Print("postCreatePost: invalid form fill (parse error)")
 		r.badRequest(w)
 		return
 	}
@@ -133,6 +145,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
+			log.Print("postCreatePost: invalid form fill")
 			http.Redirect(w, req, "/post/create", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)

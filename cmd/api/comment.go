@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
+	"log"
 	"net/http"
 )
 
@@ -17,23 +18,26 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	postID, err := r.getIdFromPath(req, 4)
-	if err != nil {
-		if errors.Is(err, entity.ErrInvalidURLPath) {
-			r.notFound(w)
-			return
-		}
-		r.badRequest(w)
-		return
-	}
-
-	content := req.PostForm.Get("commentContent")
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
 		r.unauthorized(w)
 		return
 	}
 
+	postID, err := getIdFromPath(req, 4)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidURLPath):
+			log.Print("commentCreate: invalid url path")
+			r.notFound(w)
+		case errors.Is(err, entity.ErrInvalidPathID):
+			log.Print("commentCreate: invalid id in request path")
+			r.badRequest(w)
+		}
+		return
+	}
+
+	content := req.PostForm.Get("commentContent")
 	comment := &entity.CommentCreateForm{
 		Content: content,
 	}
@@ -42,6 +46,7 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
+			log.Print("commentCreate: invalid form fill")
 			http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
