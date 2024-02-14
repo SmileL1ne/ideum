@@ -54,7 +54,7 @@ func main() {
 	}()
 
 	// Starting the server
-	log.Printf("starting the server on address%s", cfg.Addr)
+	log.Printf("starting the server on address - http://localhost%s", cfg.Addr)
 	err = server.ListenAndServe()
 	log.Fatalf("Listen and serve error:%v", err)
 }
