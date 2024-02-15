@@ -57,15 +57,8 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	postTags, err := r.service.Tag.GetAllTagsForPost(postID)
-	if err != nil {
-		r.serverError(w, req, err)
-		return
-	}
-
 	data := r.newTemplateData(req)
 	data.Models.Post = post
-	data.Models.Post.PostTags = *postTags
 	data.Models.Comments = *comments
 	data.Models.Tags = *tags
 	data.Username = username
@@ -152,4 +145,48 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	r.sesm.Put(req.Context(), "flash", "Post successfully created!")
 
 	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", id), http.StatusSeeOther)
+}
+
+func (r *routes) postPersonal(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	if userID == 0 {
+		r.unauthorized(w)
+		return
+	}
+
+	username, err := r.getUsername(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			log.Print("postCreate: invalid user id")
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
+	tags, err := r.service.Tag.GetAllTags()
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	userPosts, err := r.service.Post.GetAllPostsByUserID(userID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	data := r.newTemplateData(req)
+	data.Models.Tags = *tags
+	data.Models.Posts = *userPosts
+	data.Username = username
+
+	r.render(w, req, http.StatusOK, "home.html", data)
 }

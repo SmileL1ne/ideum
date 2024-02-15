@@ -38,7 +38,7 @@ func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	}
 
 	// Serve static files
-	router.HandleFunc("/static/", fileServer.ServeHTTP)
+	router.Handle("/static/", r.preventDirListing(fileServer))
 
 	// Dynamic middleware chain for routes that don't require authentication
 	dynamic := mids.New(sesm.LoadAndSave)
@@ -53,6 +53,7 @@ func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	// that require authentication
 	protected := dynamic.Append(r.requireAuthentication)
 
+	router.Handle("/post/myPosts", protected.ThenFunc(r.postPersonal))
 	router.Handle("/post/create", protected.ThenFunc(r.postCreate))
 	router.Handle("/post/reaction/", protected.ThenFunc(r.postReaction))            // postID at the end
 	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))            // postID at the end

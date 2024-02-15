@@ -15,7 +15,7 @@ type PostEntity struct {
 	Username    string
 	Likes       int
 	Dislikes    int
-	PostTags    []TagEntity
+	PostTags    string
 	CommentsLen int
 }
 
@@ -28,7 +28,7 @@ type PostView struct {
 	Username    string
 	Likes       int
 	Dislikes    int
-	PostTags    []TagEntity
+	PostTags    []string
 	CommentsLen int
 }
 

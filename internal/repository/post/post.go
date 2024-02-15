@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"forum/internal/entity"
-	"sync"
 )
 
 type IPostRepository interface {
@@ -12,7 +11,7 @@ type IPostRepository interface {
 	GetPost(int) (entity.PostEntity, error)
 	GetAllPosts() (*[]entity.PostEntity, error)
 	GetAllPostsByTagId(int) (*[]entity.PostEntity, error)
-	GetTagsForEachPost(*[]entity.PostEntity) (*[]entity.PostEntity, error)
+	GetAllPostsByUserID(int) (*[]entity.PostEntity, error)
 	ExistsPost(int) (bool, error)
 }
 
@@ -75,7 +74,13 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username,
 			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
-			SUM(CASE WHEN pr.is_like = false THEN 1 ELSE 0 END) as dislikes_count  
+			SUM(CASE WHEN pr.is_like = false THEN 1 ELSE 0 END) as dislikes_count,
+			(
+				SELECT GROUP_CONCAT(t.name, ', ')
+				FROM tags t
+				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+				WHERE pt.post_id = p.id
+			)  
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
 		LEFT JOIN post_reactions pr ON p.id = pr.post_id
@@ -84,12 +89,20 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 		`
 
 	var post entity.PostEntity
+	var tags sql.NullString
 	if err := r.DB.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content,
-		&post.CreatedAt, &post.Username, &post.Likes, &post.Dislikes); err != nil {
+		&post.CreatedAt, &post.Username, &post.Likes, &post.Dislikes, &post.PostTags); err != nil {
+
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.PostEntity{}, entity.ErrNoRecord
 		}
 		return entity.PostEntity{}, err
+	}
+
+	if tags.Valid {
+		post.PostTags = tags.String
+	} else {
+		post.PostTags = ""
 	}
 
 	return post, nil
@@ -104,6 +117,12 @@ func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 				SELECT COUNT(*)
 				FROM comments c
 				WHERE c.post_id = p.id
+			),
+			(
+				SELECT GROUP_CONCAT(t.name, ', ')
+				FROM tags t
+				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+				WHERE pt.post_id = p.id
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
@@ -111,7 +130,7 @@ func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 		GROUP BY p.id
 	`
 
-	return r.getAllPostsByQuery(query)
+	return getAllPostsByQuery(r.DB, query)
 }
 
 func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, error) {
@@ -123,6 +142,12 @@ func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, er
 				SELECT COUNT(*)
 				FROM comments c
 				WHERE c.post_id = p.id
+			),
+			(
+				SELECT GROUP_CONCAT(t.name, ', ')
+				FROM tags t
+				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+				WHERE pt.post_id = p.id
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
@@ -135,76 +160,33 @@ func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, er
 		GROUP BY p.id
 	`
 
-	return r.getAllPostsByQuery(query, tagID)
+	return getAllPostsByQuery(r.DB, query, tagID)
 }
 
-func (r *postRepository) getAllPostsByQuery(query string, args ...interface{}) (*[]entity.PostEntity, error) {
-	rows, err := r.DB.Query(query, args...)
-	if err != nil {
-		return nil, err
-	}
-
-	var posts []entity.PostEntity
-
-	for rows.Next() {
-		var post entity.PostEntity
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt,
-			&post.Username, &post.Likes, &post.Dislikes, &post.CommentsLen); err != nil {
-
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return &posts, nil
-}
-
-func (r *postRepository) GetTagsForEachPost(posts *[]entity.PostEntity) (*[]entity.PostEntity, error) {
+func (r *postRepository) GetAllPostsByUserID(userID int) (*[]entity.PostEntity, error) {
 	query := `
-		SELECT t.id, t.name, t.created_at
-		FROM tags t
-		LEFT JOIN posts_tags pt ON pt.tag_id = t.id
-		WHERE pt.post_id = $1
+		SELECT p.id, p.title, p.content, p.created_at, u.username,
+			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
+			SUM(CASE WHEN pr.is_like = false THEN 1 ELSE 0 END) as dislikes_count,
+			(
+				SELECT COUNT(*)
+				FROM comments c
+				WHERE c.post_id = p.id
+			),
+			(
+				SELECT GROUP_CONCAT(t.name, ', ')
+				FROM tags t
+				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+				WHERE pt.post_id = p.id
+			)
+		FROM posts p
+		INNER JOIN users u ON p.user_id = u.id
+		LEFT JOIN post_reactions pr ON p.id = pr.post_id
+		WHERE p.user_id = $1
+		GROUP BY p.id 
 	`
 
-	var wg sync.WaitGroup
-	wg.Add(len(*posts))
-	errCh := make(chan error, len(*posts))
-
-	for i := 0; i < len(*posts); i++ {
-		go func(p *entity.PostEntity) {
-			defer wg.Done()
-
-			var tags []entity.TagEntity
-			rows, err := r.DB.Query(query, p.ID)
-			if err != nil {
-				errCh <- err
-				return
-			}
-			for rows.Next() {
-				var tag entity.TagEntity
-				if err := rows.Scan(&tag.ID, &tag.Name, &tag.CreatedAt); err != nil {
-					errCh <- err
-					return
-				}
-				tags = append(tags, tag)
-			}
-			p.PostTags = tags
-		}(&(*posts)[i])
-	}
-
-	wg.Wait()
-
-	select {
-	case err := <-errCh:
-		return nil, err
-	default:
-		return posts, nil
-	}
+	return getAllPostsByQuery(r.DB, query, userID)
 }
 
 func (r *postRepository) ExistsPost(postID int) (bool, error) {

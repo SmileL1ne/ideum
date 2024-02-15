@@ -12,6 +12,7 @@ type IPostService interface {
 	GetPost(int) (entity.PostView, error)
 	GetAllPosts() (*[]entity.PostView, error)
 	GetAllPostsByTagId(int) (*[]entity.PostView, error)
+	GetAllPostsByUserID(int) (*[]entity.PostView, error)
 	ExistsPost(int) (bool, error)
 }
 
@@ -58,6 +59,7 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 		return entity.PostView{}, err
 	}
 
+	tags := convertToStrArr(post.PostTags)
 	pView := entity.PostView{
 		ID:        post.ID,
 		Title:     post.Title,
@@ -66,6 +68,7 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 		Username:  post.Username,
 		Likes:     post.Likes,
 		Dislikes:  post.Dislikes,
+		PostTags:  tags,
 	}
 
 	return pView, nil
@@ -77,9 +80,7 @@ func (pc *postService) GetAllPosts() (*[]entity.PostView, error) {
 		return nil, err
 	}
 
-	postsWithTags, err := pc.postRepo.GetTagsForEachPost(posts)
-
-	return pc.convertEntitiesToViews(postsWithTags)
+	return convertEntitiesToViews(posts)
 }
 
 func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
@@ -88,28 +89,16 @@ func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error)
 		return nil, err
 	}
 
-	return pc.convertEntitiesToViews(posts)
+	return convertEntitiesToViews(posts)
 }
 
-func (pc *postService) convertEntitiesToViews(posts *[]entity.PostEntity) (*[]entity.PostView, error) {
-	// Convert received PostEntity's to PostView's
-	var pViews []entity.PostView
-	for _, p := range *posts {
-		post := entity.PostView{
-			ID:          p.ID,
-			Title:       p.Title,
-			Content:     p.Content,
-			CreatedAt:   p.CreatedAt,
-			Username:    p.Username,
-			Likes:       p.Likes,
-			Dislikes:    p.Dislikes,
-			PostTags:    p.PostTags,
-			CommentsLen: p.CommentsLen,
-		}
-		pViews = append(pViews, post)
+func (pc *postService) GetAllPostsByUserID(userID int) (*[]entity.PostView, error) {
+	posts, err := pc.postRepo.GetAllPostsByUserID(userID)
+	if err != nil {
+		return nil, err
 	}
 
-	return &pViews, nil
+	return convertEntitiesToViews(posts)
 }
 
 func (pc *postService) ExistsPost(postID int) (bool, error) {

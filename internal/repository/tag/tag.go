@@ -7,7 +7,7 @@ import (
 
 type ITagRepository interface {
 	GetAllTags() (*[]entity.TagEntity, error)
-	GetAllTagsForPost(int) (*[]entity.TagEntity, error)
+	// GetAllTagsForPost(int) (*[]entity.TagEntity, error)
 }
 
 type tagRepo struct {
@@ -45,27 +45,27 @@ func (r *tagRepo) GetAllTags() (*[]entity.TagEntity, error) {
 	return &tags, nil
 }
 
-func (r *tagRepo) GetAllTagsForPost(postID int) (*[]entity.TagEntity, error) {
-	query := `
-		SELECT t.id, t.name, t.created_at
-		FROM tags t
-		LEFT JOIN posts_tags pt ON pt.tag_id = t.id
-		WHERE pt.post_id = $1
-	`
+// func (r *tagRepo) GetAllTagsForPost(postID int) (*[]entity.TagEntity, error) {
+// 	query := `
+// 		SELECT t.id, t.name, t.created_at
+// 		FROM tags t
+// 		LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+// 		WHERE pt.post_id = $1
+// 	`
 
-	rows, err := r.DB.Query(query, postID)
-	if err != nil {
-		return nil, err
-	}
+// 	rows, err := r.DB.Query(query, postID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	var tags []entity.TagEntity
-	for rows.Next() {
-		var tag entity.TagEntity
-		if err := rows.Scan(&tag.ID, &tag.Name, &tag.CreatedAt); err != nil {
-			return nil, err
-		}
-		tags = append(tags, tag)
-	}
+// 	var tags []entity.TagEntity
+// 	for rows.Next() {
+// 		var tag entity.TagEntity
+// 		if err := rows.Scan(&tag.ID, &tag.Name, &tag.CreatedAt); err != nil {
+// 			return nil, err
+// 		}
+// 		tags = append(tags, tag)
+// 	}
 
-	return &tags, nil
-}
+// 	return &tags, nil
+// }
