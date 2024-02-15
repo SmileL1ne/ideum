@@ -37,8 +37,6 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	r.sesm.Put(req.Context(), "flash", "Your signup was successful. Please log in.")
-
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
 
@@ -78,9 +76,8 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Add authenticated user's id and flash message to session
+	// Add authenticated user's id to a session data
 	r.sesm.Put(req.Context(), "authenticatedUserID", id)
-	r.sesm.Put(req.Context(), "flash", "Successfully logged in!")
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
@@ -91,16 +88,11 @@ func (r *routes) userLogout(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Renew session token whenever user logs out to keep flash message
-	err := r.sesm.RenewToken(req.Context())
+	err := r.sesm.DeleteToken(req.Context())
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
-
-	// Remove auth status from context and put flash message
-	r.sesm.Remove(req.Context(), "authenticatedUserID")
-	r.sesm.Put(req.Context(), "flash", "You've been logged out successfully!")
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }

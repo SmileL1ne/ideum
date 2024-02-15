@@ -102,6 +102,24 @@ func (sm *SessionManager) RenewToken(ctx context.Context) error {
 	return nil
 }
 
+func (sm *SessionManager) DeleteToken(ctx context.Context) error {
+	sd := sm.getSessionDataFromContext(ctx)
+
+	sd.mu.Lock()
+	defer sd.mu.Unlock()
+
+	if sd.sessionID != "" {
+		err := sm.Store.StoreDelete(ctx, sd.sessionID)
+		if err != nil {
+			return err
+		}
+	}
+
+	sd.status = Destroyed
+
+	return nil
+}
+
 // Status returns current status of session data
 func (sm *SessionManager) Status(ctx context.Context) Status {
 	sd := sm.getSessionDataFromContext(ctx)

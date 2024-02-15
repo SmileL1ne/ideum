@@ -78,16 +78,19 @@ func (sm *SessionManager) commitAndWriteSessionCookie(w http.ResponseWriter, r *
 	case Modified:
 		token, expiry, err := sm.commit(ctx)
 		if err != nil {
-			log.Println("Commit session:", err.Error())
+			log.Print("Commit session:", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
 		sm.writeSessionCookie(ctx, w, token, expiry)
+	case Destroyed:
+		sm.writeSessionCookie(ctx, w, "", time.Time{})
 	}
+
 }
 
-// Commit attempts to save changes in database.
+// commit attempts to save changes in database.
 //
 // If given context doesn't hold session it creates new one.
 //

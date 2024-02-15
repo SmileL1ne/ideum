@@ -12,14 +12,8 @@ import (
 	"strings"
 )
 
-/*
-	TODO:
-	- Create error page func that would render prettys error pages (refer to 'ERR')
-*/
-
 func (r *routes) newTemplateData(req *http.Request) templateData {
 	return templateData{
-		Flash:           r.sesm.PopString(req.Context(), "flash"),
 		IsAuthenticated: r.isAuthenticated(req),
 	}
 }

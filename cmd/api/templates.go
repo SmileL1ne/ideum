@@ -19,7 +19,6 @@ type Models struct {
 type templateData struct {
 	Models          Models
 	Username        string
-	Flash           string
 	IsAuthenticated bool
 	ErrInfo         errData
 }
