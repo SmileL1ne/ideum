@@ -177,7 +177,7 @@ func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userPosts, err := r.service.Post.GetAllPostsByUserID(userID)
+	userPosts, err := r.service.Post.GetAllPostsByUserId(userID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return

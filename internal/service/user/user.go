@@ -12,7 +12,7 @@ import (
 type IUserService interface {
 	SaveUser(*entity.UserSignupForm) (int, error)
 	Authenticate(*entity.UserLoginForm) (int, error)
-	GetUsernameByID(int) (string, error)
+	GetUsernameById(int) (string, error)
 }
 
 type userService struct {
@@ -84,6 +84,6 @@ func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
 	return userFromDB.Id, nil
 }
 
-func (us *userService) GetUsernameByID(userID int) (string, error) {
+func (us *userService) GetUsernameById(userID int) (string, error) {
 	return us.userRepo.GetUsernameByID(userID)
 }

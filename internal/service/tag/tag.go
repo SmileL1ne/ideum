@@ -7,7 +7,6 @@ import (
 
 type ITagService interface {
 	GetAllTags() (*[]entity.TagEntity, error)
-	// GetAllTagsForPost(int) (*[]entity.TagEntity, error)
 }
 
 type tagService struct {
@@ -25,7 +24,3 @@ func NewTagService(r tag.ITagRepository) *tagService {
 func (ts *tagService) GetAllTags() (*[]entity.TagEntity, error) {
 	return ts.tagRepo.GetAllTags()
 }
-
-// func (ts *tagService) GetAllTagsForPost(postID int) (*[]entity.TagEntity, error) {
-// 	return ts.tagRepo.GetAllTagsForPost(postID)
-// }

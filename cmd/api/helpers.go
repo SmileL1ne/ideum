@@ -94,7 +94,7 @@ func (r *routes) getUsername(req *http.Request) (string, error) {
 		return "", entity.ErrInvalidUserID
 	}
 
-	username, err := r.service.User.GetUsernameByID(userID)
+	username, err := r.service.User.GetUsernameById(userID)
 	if errors.Is(err, entity.ErrInvalidCredentials) {
 		return "", entity.ErrInvalidUserID
 	}
