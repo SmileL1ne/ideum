@@ -13,6 +13,7 @@ type IPostService interface {
 	GetAllPosts() (*[]entity.PostView, error)
 	GetAllPostsByTagId(int) (*[]entity.PostView, error)
 	GetAllPostsByUserID(int) (*[]entity.PostView, error)
+	GetAllPostsByUserReaction(int) (*[]entity.PostView, error)
 	ExistsPost(int) (bool, error)
 }
 
@@ -94,6 +95,15 @@ func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error)
 
 func (pc *postService) GetAllPostsByUserID(userID int) (*[]entity.PostView, error) {
 	posts, err := pc.postRepo.GetAllPostsByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return convertEntitiesToViews(posts)
+}
+
+func (pc *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView, error) {
+	posts, err := pc.postRepo.GetAllPostsByUserReaction(userID)
 	if err != nil {
 		return nil, err
 	}

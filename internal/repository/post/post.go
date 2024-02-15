@@ -12,6 +12,7 @@ type IPostRepository interface {
 	GetAllPosts() (*[]entity.PostEntity, error)
 	GetAllPostsByTagId(int) (*[]entity.PostEntity, error)
 	GetAllPostsByUserID(int) (*[]entity.PostEntity, error)
+	GetAllPostsByUserReaction(int) (*[]entity.PostEntity, error)
 	ExistsPost(int) (bool, error)
 }
 
@@ -187,6 +188,32 @@ func (r *postRepository) GetAllPostsByUserID(userID int) (*[]entity.PostEntity, 
 		WHERE p.user_id = $1
 		GROUP BY p.id 
 		ORDER BY p.created_at DESC
+	`
+
+	return getAllPostsByQuery(r.DB, query, userID)
+}
+
+func (r *postRepository) GetAllPostsByUserReaction(userID int) (*[]entity.PostEntity, error) {
+	query := `
+		SELECT p.id, p.title, p.content, p.created_at, u.username,
+			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
+			SUM(CASE WHEN pr.is_like = false THEN 1 ELSE 0 END) as dislikes_count,
+			(
+				SELECT COUNT(*)
+				FROM comments c
+				WHERE c.post_id = p.id
+			),
+			(
+				SELECT GROUP_CONCAT(t.name, ', ')
+				FROM tags t
+				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+				WHERE pt.post_id = p.id 
+			)
+		FROM posts p
+		INNER JOIN users u ON p.user_id = u.id
+		LEFT JOIN post_reactions pr ON p.id = pr.post_id
+		WHERE pr.user_id = $1
+		GROUP BY p.id 
 	`
 
 	return getAllPostsByQuery(r.DB, query, userID)

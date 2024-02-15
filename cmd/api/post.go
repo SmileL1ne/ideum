@@ -147,7 +147,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", id), http.StatusSeeOther)
 }
 
-func (r *routes) postPersonal(w http.ResponseWriter, req *http.Request) {
+func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
 		r.methodNotAllowed(w)
 		return
@@ -186,6 +186,50 @@ func (r *routes) postPersonal(w http.ResponseWriter, req *http.Request) {
 	data := r.newTemplateData(req)
 	data.Models.Tags = *tags
 	data.Models.Posts = *userPosts
+	data.Username = username
+
+	r.render(w, req, http.StatusOK, "home.html", data)
+}
+
+func (r *routes) postsReacted(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	if userID == 0 {
+		r.unauthorized(w)
+		return
+	}
+
+	username, err := r.getUsername(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			log.Print("postCreate: invalid user id")
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
+	tags, err := r.service.Tag.GetAllTags()
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	reactedPosts, err := r.service.Post.GetAllPostsByUserReaction(userID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	data := r.newTemplateData(req)
+	data.Models.Tags = *tags
+	data.Models.Posts = *reactedPosts
 	data.Username = username
 
 	r.render(w, req, http.StatusOK, "home.html", data)

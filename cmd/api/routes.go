@@ -53,7 +53,8 @@ func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	// that require authentication
 	protected := dynamic.Append(r.requireAuthentication)
 
-	router.Handle("/post/myPosts", protected.ThenFunc(r.postPersonal))
+	router.Handle("/post/myPosts", protected.ThenFunc(r.postsPersonal))
+	router.Handle("/post/myReacted", protected.ThenFunc(r.postsReacted))
 	router.Handle("/post/create", protected.ThenFunc(r.postCreate))
 	router.Handle("/post/reaction/", protected.ThenFunc(r.postReaction))            // postID at the end
 	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))            // postID at the end
