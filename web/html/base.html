@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/static/css/reset.css">
     <link rel="stylesheet" href="/static/css/font.css">
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/msgerr.js" defer></script>
     <!-- <script src="/static/js/like.js" defer></script> -->
     <script src="/static/js/modal.js" defer></script>
     <title>{{template "title" .}}</title>
@@ -60,30 +61,31 @@
             <div class="wrapper_user-bar">
                 <div class="user-bar">
 
-                    <form action="/user/login" method="POST">
+                    <form class="loginQuery">
                         <div class="user-bar-sign-up" id="SignUpP">
                             <h1>Welcome back!</h1>
-                            <input class="dark-input" type="text" placeholder="Email" name="identifier">
-                            <input class="dark-input" type="text" placeholder="Password" name="password">
+                            <input class="dark-input" type="text" placeholder="Email" name="identifier" autocomplete="off">
+                            <input class="dark-input" type="password" placeholder="Password" name="password">
                             <button class="light-button" type="submit">Sign up</button>
+                            <p class="error-msg"></p>
                             <div class="user-bar-line"></div>
                             <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
                                     alt="Google_logo">Google</button>
                             <button class="dark-button" disabled><img src="/static/img/svg/github_logo.svg"
                                     alt="github_logo">GitHub</button>
-                            <a class="user-bar-link" id="SignUpBtnP" href="#">Don`t have an account?<span> Register
-                                    Now</span> </a>
+                            <a class="user-bar-link" id="SignUpBtnP" href="#">Don`t have an account?<span> Register Now</span> </a>
                         </div>
                     </form>
 
-                    <form action="/user/signup" method="POST"> <!--TODO fix action path -->
+                    <form class="singupQuery"> 
                         <div class="user-bar-register" id="SignInP">
                             <h1>Register</h1>
-                            <input class="dark-input" type="text" placeholder="Username" name="username">
-                            <input class="dark-input" type="text" placeholder="Email" name="email">
-                            <input class="dark-input" type="text" placeholder="Password" name="password">
-                            <input class="dark-input" type="text" placeholder="Confirm password">
+                            <input class="dark-input" type="text" placeholder="Username" name="username" autocomplete="off">
+                            <input class="dark-input" type="text" placeholder="Email" name="email" autocomplete="off">
+                            <input class="dark-input" type="password" placeholder="Password" name="password">
+                            
                             <button class="light-button" type="submit">Register</button>
+                            <p class="error-msg"></p>
                             <div class="user-bar-line"></div>
                             <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
                                     alt="Google_logo">Google</button>

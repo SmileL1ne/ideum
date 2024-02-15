@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"forum/internal/service"
@@ -20,6 +20,7 @@ type routes struct {
 	sesm      *sesm.SessionManager
 }
 
+// NewRouter returns http.Handler type router with registered routes
 func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
 	router := http.NewServeMux()
 

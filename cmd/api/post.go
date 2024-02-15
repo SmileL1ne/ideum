@@ -1,9 +1,10 @@
-package handlers
+package main
 
 import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
+	"log"
 	"net/http"
 )
 
@@ -35,18 +36,23 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tags, err := r.service.Tag.GetAllTagsForPost(postID)
+	tags, err := r.service.Tag.GetAllTags()
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
 
-	// Create template struct with page related data
+	postTags, err := r.service.Tag.GetAllTagsForPost(postID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
 	data := r.newTemplateData(req)
 	data.Models.Post = post
+	data.Models.Post.PostTags = *postTags
 	data.Models.Comments = *comments
 	data.Models.Tags = *tags
-	data.Form = entity.CommentCreateForm{}
 
 	r.render(w, req, http.StatusOK, "view.html", data)
 }
@@ -69,7 +75,6 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 
 	data := r.newTemplateData(req)
 	data.Models.Tags = *tags
-	data.Form = entity.PostCreateForm{}
 
 	r.render(w, req, http.StatusOK, "create.html", data)
 }
@@ -80,6 +85,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if err := req.ParseForm(); err != nil {
+		log.Print("postCreatePost: invalid form fill (parse error)")
 		r.badRequest(w)
 		return
 	}
@@ -105,17 +111,16 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			data := r.newTemplateData(req)
-			data.Form = p
-			r.render(w, req, http.StatusUnprocessableEntity, "create.html", data)
+			log.Print("postCreatePost: invalid form fill")
+			http.Redirect(w, req, "/post/create", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
 		return
 	}
 
-	// Add flash message to context
-	r.sesm.Put(req.Context(), "flash", "Post successfully created!")
+	redirectURL := fmt.Sprintf("/post/view/%d", id)
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, redirectURL)
 
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", id), http.StatusSeeOther)
 }

@@ -1,10 +1,15 @@
-package handlers
+package main
 
 import (
 	"fmt"
 	"net/http"
 )
 
+// requireAuthentication middleware checks if user if authenticated
+// and if not, redirects to login page.
+//
+// It also sets 'Cache-Control' to 'no-store' to avoid saving pages
+// in browsers cache
 func (r *routes) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if !r.isAuthenticated(req) {
@@ -18,6 +23,7 @@ func (r *routes) requireAuthentication(next http.Handler) http.Handler {
 	})
 }
 
+// secureHeaders middleware sets several headers to secure every response
 func secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self'")
@@ -29,6 +35,8 @@ func secureHeaders(next http.Handler) http.Handler {
 	})
 }
 
+// recoverPanic middleware ensures that any panic WITHIN a handler would be
+// handled by the anonymous function declared in this middleware
 func (r *routes) recoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		defer func() {

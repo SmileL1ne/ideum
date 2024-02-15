@@ -10,6 +10,9 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+// Load returns context with loaded session.
+//
+// If empty sessionID is given it returns context with new session created.
 func (sm *SessionManager) Load(ctx context.Context, sessionID string) (context.Context, error) {
 	if _, ok := ctx.Value(sm.ContextKey).(*sessionData); ok {
 		return ctx, nil
@@ -30,13 +33,14 @@ func (sm *SessionManager) Load(ctx context.Context, sessionID string) (context.C
 		sessionID: sessionID,
 		status:    Unmodified,
 	}
-	if sd.expiryTime, sd.values, err = sm.Decode(b); err != nil {
+	if sd.expiryTime, sd.values, err = sm.decode(b); err != nil {
 		return nil, err
 	}
 
 	return context.WithValue(ctx, sm.ContextKey, sd), nil
 }
 
+// createSessionID generates session id using uuid package
 func createSessionID() (string, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
@@ -63,6 +67,7 @@ type sessionData struct {
 	mu         sync.Mutex
 }
 
+// newSessionData returs sessionData with given and default values
 func newSessionData(lifetime time.Duration) *sessionData {
 	return &sessionData{
 		status:     Unmodified,
@@ -71,6 +76,7 @@ func newSessionData(lifetime time.Duration) *sessionData {
 	}
 }
 
+// RenewToken updates tocken for given context, deleting old one (if exists)
 func (sm *SessionManager) RenewToken(ctx context.Context) error {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -96,6 +102,7 @@ func (sm *SessionManager) RenewToken(ctx context.Context) error {
 	return nil
 }
 
+// Status returns current status of session data
 func (sm *SessionManager) Status(ctx context.Context) Status {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -105,7 +112,9 @@ func (sm *SessionManager) Status(ctx context.Context) Status {
 	return sd.status
 }
 
-// Puts value by key to the 'values' field in session data. Sets session status to Modified
+// Put puts value by key into 'values' field in session data.
+//
+// It sets session status to Modified.
 func (sm *SessionManager) Put(ctx context.Context, key string, val interface{}) {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -115,8 +124,9 @@ func (sm *SessionManager) Put(ctx context.Context, key string, val interface{}) 
 	sd.mu.Unlock()
 }
 
-// GetInt reads integer value from context by given key, if not value exists by this key
-// or value is not int - it returns zero value
+// GetInt reads integer value from context by given key.
+//
+// If no value exists by this key or value is not int - it returns zero value
 func (sm *SessionManager) GetInt(ctx context.Context, key string) int {
 	val := sm.Get(ctx, key)
 	num, ok := val.(int)
@@ -127,6 +137,9 @@ func (sm *SessionManager) GetInt(ctx context.Context, key string) int {
 	return num
 }
 
+// Get reads value from session data by given key.
+//
+// If no value exists, it returns nil
 func (sm *SessionManager) Get(ctx context.Context, key string) interface{} {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -140,6 +153,11 @@ func (sm *SessionManager) Get(ctx context.Context, key string) interface{} {
 	return val
 }
 
+// PopString reads and deletes string value by given key from session data.
+//
+// If retrieved data is not string, it returns empty string.
+//
+// PopString sets status to Modified
 func (sm *SessionManager) PopString(ctx context.Context, key string) string {
 	val := sm.Pop(ctx, key)
 	str, ok := val.(string)
@@ -149,6 +167,11 @@ func (sm *SessionManager) PopString(ctx context.Context, key string) string {
 	return str
 }
 
+// Pop reads and deletes data by given key.
+//
+// If no value exists by given key, it returns nil.
+//
+// Pop sets status to Modified
 func (sm *SessionManager) Pop(ctx context.Context, key string) interface{} {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -165,6 +188,9 @@ func (sm *SessionManager) Pop(ctx context.Context, key string) interface{} {
 	return val
 }
 
+// Remove deletes key-value pair by given key
+//
+// Remove sets status to Modified
 func (sm *SessionManager) Remove(ctx context.Context, key string) {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -175,12 +201,16 @@ func (sm *SessionManager) Remove(ctx context.Context, key string) {
 	sd.status = Modified
 }
 
+// Exists checks if value by given key exists in session data
 func (sm *SessionManager) Exists(ctx context.Context, key string) bool {
 	sd := sm.getSessionDataFromContext(ctx)
 	_, ok := sd.values[key]
 	return ok
 }
 
+// getSessionDataFromContext retrieves session data from given contex.
+//
+// It panics if no session data is found
 func (sm *SessionManager) getSessionDataFromContext(ctx context.Context) *sessionData {
 	sd, ok := ctx.Value(sm.ContextKey).(*sessionData)
 	if !ok {
@@ -196,6 +226,7 @@ var (
 	contextKeyMutex = &sync.Mutex{}
 )
 
+// generateContextKey gerenerates new ContextKey
 func generateContextKey() contextKey {
 	contextKeyMutex.Lock()
 	defer contextKeyMutex.Unlock()

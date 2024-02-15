@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"errors"
@@ -17,7 +17,6 @@ func (r *routes) userSignup(w http.ResponseWriter, req *http.Request) {
 	}
 
 	data := r.newTemplateData(req)
-	data.Form = entity.UserSignupForm{}
 	r.render(w, req, http.StatusOK, "signup.html", data)
 }
 
@@ -39,9 +38,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			data := r.newTemplateData(req)
-			data.Form = u
-			r.render(w, req, http.StatusUnprocessableEntity, "signup.html", data)
+			http.Redirect(w, req, "/user/signup", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
@@ -50,7 +47,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 
 	r.sesm.Put(req.Context(), "flash", "Your signup was successful. Please log in.")
 
-	http.Redirect(w, req, "/", http.StatusSeeOther)
+	http.Redirect(w, req, "/user/login", http.StatusSeeOther)
 }
 
 func (r *routes) userLogin(w http.ResponseWriter, req *http.Request) {
@@ -64,7 +61,6 @@ func (r *routes) userLogin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	data := r.newTemplateData(req)
-	data.Form = entity.UserLoginForm{}
 	r.render(w, req, http.StatusOK, "login.html", data)
 }
 
@@ -81,25 +77,10 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	u := entity.UserLoginForm{Identifier: identifier, Password: password}
 	id, err := r.service.User.Authenticate(&u)
 	if err != nil {
-		/*
-			Problem: 2 cases are similar (ErrInvalidFormData and ErrInvalidCredentials)
-
-			Solution 1: make common err method and call in both cases
-				(this reduces lines of code (*DRY) )
-
-			Solution 2: create error tree so both errors would be same type and use
-				errors.As method to distinguish that returned err is related to this
-				custom error tree
-		*/
 		switch {
-		case errors.Is(err, entity.ErrInvalidFormData):
-			data := r.newTemplateData(req)
-			data.Form = u
-			r.render(w, req, http.StatusUnprocessableEntity, "login.html", data)
-		case errors.Is(err, entity.ErrInvalidCredentials):
-			data := r.newTemplateData(req)
-			data.Form = u
-			r.render(w, req, http.StatusUnprocessableEntity, "login.html", data)
+		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrInvalidCredentials):
+
+			http.Redirect(w, req, "/user/login", http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}

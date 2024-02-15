@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (sm *SessionManager) Encode(deadline time.Time, values map[string]interface{}) ([]byte, error) {
+func (sm *SessionManager) encode(deadline time.Time, values map[string]interface{}) ([]byte, error) {
 	aux := &struct {
 		Deadline time.Time
 		Values   map[string]interface{}
@@ -23,7 +23,7 @@ func (sm *SessionManager) Encode(deadline time.Time, values map[string]interface
 	return b.Bytes(), nil
 }
 
-func (sm *SessionManager) Decode(b []byte) (time.Time, map[string]interface{}, error) {
+func (sm *SessionManager) decode(b []byte) (time.Time, map[string]interface{}, error) {
 	aux := &struct {
 		Deadline time.Time
 		Values   map[string]interface{}

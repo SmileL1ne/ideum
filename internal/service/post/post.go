@@ -82,7 +82,9 @@ func (pc *postService) GetAllPosts() (*[]entity.PostView, error) {
 		return nil, err
 	}
 
-	return pc.convertEntitiesToViews(posts)
+	postsWithTags, err := pc.postRepo.GetTagsForEachPost(posts)
+
+	return pc.convertEntitiesToViews(postsWithTags)
 }
 
 func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
@@ -106,6 +108,7 @@ func (pc *postService) convertEntitiesToViews(posts *[]entity.PostEntity) (*[]en
 			Username:  p.Username,
 			Likes:     p.Likes,
 			Dislikes:  p.Dislikes,
+			PostTags:  p.PostTags,
 		}
 		pViews = append(pViews, post)
 	}

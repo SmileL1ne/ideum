@@ -6,6 +6,14 @@ import (
 	"unicode/utf8"
 )
 
+/*
+	Validator is package that provides tools for validating
+	data.
+
+	Validator struct holds 2 structures that holds field and
+	non-field error messages if there any
+*/
+
 type Validator struct {
 	NonFieldErrors []string
 	FieldErrors    map[string]string

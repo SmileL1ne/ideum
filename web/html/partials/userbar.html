@@ -29,7 +29,7 @@
                             <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
                         </a></li>
                 </ul>
-                <form action="/post/create">
+                <form action="/post/create" method="get">
                     <button id="make-post-button" class="light-button">Create new post</button>
                 </form>
             </div>
@@ -40,16 +40,16 @@
     {{else}}
 
     <div class="user-bar">
+        
+        
 
-        <form action="/user/login" method="POST">
+        <form class="loginQuery">
             <div class="user-bar-sign-up" id="SignUp">
                 <h1>Welcome back!</h1>
-                <input class="dark-input" type="text" placeholder="Email or username" name="identifier" required>
-                <input class="dark-input" type="text" placeholder="Password" name="password" required>
-
-                <p class="error-msg">error here</p> <!--TODO ERROR MSG -->
-
+                <input class="dark-input" type="text" placeholder="Email or username" name="identifier" required autocomplete="off">
+                <input class="dark-input" type="password" placeholder="Password" name="password" required>
                 <button class="light-button" type="submit">Sign up</button>
+                <p class="error-msg"></p>
                 <div class="user-bar-line"></div>
                 <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
                         alt="Google_logo">Google</button>
@@ -60,14 +60,15 @@
             </div>
         </form>
 
-        <form action="/user/signup" method="POST"> <!--TODO fix action path -->
+        <form class="singupQuery"> 
             <div class="user-bar-register" id="SignIn">
                 <h1>Register</h1>
-                <input class="dark-input" type="text" placeholder="Username" name="username" required minlength="3">
-                <input class="dark-input" type="text" placeholder="Email" name="email" required>
-                <input class="dark-input" type="text" placeholder="Password" name="password" required minlength="8">
-                <input class="dark-input" type="text" placeholder="Confirm password" required minlength="8">
+                <input class="dark-input" type="text" placeholder="Username" name="username" required minlength="3" autocomplete="off">
+                <input class="dark-input" type="text" placeholder="Email" name="email" required autocomplete="off">
+                <input class="dark-input" type="password" placeholder="Password" name="password" required minlength="8">
+                
                 <button class="light-button" type="submit">Register</button>
+                <p class="error-msg"></p>
                 <div class="user-bar-line"></div>
                 <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
                         alt="Google_logo">Google</button>

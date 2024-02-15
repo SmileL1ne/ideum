@@ -1,6 +1,9 @@
 {{define "title"}} Post #{{.Models.Post.ID}}{{end}}
 
 {{define "main"}}
+{{ if not .IsAuthenticated}}
+<script src="/static/js/like.js"></script>
+{{ end }}
 
 <div class="base">
     <!-- post feed-->
@@ -18,13 +21,14 @@
                     <div class="likes-frame">
                         <form action="/post/like/{{.Models.Post.ID}}" method="POST">
                             <button class="like-button" id="like">
-                                <img src="/static/img/svg/like-icon.svg" alt="like">{{.Models.Post.Likes}}
+                                <img src="/static/img/svg/like-icon.svg" alt="like"><span
+                                    class="rating-count">{{.Models.Post.Likes}}</span>
                             </button>
                         </form>
 
                         <form action="/post/dislike/{{.Models.Post.ID}}" method="POST">
                             <button class="like-button" id="dislike"><img src="/static/img/svg/dislike.svg"
-                                    alt="dislike">{{.Models.Post.Dislikes}}
+                                    alt="dislike"><span class="rating-count">{{.Models.Post.Dislikes}} </span>
                             </button>
                         </form>
 
@@ -41,9 +45,9 @@
                 <div class="post-text">
                     <p>{{ .Models.Post.Content }}</p>
                 </div>
-                <div class="post-tags">
-                    {{range .Models.Tags}}
-                    <p class="post-date">| {{.Name}} </p>
+                <div class="likes-frame post-tags">
+                    {{range .Models.Post.PostTags}}
+                    <button class="like-button tag" disabled>{{ .Name}} </button>
                     {{end}}
                 </div>
                 <!-- <div class="post-img"><img src="/static/img/sample.png" alt="post-img">
@@ -77,13 +81,14 @@
                     <div class="likes-frame">
                         <form action="/post/comment/like/{{.PostID}}/{{.ID}}" method="POST">
                             <button class="like-button" id="like">
-                                <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
+                                <img src="/static/img/svg/like-icon.svg" alt="like"><span
+                                    class="rating-count">{{.Likes}}</span>
                             </button>
                         </form>
 
                         <form action="/post/comment/dislike/{{.PostID}}/{{.ID}}" method="POST">
                             <button class="like-button" id="dislike"><img src="/static/img/svg/dislike.svg"
-                                    alt="dislike">{{.Dislikes}}
+                                    alt="dislike"><span class="rating-count">{{.Dislikes}}</span>
                             </button>
                         </form>
                     </div>
@@ -100,16 +105,19 @@
 
         <!-- Leave Your comment -->
         {{if .IsAuthenticated}}
+        <script src="/static/js/comment.js"></script>
         <div class="feed-message-wrapper">
             <div class="comment-frame">
 
-                <form action="/post/comment/{{.Models.Post.ID}}" method="POST">
+
+                <form action="/post/comment/{{.Models.Post.ID}}" method="POST" id="commentForm">
+                    <p class="error-msg"></p>
+                    <br>
                     <textarea class="white-text-area" name="commentContent" id="usercomment" type="text" minlength="3"
-                        maxlength="256" spellcheck="false"></textarea>
+                        maxlength="256" spellcheck="false" required></textarea>
                     <button class="light-button">Leave Comment</button>
                 </form>
             </div>
-
         </div>
         {{end}}
 

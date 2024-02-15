@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"forum/internal/entity"
@@ -19,18 +19,15 @@ type Models struct {
 type templateData struct {
 	Models          Models
 	Flash           string
-	Form            interface{}
 	IsAuthenticated bool
 }
 
-/* testing temp functions */
-
 var fm = template.FuncMap{
-	"low": strings.ToLower, // for icons
+	"low": strings.ToLower,
 	"rev": reverse,
 }
 
-// sort posts by date
+// reverse reverses posts slice (to output them by creation time in descending order)
 func reverse(slice []entity.PostView) []entity.PostView {
 	length := len(slice)
 	reversed := make([]entity.PostView, length)

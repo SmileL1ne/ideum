@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+/*
+	Sesm is a session manager that helps to manage user sessions
+	by providing convinient tools for it.
+*/
+
 type SessionManager struct {
 	Store      *sqlit3store.SQLite3Store
 	Lifetime   time.Duration
@@ -15,6 +20,7 @@ type SessionManager struct {
 	ContextKey contextKey
 }
 
+// New returns pointer to new SessionManager struct
 func New() *SessionManager {
 	return &SessionManager{
 		Lifetime:   12 * time.Hour,
@@ -23,6 +29,10 @@ func New() *SessionManager {
 	}
 }
 
+// LoadAndSave is a middleware that loads session from cookie puts it
+// to the request's context.
+//
+// If no session exists, it creates new automatically creates a new one.
 func (sm *SessionManager) LoadAndSave(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Vary", "Cookie")
@@ -50,29 +60,39 @@ func (sm *SessionManager) LoadAndSave(next http.Handler) http.Handler {
 
 		next.ServeHTTP(sessionWriter, sessionReq)
 
+		// Commit changed data and write it to cookie if not by the
+		// end of handler usage
 		if !sessionWriter.written {
 			sm.commitAndWriteSessionCookie(sessionWriter, sessionReq)
 		}
 	})
 }
 
+// commitAndWriteSessionCookie commits changes to database and saves it into cookie.
+//
+// It does it only in case of data being modified.
 func (sm *SessionManager) commitAndWriteSessionCookie(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	switch sm.Status(ctx) {
 	case Modified:
-		token, expiry, err := sm.Commit(ctx)
+		token, expiry, err := sm.commit(ctx)
 		if err != nil {
 			log.Println("Commit session:", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
-		sm.WriteSessionCookie(ctx, w, token, expiry)
+		sm.writeSessionCookie(ctx, w, token, expiry)
 	}
 }
 
-func (sm *SessionManager) Commit(ctx context.Context) (string, time.Time, error) {
+// Commit attempts to save changes in database.
+//
+// If given context doesn't hold session it creates new one.
+//
+// It retures saved token, expiration date and error (if encountered).
+func (sm *SessionManager) commit(ctx context.Context) (string, time.Time, error) {
 	sd := sm.getSessionDataFromContext(ctx)
 
 	sd.mu.Lock()
@@ -85,7 +105,7 @@ func (sm *SessionManager) Commit(ctx context.Context) (string, time.Time, error)
 		}
 	}
 
-	b, err := sm.Encode(sd.expiryTime, sd.values)
+	b, err := sm.encode(sd.expiryTime, sd.values)
 	if err != nil {
 		return "", time.Time{}, err
 	}
@@ -99,7 +119,8 @@ func (sm *SessionManager) Commit(ctx context.Context) (string, time.Time, error)
 	return sd.sessionID, expiry, nil
 }
 
-func (sm *SessionManager) WriteSessionCookie(ctx context.Context, w http.ResponseWriter,
+// writeSessionCookie creates new cookie and and saves it in response.
+func (sm *SessionManager) writeSessionCookie(ctx context.Context, w http.ResponseWriter,
 	token string, expiry time.Time) {
 
 	cookie := &http.Cookie{
@@ -121,6 +142,9 @@ func (sm *SessionManager) WriteSessionCookie(ctx context.Context, w http.Respons
 	w.Header().Add("Cache-Control", `no-cache="Set-Cookie"`)
 }
 
+// sessionWriter overrides ResponseWriter's methods to save changes
+// in session data before executing Write or WriteHeader methods
+// (essentially, when handler finishes it's work)
 type sessionWriter struct {
 	http.ResponseWriter
 	request        *http.Request

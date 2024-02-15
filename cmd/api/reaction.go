@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 /*
 	TODO:
 	- Find way to merge these 2 routes into 1, because they have pretty much
-	same body except for like it is true and for dislike - false
+	same body except for 'like' it is true and for 'dislike' - false
 	- Before liking post or comment check if they exist
 */
 

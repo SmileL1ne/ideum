@@ -1,4 +1,4 @@
-package app
+package main
 
 import (
 	"database/sql"
@@ -11,18 +11,16 @@ import (
 	"os/signal"
 	"syscall"
 
-	"forum/internal/handlers"
 	"forum/internal/repository"
 	"forum/internal/service"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-/*
-	TODO:
-*/
+func main() {
+	// Parse config
+	cfg := config.NewConfig()
 
-func Run(cfg *config.Config) {
 	// Database connection
 	db, err := OpenDB(cfg.Database.DSN)
 	if err != nil {
@@ -40,7 +38,7 @@ func Run(cfg *config.Config) {
 	// Server creation
 	server := &http.Server{
 		Addr:    "127.0.0.1" + cfg.Http.Addr,
-		Handler: handlers.NewRouter(s, sesm),
+		Handler: NewRouter(s, sesm),
 	}
 
 	// Graceful shutdown
@@ -56,7 +54,7 @@ func Run(cfg *config.Config) {
 	}()
 
 	// Starting the server
-	log.Printf("starting the server on address%s", cfg.Addr)
+	log.Printf("starting the server on address - http://localhost%s", cfg.Addr)
 	err = server.ListenAndServe()
 	log.Fatalf("Listen and serve error:%v", err)
 }

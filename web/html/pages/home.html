@@ -12,15 +12,15 @@
         <div class="post">
             <div class="post-content">
                 <div class="post-top-info">
-                    <div class="post-top-user"><img src="static/img/ava/user.png" alt="user-ava">
+                    <div class="post-top-user"><img src="/static/img/ava/user.png" alt="user-ava">
                         <p>{{.Username}}</p>
                         <p class="post-date">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</p>
                     </div>
                     <div class="likes-frame">
-                        <button class="like-button" id="like">
-                            <img src="static/img/svg/like-icon.svg" alt="like">{{.Likes}}
+                        <button class="like-button tag" id="like">
+                            <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
                         </button>
-                        <button class="like-button" id="dislike"><img src="static/img/svg/dislike.svg"
+                        <button class="like-button tag" id="dislike"><img src="/static/img/svg/dislike.svg"
                                 alt="dislike">{{.Dislikes}}
                         </button>
                     </div>
@@ -33,16 +33,21 @@
                 <div class="post-text">
                     <p>{{.Content}}</p>
                 </div>
+                <div class="likes-frame post-tags">
+                    {{range .PostTags}}
+                    <button class="like-button tag" disabled >{{ .Name}} </button>
+                    {{end}}
+                </div>
                 <!-- <div class="post-img"><img src="/img/sample.png" alt="post-img"></div> -->
                 <div class="post-footer">
-                    <div class="post-comments"><img src="static/img/svg/comment-icon.svg" alt="comment-icon">199
+                    <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">199
                         comments
                     </div>
                     <div class="post-options">
-                        <img class="Btn" data-modal="edit" src="static/img/svg/edit-icon.svg" alt="edit-icon">
-                        <a href="#" class="Btn" data-modal="delete-modal"><img src="static/img/svg/delete-icon.svg"
+                        <img class="Btn" data-modal="edit" src="/static/img/svg/edit-icon.svg" alt="edit-icon">
+                        <a href="#" class="Btn" data-modal="delete-modal"><img src="/static/img/svg/delete-icon.svg"
                                 alt="delete-icon"></a>
-                        <img src="static/img/svg/report-icon.svg" alt="report-icon">
+                        <img src="/static/img/svg/report-icon.svg" alt="report-icon">
                     </div>
                 </div>
 

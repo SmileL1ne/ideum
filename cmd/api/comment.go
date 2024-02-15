@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"errors"
@@ -42,17 +42,15 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			data := r.newTemplateData(req)
-			data.Form = comment
-			r.render(w, req, http.StatusUnprocessableEntity, "view.html", data)
+			http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
 		return
 	}
 
-	// Add flash message to request's context
-	r.sesm.Put(req.Context(), "flash", "Successfully added your comment!")
+	redirectURL := fmt.Sprintf("/post/view/%d", postID)
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, redirectURL)
 
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }
