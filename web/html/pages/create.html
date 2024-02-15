@@ -1,7 +1,9 @@
 {{define "title"}}Create new post{{end}}
 
 {{define "main"}}
-<form action="/post/create" method="POST">
+<script src="/static/js/create.js"></script>
+
+<form action="/post/create" method="POST" id="postForm">
     <div class="base">
 
         <div class="post-feed">
@@ -9,6 +11,9 @@
 
             <div class="post">
                 <div class="make-post-content">
+
+                    <p class="error-msg"></p>
+
                     <label for="">Title</label>
                     <input class="white-input" type="text" name="title">
                     <label for="">Content</label>

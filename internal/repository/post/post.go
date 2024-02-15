@@ -92,7 +92,7 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 	var post entity.PostEntity
 	var tags sql.NullString
 	if err := r.DB.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content,
-		&post.CreatedAt, &post.Username, &post.Likes, &post.Dislikes, &post.PostTags); err != nil {
+		&post.CreatedAt, &post.Username, &post.Likes, &post.Dislikes, &tags); err != nil {
 
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.PostEntity{}, entity.ErrNoRecord

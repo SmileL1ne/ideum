@@ -21,6 +21,12 @@ type templateData struct {
 	Username        string
 	Flash           string
 	IsAuthenticated bool
+	ErrInfo         errData
+}
+
+type errData struct {
+	ErrCode int
+	ErrMsg  string
 }
 
 var fm = template.FuncMap{

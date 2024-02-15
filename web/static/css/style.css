@@ -256,13 +256,15 @@ body {
 }
 
 .like-button:hover{
-    border: #8B5CF6 1px solid;
+    /* border: #8B5CF6 1px solid; */
+    background-color: #8B5CF6;
     cursor: pointer;
 }
 
 .tag:hover{
     cursor: default;
     border: none;
+    background-color: #171717;
 }
 
 .liked-button {
@@ -789,4 +791,15 @@ dialog::backdrop {
     gap: 10px;
     accent-color: #8B5CF6;
     font-size: 16px;
+}
+
+.big-error-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 34px;
+    width: 540px;
+    height: fit-content;
+    font-size: 48px;
+    gap:10px
 }

@@ -10,17 +10,17 @@ import (
 
 func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 	if err := req.ParseForm(); err != nil {
-		r.badRequest(w)
+		r.badRequest(w, req)
 		return
 	}
 
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		r.unauthorized(w)
+		r.unauthorized(w, req)
 		return
 	}
 
@@ -29,10 +29,10 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
 			log.Print("commentCreate: invalid url path")
-			r.notFound(w)
+			r.notFound(w, req)
 		case errors.Is(err, entity.ErrInvalidPathID):
 			log.Print("commentCreate: invalid id in request path")
-			r.badRequest(w)
+			r.badRequest(w, req)
 		}
 		return
 	}
@@ -47,15 +47,14 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
 			log.Print("commentCreate: invalid form fill")
-			http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
 		return
 	}
 
-	// Add flash message to request's context
-	r.sesm.Put(req.Context(), "flash", "Successfully added your comment!")
-
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
+	redirectURL := fmt.Sprintf("/post/view/%d", postID)
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, redirectURL)
 }

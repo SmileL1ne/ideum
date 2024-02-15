@@ -9,11 +9,11 @@ import (
 
 func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 	if err := req.ParseForm(); err != nil {
-		r.badRequest(w)
+		r.badRequest(w, req)
 		return
 	}
 
@@ -30,7 +30,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
 			log.Print("userSignupPost: invalid form fill")
-			http.Redirect(w, req, "/user/signup", http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
@@ -44,13 +44,13 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 
 	if err := req.ParseForm(); err != nil {
 		log.Print("userLoginPost: invalid form fill (parse error)")
-		r.badRequest(w)
+		r.badRequest(w, req)
 		return
 	}
 
@@ -64,7 +64,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrInvalidCredentials):
 			log.Print("userSignupPost: invalid form fill")
-			http.Redirect(w, req, "/user/login", http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
@@ -87,7 +87,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) userLogout(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 

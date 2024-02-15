@@ -36,33 +36,71 @@ func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error
 	)
 
 	log.Printf(err.Error()+"; method - %s, uri - %s, stack - %s", method, uri, trace)
-	/*
-		ERR
-	*/
-	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+
+	username, tags, err := r.getBaseInfo(req)
+	if err != nil {
+		log.Print("error executing error.html template")
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	data := r.newTemplateData(req)
+	data.Username = username
+	data.Models.Tags = *tags
+	data.ErrInfo.ErrCode = http.StatusInternalServerError
+	data.ErrInfo.ErrMsg = http.StatusText(http.StatusInternalServerError)
+
+	// Custom render template for server error for avoiding infinite recursion
+	tmpl, ok := r.tempCache["error.html"]
+	if !ok {
+		log.Print("the template error.html does not exist")
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	buf := new(bytes.Buffer)
+	if err := tmpl.ExecuteTemplate(buf, "base", data); err != nil {
+		log.Print("error executing error.html template")
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusInternalServerError)
+
+	buf.WriteTo(w)
 }
 
-func (r *routes) clientError(w http.ResponseWriter, status int) {
-	/*
-		ERR
-	*/
-	http.Error(w, http.StatusText(status), status)
+func (r *routes) clientError(w http.ResponseWriter, req *http.Request, status int) {
+	username, tags, err := r.getBaseInfo(req)
+	if err != nil {
+		log.Print("error executing error.html template")
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	data := r.newTemplateData(req)
+	data.Username = username
+	data.Models.Tags = *tags
+	data.ErrInfo.ErrCode = status
+	data.ErrInfo.ErrMsg = http.StatusText(status)
+
+	r.render(w, req, status, "error.html", data)
 }
 
-func (r *routes) unauthorized(w http.ResponseWriter) {
-	r.clientError(w, http.StatusUnauthorized)
+func (r *routes) unauthorized(w http.ResponseWriter, req *http.Request) {
+	r.clientError(w, req, http.StatusUnauthorized)
 }
 
-func (r *routes) notFound(w http.ResponseWriter) {
-	r.clientError(w, http.StatusNotFound)
+func (r *routes) notFound(w http.ResponseWriter, req *http.Request) {
+	r.clientError(w, req, http.StatusNotFound)
 }
 
-func (r *routes) badRequest(w http.ResponseWriter) {
-	r.clientError(w, http.StatusBadRequest)
+func (r *routes) badRequest(w http.ResponseWriter, req *http.Request) {
+	r.clientError(w, req, http.StatusBadRequest)
 }
 
-func (r *routes) methodNotAllowed(w http.ResponseWriter) {
-	r.clientError(w, http.StatusMethodNotAllowed)
+func (r *routes) methodNotAllowed(w http.ResponseWriter, req *http.Request) {
+	r.clientError(w, req, http.StatusMethodNotAllowed)
 }
 
 // Render templates by retrieving necessary template from template cache.
@@ -90,7 +128,7 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 // getBaseInfo retrieves all information for base of the page (username and all tags)
 func (r *routes) getBaseInfo(req *http.Request) (string, *[]entity.TagEntity, error) {
 	username, err := r.getUsername(req)
-	if err != nil && !errors.Is(err, entity.ErrInvalidUserID) {
+	if err != nil {
 		return "", nil, err
 	}
 
@@ -106,12 +144,12 @@ func (r *routes) getBaseInfo(req *http.Request) (string, *[]entity.TagEntity, er
 func (r *routes) getUsername(req *http.Request) (string, error) {
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		return "", entity.ErrInvalidUserID
+		return "", nil
 	}
 
 	username, err := r.service.User.GetUsernameById(userID)
 	if errors.Is(err, entity.ErrInvalidCredentials) {
-		return "", entity.ErrInvalidUserID
+		return "", nil
 	}
 	return username, err
 }

@@ -10,19 +10,13 @@ import (
 
 func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 
 	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			log.Print("postCreate: invalid user id")
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -31,10 +25,10 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
 			log.Print("postView: invalid url path")
-			r.notFound(w)
+			r.notFound(w, req)
 		case errors.Is(err, entity.ErrInvalidPathID):
 			log.Print("postView: invalid id in request path")
-			r.badRequest(w)
+			r.badRequest(w, req)
 		}
 		return
 	}
@@ -44,7 +38,7 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidPostID):
 			log.Print("postView: invalid post id")
-			r.notFound(w)
+			r.notFound(w, req)
 		default:
 			r.serverError(w, req, err)
 		}
@@ -72,19 +66,13 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		r.postCreatePost(w, req)
 		return
 	case req.Method != http.MethodGet:
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 
 	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			log.Print("postCreate: invalid user id")
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -97,12 +85,12 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 	if err := req.ParseForm(); err != nil {
 		log.Print("postCreatePost: invalid form fill (parse error)")
-		r.badRequest(w)
+		r.badRequest(w, req)
 		return
 	}
 
@@ -117,7 +105,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	// Get userID from request
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		r.unauthorized(w)
+		r.unauthorized(w, req)
 		return
 	}
 
@@ -128,40 +116,37 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
 			log.Print("postCreatePost: invalid form fill")
-			http.Redirect(w, req, "/post/create", http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 		default:
 			r.serverError(w, req, err)
 		}
 		return
 	}
 
-	// Add flash message to context
-	r.sesm.Put(req.Context(), "flash", "Post successfully created!")
-
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", id), http.StatusSeeOther)
+	redirectURL := fmt.Sprintf("/post/view/%d", id)
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, redirectURL)
 }
 
 func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		r.unauthorized(w)
+		r.unauthorized(w, req)
 		return
 	}
 
 	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			log.Print("postCreate: invalid user id")
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
+		return
+	}
+	if username == "" {
+		r.unauthorized(w, req)
 		return
 	}
 
@@ -181,25 +166,23 @@ func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		r.unauthorized(w)
+		r.unauthorized(w, req)
 		return
 	}
 
 	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			log.Print("postCreate: invalid user id")
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
+		return
+	}
+	if username == "" {
+		r.unauthorized(w, req)
 		return
 	}
 

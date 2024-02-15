@@ -1,0 +1,13 @@
+{{define "title"}} Error {{end}}
+
+{{define "main"}}
+
+<div class="base">
+    <div class="post-feed">
+        <div class="big-error-container">
+            <h1>Opps...</h1><h1>{{.ErrInfo.ErrCode}}</h1><h1>{{.ErrInfo.ErrMsg}}</h1>
+        </div>
+    </div>
+</div>
+
+{{end}}

@@ -17,10 +17,10 @@
                         <p class="post-date">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</p>
                     </div>
                     <div class="likes-frame">
-                        <button class="like-button" id="like">
+                        <button class="like-button tag" id="like">
                             <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
                         </button>
-                        <button class="like-button" id="dislike"><img src="/static/img/svg/dislike.svg"
+                        <button class="like-button tag" id="dislike"><img src="/static/img/svg/dislike.svg"
                                 alt="dislike">{{.Dislikes}}
                         </button>
                     </div>
@@ -40,7 +40,8 @@
                 </div>
                 <!-- <div class="post-img"><img src="/img/sample.png" alt="post-img"></div> -->
                 <div class="post-footer">
-                    <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">{{.CommentsLen}}
+                    <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">
+                        {{.CommentsLen}}
                     </div>
                     <div class="post-options">
                         <img class="Btn" data-modal="edit" src="/static/img/svg/edit-icon.svg" alt="edit-icon">

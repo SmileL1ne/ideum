@@ -16,7 +16,7 @@ var fileServer = http.FileServer(http.FS(web.Files))
 func (r *routes) preventDirListing(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if strings.HasSuffix(req.URL.Path, "/") || len(req.URL.Path) == 0 {
-			r.notFound(w)
+			r.notFound(w, req)
 			return
 		}
 		next.ServeHTTP(w, req)
@@ -25,24 +25,18 @@ func (r *routes) preventDirListing(next http.Handler) http.Handler {
 
 func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 	if req.URL.Path != "/" {
-		r.notFound(w)
+		r.notFound(w, req)
 		return
 	}
 
 	if req.Method != http.MethodGet {
-		r.notFound(w)
+		r.notFound(w, req)
 		return
 	}
 
 	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			log.Print("postCreate: invalid user id")
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -62,19 +56,13 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.methodNotAllowed(w)
+		r.methodNotAllowed(w, req)
 		return
 	}
 
 	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidUserID):
-			log.Print("postCreate: invalid user id")
-			r.unauthorized(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -83,10 +71,10 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
 			log.Print("sortedByTag: invalid url path")
-			r.notFound(w)
+			r.notFound(w, req)
 		case errors.Is(err, entity.ErrInvalidPathID):
 			log.Print("sortedByTag: invalid id in request path")
-			r.badRequest(w)
+			r.badRequest(w, req)
 		}
 		return
 	}
