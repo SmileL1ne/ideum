@@ -34,19 +34,19 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, err := r.getUsername(req)
-	if err != nil && !errors.Is(err, entity.ErrInvalidUserID) {
-		r.serverError(w, req, err)
+	username, tags, err := r.getBaseInfo(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			log.Print("postCreate: invalid user id")
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
 	posts, err := r.service.Post.GetAllPosts()
-	if err != nil {
-		r.serverError(w, req, err)
-		return
-	}
-
-	tags, err := r.service.Tag.GetAllTags()
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -66,9 +66,15 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, err := r.getUsername(req)
-	if err != nil && !errors.Is(err, entity.ErrInvalidUserID) {
-		r.serverError(w, req, err)
+	username, tags, err := r.getBaseInfo(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			log.Print("postCreate: invalid user id")
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -86,12 +92,6 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 	}
 
 	posts, err := r.service.Post.GetAllPostsByTagId(tagID)
-	if err != nil {
-		r.serverError(w, req, err)
-		return
-	}
-
-	tags, err := r.service.Tag.GetAllTags()
 	if err != nil {
 		r.serverError(w, req, err)
 		return

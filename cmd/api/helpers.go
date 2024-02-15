@@ -87,6 +87,21 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 	buf.WriteTo(w)
 }
 
+// getBaseInfo retrieves all information for base of the page (username and all tags)
+func (r *routes) getBaseInfo(req *http.Request) (string, *[]entity.TagEntity, error) {
+	username, err := r.getUsername(req)
+	if err != nil && !errors.Is(err, entity.ErrInvalidUserID) {
+		return "", nil, err
+	}
+
+	tags, err := r.service.Tag.GetAllTags()
+	if err != nil {
+		return "", nil, err
+	}
+
+	return username, tags, nil
+}
+
 // getUsername retrieves username by user id from request context
 func (r *routes) getUsername(req *http.Request) (string, error) {
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")

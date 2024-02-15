@@ -14,9 +14,15 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, err := r.getUsername(req)
-	if err != nil && !errors.Is(err, entity.ErrInvalidUserID) {
-		r.serverError(w, req, err)
+	username, tags, err := r.getBaseInfo(req)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidUserID):
+			log.Print("postCreate: invalid user id")
+			r.unauthorized(w)
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -51,12 +57,6 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tags, err := r.service.Tag.GetAllTags()
-	if err != nil {
-		r.serverError(w, req, err)
-		return
-	}
-
 	data := r.newTemplateData(req)
 	data.Models.Post = post
 	data.Models.Comments = *comments
@@ -76,7 +76,7 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, err := r.getUsername(req)
+	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidUserID):
@@ -85,12 +85,6 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		default:
 			r.serverError(w, req, err)
 		}
-		return
-	}
-
-	tags, err := r.service.Tag.GetAllTags()
-	if err != nil {
-		r.serverError(w, req, err)
 		return
 	}
 
@@ -159,7 +153,7 @@ func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, err := r.getUsername(req)
+	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidUserID):
@@ -168,12 +162,6 @@ func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		default:
 			r.serverError(w, req, err)
 		}
-		return
-	}
-
-	tags, err := r.service.Tag.GetAllTags()
-	if err != nil {
-		r.serverError(w, req, err)
 		return
 	}
 
@@ -203,7 +191,7 @@ func (r *routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, err := r.getUsername(req)
+	username, tags, err := r.getBaseInfo(req)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidUserID):
@@ -212,12 +200,6 @@ func (r *routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 		default:
 			r.serverError(w, req, err)
 		}
-		return
-	}
-
-	tags, err := r.service.Tag.GetAllTags()
-	if err != nil {
-		r.serverError(w, req, err)
 		return
 	}
 
