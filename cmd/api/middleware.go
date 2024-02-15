@@ -13,7 +13,7 @@ import (
 func (r *routes) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if !r.isAuthenticated(req) {
-			http.Redirect(w, req, "/user/login", http.StatusUnauthorized)
+			http.Redirect(w, req, "/", http.StatusSeeOther)
 			return
 		}
 
