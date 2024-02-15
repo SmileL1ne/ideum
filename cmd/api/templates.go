@@ -25,17 +25,6 @@ type templateData struct {
 
 var fm = template.FuncMap{
 	"low": strings.ToLower,
-	"rev": reverse,
-}
-
-// reverse reverses posts slice (to output them by creation time in descending order)
-func reverse(slice []entity.PostView) []entity.PostView {
-	length := len(slice)
-	reversed := make([]entity.PostView, length)
-	for i, v := range slice {
-		reversed[length-i-1] = v
-	}
-	return reversed
 }
 
 // newTemplateCache initializes all templates and stores them in map

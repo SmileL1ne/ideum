@@ -128,6 +128,7 @@ func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 		INNER JOIN users u ON p.user_id = u.id
 		LEFT JOIN post_reactions pr ON p.id = pr.post_id
 		GROUP BY p.id
+		ORDER BY p.created_at DESC
 	`
 
 	return getAllPostsByQuery(r.DB, query)
@@ -158,6 +159,7 @@ func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, er
 			WHERE pt.tag_id = $1
 			)
 		GROUP BY p.id
+		ORDER BY p.created_at DESC
 	`
 
 	return getAllPostsByQuery(r.DB, query, tagID)
@@ -184,6 +186,7 @@ func (r *postRepository) GetAllPostsByUserID(userID int) (*[]entity.PostEntity, 
 		LEFT JOIN post_reactions pr ON p.id = pr.post_id
 		WHERE p.user_id = $1
 		GROUP BY p.id 
+		ORDER BY p.created_at DESC
 	`
 
 	return getAllPostsByQuery(r.DB, query, userID)
