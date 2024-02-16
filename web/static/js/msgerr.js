@@ -7,7 +7,7 @@ function LoginErr(form) {
             if (xhr.status === 200) {
                 
                 console.log('OK');
-                window.location.href = "/"; // Перенаправление на главную страницу
+                window.location.href = "/"; 
             } else {
                 console.log(xhr.status);
                 var errorMsg = form.querySelector('.error-msg');
@@ -18,8 +18,8 @@ function LoginErr(form) {
             }
         }
     };
-    var formData = new FormData(form); // Получение данных формы
-    var encodedData = new URLSearchParams(formData).toString(); // Кодирование данных в строку
+    var formData = new FormData(form);
+    var encodedData = new URLSearchParams(formData).toString(); 
     xhr.send(encodedData);
 }
 
@@ -43,7 +43,7 @@ function RegErr(form) {
             if (xhr.status === 200) {
                 
                 console.log('OK');
-                window.location.href = "/"; // Перенаправление на главную страницу
+                window.location.href = "/"; 
             } else {
                 console.log('NO');
                 var errorMsg = form.querySelector('.error-msg');
@@ -54,8 +54,8 @@ function RegErr(form) {
             }
         }
     };
-    var formData = new FormData(form); // Получение данных формы
-    var encodedData = new URLSearchParams(formData).toString(); // Кодирование данных в строку
+    var formData = new FormData(form); 
+    var encodedData = new URLSearchParams(formData).toString(); 
     xhr.send(encodedData);
 }
 

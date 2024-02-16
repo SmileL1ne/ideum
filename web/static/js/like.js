@@ -3,10 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     likeButtons.forEach(function (button) {
         button.addEventListener('click', function (event) {
-            event.preventDefault(); // Отключаем отправку формы
+            event.preventDefault(); 
 
             var modal = document.getElementById('signin');
-            modal.showModal(); // Открываем модальное окно
+            modal.showModal(); 
         });
     });
 });
