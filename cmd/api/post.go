@@ -50,9 +50,11 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		r.serverError(w, req, err)
 		return
 	}
+	
 
 	data := r.newTemplateData(req)
 	data.Models.Post = post
+	// data.Models.Post.PostTags = *postTags
 	data.Models.Comments = *comments
 	data.Models.Tags = *tags
 	data.Username = username
