@@ -77,6 +77,11 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
 			SUM(CASE WHEN pr.is_like = false THEN 1 ELSE 0 END) as dislikes_count,
 			(
+				SELECT COUNT(*)
+				FROM comments c
+				WHERE c.post_id = p.id
+			),
+			(
 				SELECT GROUP_CONCAT(t.name, ', ')
 				FROM tags t
 				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
@@ -92,7 +97,7 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 	var post entity.PostEntity
 	var tags sql.NullString
 	if err := r.DB.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content,
-		&post.CreatedAt, &post.Username, &post.Likes, &post.Dislikes, &tags); err != nil {
+		&post.CreatedAt, &post.Username, &post.Likes, &post.Dislikes, &post.CommentsLen, &tags); err != nil {
 
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.PostEntity{}, entity.ErrNoRecord

@@ -10,17 +10,17 @@ import (
 
 func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 	if err := req.ParseForm(); err != nil {
-		r.badRequest(w, req)
+		r.badRequest(w)
 		return
 	}
 
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		r.unauthorized(w, req)
+		r.unauthorized(w)
 		return
 	}
 
@@ -29,10 +29,10 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
 			log.Print("commentCreate: invalid url path")
-			r.notFound(w, req)
+			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidPathID):
 			log.Print("commentCreate: invalid id in request path")
-			r.badRequest(w, req)
+			r.badRequest(w)
 		}
 		return
 	}
@@ -48,6 +48,7 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		case errors.Is(err, entity.ErrInvalidFormData):
 			log.Print("commentCreate: invalid form fill")
 			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, comment.FieldErrors["commentContent"])
 		default:
 			r.serverError(w, req, err)
 		}

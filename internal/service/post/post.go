@@ -62,14 +62,15 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 
 	tags := convertToStrArr(post.PostTags)
 	pView := entity.PostView{
-		ID:        post.ID,
-		Title:     post.Title,
-		Content:   post.Content,
-		CreatedAt: post.CreatedAt,
-		Username:  post.Username,
-		Likes:     post.Likes,
-		Dislikes:  post.Dislikes,
-		PostTags:  tags,
+		ID:          post.ID,
+		Title:       post.Title,
+		Content:     post.Content,
+		CreatedAt:   post.CreatedAt,
+		Username:    post.Username,
+		Likes:       post.Likes,
+		Dislikes:    post.Dislikes,
+		CommentsLen: post.CommentsLen,
+		PostTags:    tags,
 	}
 
 	return pView, nil

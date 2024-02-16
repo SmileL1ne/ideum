@@ -2,18 +2,20 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"forum/internal/entity"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 	if err := req.ParseForm(); err != nil {
-		r.badRequest(w, req)
+		r.badRequest(w)
 		return
 	}
 
@@ -30,7 +32,10 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
 			log.Print("userSignupPost: invalid form fill")
+
 			w.WriteHeader(http.StatusBadRequest)
+			msg := getErrorMessage(&u.Validator)
+			fmt.Fprint(w, strings.TrimSpace(msg))
 		default:
 			r.serverError(w, req, err)
 		}
@@ -42,13 +47,13 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 
 	if err := req.ParseForm(); err != nil {
 		log.Print("userLoginPost: invalid form fill (parse error)")
-		r.badRequest(w, req)
+		r.badRequest(w)
 		return
 	}
 
@@ -62,7 +67,10 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrInvalidCredentials):
 			log.Print("userSignupPost: invalid form fill")
+
 			w.WriteHeader(http.StatusBadRequest)
+			msg := getErrorMessage(&u.Validator)
+			fmt.Fprint(w, strings.TrimSpace(msg))
 		default:
 			r.serverError(w, req, err)
 		}
@@ -84,7 +92,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) userLogout(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 

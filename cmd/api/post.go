@@ -6,11 +6,12 @@ import (
 	"forum/internal/entity"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 
@@ -25,10 +26,10 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
 			log.Print("postView: invalid url path")
-			r.notFound(w, req)
+			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidPathID):
 			log.Print("postView: invalid id in request path")
-			r.badRequest(w, req)
+			r.badRequest(w)
 		}
 		return
 	}
@@ -38,7 +39,7 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidPostID):
 			log.Print("postView: invalid post id")
-			r.notFound(w, req)
+			r.notFound(w)
 		default:
 			r.serverError(w, req, err)
 		}
@@ -50,11 +51,9 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		r.serverError(w, req, err)
 		return
 	}
-	
 
 	data := r.newTemplateData(req)
 	data.Models.Post = post
-	// data.Models.Post.PostTags = *postTags
 	data.Models.Comments = *comments
 	data.Models.Tags = *tags
 	data.Username = username
@@ -68,7 +67,7 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		r.postCreatePost(w, req)
 		return
 	case req.Method != http.MethodGet:
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 
@@ -87,12 +86,12 @@ func (r *routes) postCreate(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 	if err := req.ParseForm(); err != nil {
 		log.Print("postCreatePost: invalid form fill (parse error)")
-		r.badRequest(w, req)
+		r.badRequest(w)
 		return
 	}
 
@@ -107,7 +106,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	// Get userID from request
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		r.unauthorized(w, req)
+		r.unauthorized(w)
 		return
 	}
 
@@ -118,7 +117,10 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
 			log.Print("postCreatePost: invalid form fill")
+
 			w.WriteHeader(http.StatusBadRequest)
+			msg := getErrorMessage(&p.Validator)
+			fmt.Fprint(w, strings.TrimSpace(msg))
 		default:
 			r.serverError(w, req, err)
 		}
@@ -132,13 +134,13 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		r.unauthorized(w, req)
+		r.unauthorized(w)
 		return
 	}
 
@@ -147,8 +149,8 @@ func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		r.serverError(w, req, err)
 		return
 	}
-	if username == "" {
-		r.unauthorized(w, req)
+	if username == "" { // This should never happen
+		r.unauthorized(w)
 		return
 	}
 
@@ -168,13 +170,13 @@ func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 
 	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
 	if userID == 0 {
-		r.unauthorized(w, req)
+		r.unauthorized(w)
 		return
 	}
 
@@ -184,7 +186,7 @@ func (r *routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if username == "" {
-		r.unauthorized(w, req)
+		r.unauthorized(w)
 		return
 	}
 

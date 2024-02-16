@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
+	"forum/internal/validator"
+	"forum/web"
+	"html/template"
 	"log"
 	"net/http"
 	"runtime/debug"
@@ -31,70 +34,38 @@ func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error
 
 	log.Printf(err.Error()+"; method - %s, uri - %s, stack - %s", method, uri, trace)
 
-	username, tags, err := r.getBaseInfo(req)
-	if err != nil {
-		log.Print("error executing error.html template")
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+	errInfo := errData{
+		ErrCode: http.StatusInternalServerError,
+		ErrMsg:  http.StatusText(http.StatusInternalServerError),
 	}
 
-	data := r.newTemplateData(req)
-	data.Username = username
-	data.Models.Tags = *tags
-	data.ErrInfo.ErrCode = http.StatusInternalServerError
-	data.ErrInfo.ErrMsg = http.StatusText(http.StatusInternalServerError)
+	// Custom render of error template for server error
+	// (to avoid infinite recursion of original render function)
+	renderErrorPage(w, errInfo)
+}
 
-	// Custom render template for server error for avoiding infinite recursion
-	tmpl, ok := r.tempCache["error.html"]
-	if !ok {
-		log.Print("the template error.html does not exist")
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+func (r *routes) clientError(w http.ResponseWriter, status int) {
+	errInfo := errData{
+		ErrCode: status,
+		ErrMsg:  http.StatusText(status),
 	}
-
-	buf := new(bytes.Buffer)
-	if err := tmpl.ExecuteTemplate(buf, "base", data); err != nil {
-		log.Print("error executing error.html template")
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusInternalServerError)
-
-	buf.WriteTo(w)
+	renderErrorPage(w, errInfo)
 }
 
-func (r *routes) clientError(w http.ResponseWriter, req *http.Request, status int) {
-	username, tags, err := r.getBaseInfo(req)
-	if err != nil {
-		log.Print("error executing error.html template")
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-
-	data := r.newTemplateData(req)
-	data.Username = username
-	data.Models.Tags = *tags
-	data.ErrInfo.ErrCode = status
-	data.ErrInfo.ErrMsg = http.StatusText(status)
-
-	r.render(w, req, status, "error.html", data)
+func (r *routes) unauthorized(w http.ResponseWriter) {
+	r.clientError(w, http.StatusUnauthorized)
 }
 
-func (r *routes) unauthorized(w http.ResponseWriter, req *http.Request) {
-	r.clientError(w, req, http.StatusUnauthorized)
+func (r *routes) notFound(w http.ResponseWriter) {
+	r.clientError(w, http.StatusNotFound)
 }
 
-func (r *routes) notFound(w http.ResponseWriter, req *http.Request) {
-	r.clientError(w, req, http.StatusNotFound)
+func (r *routes) badRequest(w http.ResponseWriter) {
+	r.clientError(w, http.StatusBadRequest)
 }
 
-func (r *routes) badRequest(w http.ResponseWriter, req *http.Request) {
-	r.clientError(w, req, http.StatusBadRequest)
-}
-
-func (r *routes) methodNotAllowed(w http.ResponseWriter, req *http.Request) {
-	r.clientError(w, req, http.StatusMethodNotAllowed)
+func (r *routes) methodNotAllowed(w http.ResponseWriter) {
+	r.clientError(w, http.StatusMethodNotAllowed)
 }
 
 // Render templates by retrieving necessary template from template cache.
@@ -115,6 +86,27 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 	}
 
 	w.WriteHeader(status)
+
+	buf.WriteTo(w)
+}
+
+// renderErrorPage renders error page with given error code and message
+func renderErrorPage(w http.ResponseWriter, errInfo errData) {
+	tmpl, err := template.ParseFS(web.Files, "html/error.html")
+	if err != nil {
+		log.Print("the template error.html does not exist")
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	buf := new(bytes.Buffer)
+	if err := tmpl.Execute(buf, errInfo); err != nil {
+		log.Print("error executing error.html template")
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(errInfo.ErrCode)
 
 	buf.WriteTo(w)
 }
@@ -173,4 +165,19 @@ func getValidID(idStr string) (int, bool) {
 		return 0, false
 	}
 	return id, true
+}
+
+// getErrorMessage accepts pointer to form's validator that should consist of
+// field and/or non field errors and returns formatted error message
+func getErrorMessage(v *validator.Validator) string {
+	var msg string
+
+	for _, str := range v.NonFieldErrors {
+		msg += str + "\n"
+	}
+	for key, val := range v.FieldErrors {
+		msg += key + ": " + val + "\n"
+	}
+
+	return msg
 }

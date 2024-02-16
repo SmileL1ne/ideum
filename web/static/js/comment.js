@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Request failed. Status: ' + xhr.status);
                 var errorMsg = form.querySelector('.error-msg');
                 if (errorMsg) {
-                    errorMsg.textContent = 'Invalid Data';
+                    errorMsg.textContent = xhr.responseText; 
                 }
             }
         };

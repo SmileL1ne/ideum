@@ -832,3 +832,7 @@ dialog::backdrop {
     position: relative;
     z-index: 1; 
 }
+
+p {
+    word-wrap: break-word;
+}

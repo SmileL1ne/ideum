@@ -16,7 +16,7 @@ var fileServer = http.FileServer(http.FS(web.Files))
 func (r *routes) preventDirListing(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if strings.HasSuffix(req.URL.Path, "/") || len(req.URL.Path) == 0 {
-			r.notFound(w, req)
+			r.notFound(w)
 			return
 		}
 		next.ServeHTTP(w, req)
@@ -25,12 +25,12 @@ func (r *routes) preventDirListing(next http.Handler) http.Handler {
 
 func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 	if req.URL.Path != "/" {
-		r.notFound(w, req)
+		r.notFound(w)
 		return
 	}
 
 	if req.Method != http.MethodGet {
-		r.notFound(w, req)
+		r.notFound(w)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (r *routes) home(w http.ResponseWriter, req *http.Request) {
 
 func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
-		r.methodNotAllowed(w, req)
+		r.methodNotAllowed(w)
 		return
 	}
 
@@ -71,10 +71,10 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
 			log.Print("sortedByTag: invalid url path")
-			r.notFound(w, req)
+			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidPathID):
 			log.Print("sortedByTag: invalid id in request path")
-			r.badRequest(w, req)
+			r.badRequest(w)
 		}
 		return
 	}

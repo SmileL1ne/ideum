@@ -11,10 +11,8 @@ function LoginErr(form) {
             } else {
                 console.log(xhr.status);
                 var errorMsg = form.querySelector('.error-msg');
-                if (errorMsg) {
-                    errorMsg.textContent = 'Invalid Data';
-                }
-                
+                const formattedText = xhr.responseText.replace(/\n/g, "<br><br>");
+                errorMsg.innerHTML = formattedText; 
             }
         }
     };
@@ -47,10 +45,8 @@ function RegErr(form) {
             } else {
                 console.log('NO');
                 var errorMsg = form.querySelector('.error-msg');
-                if (errorMsg) {
-                    errorMsg.textContent = 'Invalid Data';
-                }
-                
+                const formattedText = xhr.responseText.replace(/\n/g, "<br><br>");
+                errorMsg.innerHTML = formattedText;
             }
         }
     };

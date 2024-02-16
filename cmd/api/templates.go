@@ -20,7 +20,6 @@ type templateData struct {
 	Models          Models
 	Username        string
 	IsAuthenticated bool
-	ErrInfo         errData
 }
 
 type errData struct {

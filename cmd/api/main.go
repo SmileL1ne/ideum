@@ -27,7 +27,6 @@ func main() {
 		log.Fatalf("Error opening database connection:%v", err)
 	}
 
-	// Service
 	r := repository.New(db)
 	s := service.New(r)
 

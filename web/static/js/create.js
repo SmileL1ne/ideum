@@ -19,9 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 console.error('Request failed. Status: ' + xhr.status);
                 var errorMsg = form.querySelector('.error-msg');
-                if (errorMsg) {
-                    errorMsg.textContent = 'Invalid Data';
-                }
+                const formattedText = xhr.responseText.replace(/\n/g, "<br><br>");
+                errorMsg.innerHTML = formattedText;
             }
         };
 
