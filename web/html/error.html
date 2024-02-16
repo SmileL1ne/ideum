@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.svg">
+    <link rel="stylesheet" href="/static/css/reset.css">
+    <link rel="stylesheet" href="/static/css/font.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <title>Error Page</title>
+</head>
+<body>
+    <div class="wrapper-error">
+        
+        <div class="post-feed">
+            <div class="error-bg"><img src="/static/img/bg.svg" alt="bg"></div>
+            <div class="big-error-container">
+                <h1><span> Opps...</span></h1>
+                <h1>{{.ErrInfo.ErrCode}}</h1>
+                <h1>{{.ErrInfo.ErrMsg}}</h1>
+                <div class="go-homelink">
+                    <a href="/">Go home</a>
+                </div>
+                
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    
+</body>
+
+</html>

@@ -794,12 +794,41 @@ dialog::backdrop {
 }
 
 .big-error-container{
+    margin-top: 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     margin-bottom: 34px;
     width: 540px;
     height: fit-content;
     font-size: 48px;
     gap:10px
+}
+
+.go-homelink a{
+    text-decoration: none;
+    font-size: 25px ;
+    color: #8B5CF6;
+}
+
+.big-error-container span{
+    color: #8B5CF6;
+}
+
+.error-bg {
+    margin-top: 270px;
+    position: fixed;
+    z-index: -1;
+    opacity: 0.03; 
+}
+
+.error-bg img{
+    fill: white; 
+    width: 300px;
+}
+
+.wrapper-error {
+    position: relative;
+    z-index: 1; 
 }
