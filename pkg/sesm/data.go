@@ -2,7 +2,9 @@ package sesm
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"forum/pkg/sesm/sqlite3store"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -22,19 +24,21 @@ func (sm *SessionManager) Load(ctx context.Context, sessionID string) (context.C
 		return context.WithValue(ctx, sm.ContextKey, newSessionData(sm.Lifetime)), nil
 	}
 
-	b, found, err := sm.Store.StoreFind(ctx, sessionID)
+	userID, expiry, err := sm.Store.StoreFind(ctx, sessionID)
 	if err != nil {
+		if errors.Is(err, sqlite3store.ErrNotFound) {
+			sd := newSessionData(time.Second)
+			sd.status = Destroyed
+			return context.WithValue(ctx, sm.ContextKey, sd), nil
+		}
 		return nil, err
-	} else if !found {
-		return context.WithValue(ctx, sm.ContextKey, newSessionData(sm.Lifetime)), nil
 	}
 
 	sd := &sessionData{
-		sessionID: sessionID,
-		status:    Unmodified,
-	}
-	if sd.expiryTime, sd.values, err = sm.decode(b); err != nil {
-		return nil, err
+		sessionID:  sessionID,
+		status:     Unmodified,
+		userID:     userID,
+		expiryTime: expiry,
 	}
 
 	return context.WithValue(ctx, sm.ContextKey, sd), nil
@@ -62,7 +66,7 @@ const (
 type sessionData struct {
 	sessionID  string
 	status     Status
-	values     map[string]interface{}
+	userID     int
 	expiryTime time.Time
 	mu         sync.Mutex
 }
@@ -71,12 +75,11 @@ type sessionData struct {
 func newSessionData(lifetime time.Duration) *sessionData {
 	return &sessionData{
 		status:     Unmodified,
-		values:     make(map[string]interface{}),
-		expiryTime: time.Now().Add(lifetime).UTC().Add(6 * time.Hour),
+		expiryTime: time.Now().Local().Add(lifetime),
 	}
 }
 
-// RenewToken updates tocken for given context, deleting old one (if exists)
+// RenewToken updates token for given context, deleting old one (if exists)
 func (sm *SessionManager) RenewToken(ctx context.Context) error {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -96,12 +99,13 @@ func (sm *SessionManager) RenewToken(ctx context.Context) error {
 	}
 
 	sd.sessionID = newSessionID
-	sd.expiryTime = time.Now().Add(sm.Lifetime).UTC().Add(6 * time.Hour)
+	sd.expiryTime = time.Now().Add(sm.Lifetime)
 	sd.status = Modified
 
 	return nil
 }
 
+// DeleteToken deletes token from database
 func (sm *SessionManager) DeleteToken(ctx context.Context) error {
 	sd := sm.getSessionDataFromContext(ctx)
 
@@ -130,100 +134,33 @@ func (sm *SessionManager) Status(ctx context.Context) Status {
 	return sd.status
 }
 
-// Put puts value by key into 'values' field in session data.
+// PutUserID puts userID in session data.
 //
 // It sets session status to Modified.
-func (sm *SessionManager) Put(ctx context.Context, key string, val interface{}) {
+func (sm *SessionManager) PutUserID(ctx context.Context, userID int) {
 	sd := sm.getSessionDataFromContext(ctx)
 
 	sd.mu.Lock()
-	sd.values[key] = val
+	sd.userID = userID
 	sd.status = Modified
 	sd.mu.Unlock()
 }
 
-// GetInt reads integer value from context by given key.
-//
-// If no value exists by this key or value is not int - it returns zero value
-func (sm *SessionManager) GetInt(ctx context.Context, key string) int {
-	val := sm.Get(ctx, key)
-	num, ok := val.(int)
-	if !ok {
-		return 0
-	}
-
-	return num
-}
-
-// Get reads value from session data by given key.
+// GetUserID reads userID from session data.
 //
 // If no value exists, it returns nil
-func (sm *SessionManager) Get(ctx context.Context, key string) interface{} {
+func (sm *SessionManager) GetUserID(ctx context.Context) int {
 	sd := sm.getSessionDataFromContext(ctx)
 
 	// No need to use mutex here because the operation is read
 
-	val, exists := sd.values[key]
-	if !exists {
-		return nil
-	}
-
-	return val
+	return sd.userID
 }
 
-// PopString reads and deletes string value by given key from session data.
-//
-// If retrieved data is not string, it returns empty string.
-//
-// PopString sets status to Modified
-func (sm *SessionManager) PopString(ctx context.Context, key string) string {
-	val := sm.Pop(ctx, key)
-	str, ok := val.(string)
-	if !ok {
-		return ""
-	}
-	return str
-}
-
-// Pop reads and deletes data by given key.
-//
-// If no value exists by given key, it returns nil.
-//
-// Pop sets status to Modified
-func (sm *SessionManager) Pop(ctx context.Context, key string) interface{} {
+// Exists checks if userID exists in session data
+func (sm *SessionManager) ExistsUserID(ctx context.Context) bool {
 	sd := sm.getSessionDataFromContext(ctx)
-
-	sd.mu.Lock()
-	defer sd.mu.Unlock()
-
-	val, exists := sd.values[key]
-	if !exists {
-		return nil
-	}
-	delete(sd.values, key)
-	sd.status = Modified
-
-	return val
-}
-
-// Remove deletes key-value pair by given key
-//
-// Remove sets status to Modified
-func (sm *SessionManager) Remove(ctx context.Context, key string) {
-	sd := sm.getSessionDataFromContext(ctx)
-
-	sd.mu.Lock()
-	defer sd.mu.Unlock()
-
-	delete(sd.values, key)
-	sd.status = Modified
-}
-
-// Exists checks if value by given key exists in session data
-func (sm *SessionManager) Exists(ctx context.Context, key string) bool {
-	sd := sm.getSessionDataFromContext(ctx)
-	_, ok := sd.values[key]
-	return ok
+	return sd.userID != 0
 }
 
 // getSessionDataFromContext retrieves session data from given contex.

@@ -18,7 +18,7 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	userID := r.sesm.GetUserID(req.Context())
 	if userID == 0 {
 		r.unauthorized(w)
 		return

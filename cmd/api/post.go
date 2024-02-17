@@ -102,9 +102,15 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	// Get all selected tags id
 	tags := form["tags"]
+	if len(tags) == 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		msg := "tags: At least one tag should be selected"
+		fmt.Fprint(w, strings.TrimSpace(msg))
+		return
+	}
 
 	// Get userID from request
-	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	userID := r.sesm.GetUserID(req.Context())
 	if userID == 0 {
 		r.unauthorized(w)
 		return
@@ -138,7 +144,7 @@ func (r *routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	userID := r.sesm.GetUserID(req.Context())
 	if userID == 0 {
 		r.unauthorized(w)
 		return
@@ -174,7 +180,7 @@ func (r *routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	userID := r.sesm.GetUserID(req.Context())
 	if userID == 0 {
 		r.unauthorized(w)
 		return

@@ -2,7 +2,7 @@ package sesm
 
 import (
 	"context"
-	"forum/pkg/sesm/sqlit3store"
+	sqlit3store "forum/pkg/sesm/sqlite3store"
 	"log"
 	"net/http"
 	"time"
@@ -32,7 +32,7 @@ func New() *SessionManager {
 // LoadAndSave is a middleware that loads session from cookie puts it
 // to the request's context.
 //
-// If no session exists, it creates new automatically creates a new one.
+// If no session exists, it automatically creates a new one.
 func (sm *SessionManager) LoadAndSave(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Vary", "Cookie")
@@ -83,9 +83,9 @@ func (sm *SessionManager) commitAndWriteSessionCookie(w http.ResponseWriter, r *
 			return
 		}
 
-		sm.writeSessionCookie(ctx, w, token, expiry)
+		sm.writeSessionCookie(w, token, expiry)
 	case Destroyed:
-		sm.writeSessionCookie(ctx, w, "", time.Time{})
+		sm.writeSessionCookie(w, "", time.Time{})
 	}
 
 }
@@ -108,14 +108,10 @@ func (sm *SessionManager) commit(ctx context.Context) (string, time.Time, error)
 		}
 	}
 
-	b, err := sm.encode(sd.expiryTime, sd.values)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-
+	userID := sd.userID
 	expiry := sd.expiryTime
 
-	if err := sm.Store.StoreCommit(ctx, sd.sessionID, b, expiry); err != nil {
+	if err := sm.Store.StoreCommit(ctx, sd.sessionID, userID, expiry); err != nil {
 		return "", time.Time{}, err
 	}
 
@@ -123,7 +119,7 @@ func (sm *SessionManager) commit(ctx context.Context) (string, time.Time, error)
 }
 
 // writeSessionCookie creates new cookie and and saves it in response.
-func (sm *SessionManager) writeSessionCookie(ctx context.Context, w http.ResponseWriter,
+func (sm *SessionManager) writeSessionCookie(w http.ResponseWriter,
 	token string, expiry time.Time) {
 
 	cookie := &http.Cookie{
@@ -133,7 +129,10 @@ func (sm *SessionManager) writeSessionCookie(ctx context.Context, w http.Respons
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
-		Expires:  expiry,
+		// I don't know why but chrome shows expiration date for 6 hours earlier
+		// and so I put expiry to 6 hours later to keep same expiration date
+		// as in database
+		Expires: expiry.Add(6 * time.Hour),
 	}
 
 	if expiry.IsZero() {

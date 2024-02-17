@@ -84,8 +84,8 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Add authenticated user's id to a session data
-	r.sesm.Put(req.Context(), "authenticatedUserID", id)
+	// Add authenticated user's id to the session data
+	r.sesm.PutUserID(req.Context(), id)
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }

@@ -36,7 +36,7 @@ func (r *postRepository) SavePost(p entity.PostCreateForm, userID int, tagIDs []
 
 	query1 := `
 		INSERT INTO posts (title, content, user_id, created_at) 
-		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))
+		VALUES ($1, $2, $3, datetime('now', 'localtime'))
 	`
 
 	result, err := tx.Exec(query1, p.Title, p.Content, userID)
@@ -53,7 +53,7 @@ func (r *postRepository) SavePost(p entity.PostCreateForm, userID int, tagIDs []
 
 	query2 := `
 		INSERT INTO posts_tags (post_id, tag_id, created_at)
-		VALUES ($1, $2, datetime('now', 'utc', '+12 hours'))
+		VALUES ($1, $2, datetime('now', 'localtime'))
 	`
 
 	for _, tagID := range tagIDs {

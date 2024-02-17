@@ -37,7 +37,7 @@ func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 	}
 
 	query := `INSERT INTO users (username, email, hashed_password, created_at) 
-		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))`
+		VALUES ($1, $2, $3, datetime('now', 'localtime'))`
 
 	result, err := r.DB.Exec(query, u.Username, u.Email, string(hashedPassword))
 	if err != nil {

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"forum/config"
 	"forum/pkg/sesm"
-	"forum/pkg/sesm/sqlit3store"
+	"forum/pkg/sesm/sqlite3store"
 	"log"
 	"net/http"
 	"os"
@@ -32,7 +32,7 @@ func main() {
 
 	// Session Manager creation
 	sesm := sesm.New()
-	sesm.Store = sqlit3store.New(db)
+	sesm.Store = sqlite3store.New(db)
 
 	// Server creation
 	server := &http.Server{

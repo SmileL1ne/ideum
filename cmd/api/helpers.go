@@ -22,7 +22,7 @@ func (r *routes) newTemplateData(req *http.Request) templateData {
 }
 
 func (r *routes) isAuthenticated(req *http.Request) bool {
-	return r.sesm.Exists(req.Context(), "authenticatedUserID")
+	return r.sesm.ExistsUserID(req.Context())
 }
 
 func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error) {
@@ -128,7 +128,7 @@ func (r *routes) getBaseInfo(req *http.Request) (string, *[]entity.TagEntity, er
 
 // getUsername retrieves username by user id from request context
 func (r *routes) getUsername(req *http.Request) (string, error) {
-	userID := r.sesm.GetInt(req.Context(), "authenticatedUserID")
+	userID := r.sesm.GetUserID(req.Context())
 	if userID == 0 {
 		return "", nil
 	}

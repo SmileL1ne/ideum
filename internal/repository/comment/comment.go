@@ -26,7 +26,7 @@ func NewCommentRepo(db *sql.DB) *commentRepository {
 func (r *commentRepository) SaveComment(c entity.CommentCreateForm, postID int, userID int) error {
 	query := `
 		INSERT INTO comments (content, post_id, user_id, created_at) 
-		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))
+		VALUES ($1, $2, $3, datetime('now', 'localtime'))
 		`
 
 	_, err := r.DB.Exec(query, c.Content, postID, userID)

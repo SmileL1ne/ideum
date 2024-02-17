@@ -50,7 +50,7 @@ func (r *reactionRepository) ExistsPostReaction(userID int, postID int) (bool, e
 func (r *reactionRepository) AddPostReaction(isLike bool, postID int, userID int) error {
 	query := `
 		INSERT INTO post_reactions (post_id, user_id, is_like, created_at)
-		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))
+		VALUES ($1, $2, $3, datetime('now', 'localtime'))
 	`
 
 	_, err := r.DB.Exec(query, postID, userID, isLike)
@@ -93,7 +93,7 @@ func (r *reactionRepository) ExistsCommentReaction(userID int, commentID int) (b
 func (r *reactionRepository) AddCommentReaction(isLike bool, commentID int, userID int) error {
 	query := `
 		INSERT INTO comment_reactions (comment_id, user_id, is_like, created_at)
-		VALUES ($1, $2, $3, datetime('now', 'utc', '+12 hours'))
+		VALUES ($1, $2, $3, datetime('now', 'localtime'))
 	`
 
 	_, err := r.DB.Exec(query, commentID, userID, isLike)

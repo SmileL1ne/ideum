@@ -4,6 +4,9 @@
     - Redo every table with 'REWORK' tag (see below) by blueprint in schema (lucidchart)  
 */
 
+-- Turn on foreign keys (they are disabled by default for backward compatibility)
+PRAGMA foreign_keys = ON;
+
 -- REWORK
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -63,6 +66,6 @@ CREATE TABLE IF NOT EXISTS posts_tags (
 -- Sessions table
 CREATE TABLE IF NOT EXISTS sessions (
     session_id TEXT NOT NULL PRIMARY KEY,
-    data BLOB NOT NULL,
-    expiry TIMESTAMP(6) NOT NULL
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    expiry DATETIME NOT NULL
 );
