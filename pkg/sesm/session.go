@@ -10,7 +10,7 @@ import (
 
 /*
 	Sesm is a session manager that helps to manage user sessions
-	by providing convinient tools for it.
+	by providing convinient tools to do this.
 */
 
 type SessionManager struct {
@@ -31,8 +31,6 @@ func New() *SessionManager {
 
 // LoadAndSave is a middleware that loads session from cookie puts it
 // to the request's context.
-//
-// If no session exists, it automatically creates a new one.
 func (sm *SessionManager) LoadAndSave(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Vary", "Cookie")
@@ -68,7 +66,7 @@ func (sm *SessionManager) LoadAndSave(next http.Handler) http.Handler {
 	})
 }
 
-// commitAndWriteSessionCookie commits changes to database and saves it into cookie.
+// commitAndWriteSessionCookie commits changes to database and saves it in cookie.
 //
 // It does it only in case of data being modified.
 func (sm *SessionManager) commitAndWriteSessionCookie(w http.ResponseWriter, r *http.Request) {
@@ -154,6 +152,7 @@ type sessionWriter struct {
 	written        bool
 }
 
+// Overrode Write method to save changes in database and in cookie if not saved
 func (sw *sessionWriter) Write(b []byte) (int, error) {
 	if !sw.written {
 		sw.sessionManager.commitAndWriteSessionCookie(sw.ResponseWriter, sw.request)
@@ -163,6 +162,7 @@ func (sw *sessionWriter) Write(b []byte) (int, error) {
 	return sw.ResponseWriter.Write(b)
 }
 
+// Overrode WriteHeader method to save changes in database and in cookie if not saved
 func (sw *sessionWriter) WriteHeader(code int) {
 	if !sw.written {
 		sw.sessionManager.commitAndWriteSessionCookie(sw.ResponseWriter, sw.request)

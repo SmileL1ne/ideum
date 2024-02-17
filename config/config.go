@@ -39,7 +39,7 @@ func NewConfig() *Config {
 			StaticDir: "./web/static",
 		},
 		Database{
-			DSN: "file:./internal/database/rabbit.db?cache=shared&mode=rwc",
+			DSN: "file:./internal/database/rabbit.db?foreign_keys=on",
 		},
 	}
 	return cfg

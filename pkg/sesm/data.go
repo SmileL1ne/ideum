@@ -71,7 +71,7 @@ type sessionData struct {
 	mu         sync.Mutex
 }
 
-// newSessionData returs sessionData with given and default values
+// newSessionData returs sessionData with given lifetime and default values
 func newSessionData(lifetime time.Duration) *sessionData {
 	return &sessionData{
 		status:     Unmodified,
@@ -147,8 +147,6 @@ func (sm *SessionManager) PutUserID(ctx context.Context, userID int) {
 }
 
 // GetUserID reads userID from session data.
-//
-// If no value exists, it returns nil
 func (sm *SessionManager) GetUserID(ctx context.Context) int {
 	sd := sm.getSessionDataFromContext(ctx)
 

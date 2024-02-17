@@ -1,0 +1,1 @@
+CREATE INDEX expiry_delete ON sessions (expiry);
