@@ -78,7 +78,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Renew session token whenever user logs in
-	err = r.sesm.RenewToken(req.Context())
+	err = r.sesm.RenewToken(req.Context(), id)
 	if err != nil {
 		r.serverError(w, req, err)
 		return

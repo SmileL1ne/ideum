@@ -80,17 +80,15 @@ func newSessionData(lifetime time.Duration) *sessionData {
 }
 
 // RenewToken updates token for given context, deleting old one (if exists)
-func (sm *SessionManager) RenewToken(ctx context.Context) error {
+func (sm *SessionManager) RenewToken(ctx context.Context, userID int) error {
 	sd := sm.getSessionDataFromContext(ctx)
 
 	sd.mu.Lock()
 	defer sd.mu.Unlock()
 
-	if sd.sessionID != "" {
-		err := sm.Store.StoreDelete(ctx, sd.sessionID)
-		if err != nil {
-			return err
-		}
+	err := sm.Store.StoreDeleteAll(ctx, userID)
+	if err != nil {
+		return err
 	}
 
 	newSessionID, err := createSessionID()

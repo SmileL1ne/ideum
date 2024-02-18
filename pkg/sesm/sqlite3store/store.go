@@ -57,6 +57,14 @@ func (s *SQLite3Store) StoreCommit(ctx context.Context, sessionID string, userID
 	return nil
 }
 
+func (s *SQLite3Store) StoreDeleteAll(ctx context.Context, userID int) error {
+	query := `
+		DELETE FROM sessions WHERE user_id = $1
+	`
+	_, err := s.db.ExecContext(ctx, query, userID)
+	return err
+}
+
 func (s *SQLite3Store) StoreDelete(ctx context.Context, sessionID string) error {
 	query := `
 		DELETE FROM sessions WHERE session_id = $1
