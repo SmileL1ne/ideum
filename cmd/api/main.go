@@ -36,7 +36,7 @@ func main() {
 
 	// Server creation
 	server := &http.Server{
-		Addr:    "127.0.0.1" + cfg.Http.Addr,
+		Addr:    "0.0.0.0" + cfg.Http.Addr,
 		Handler: NewRouter(s, sesm),
 	}
 
