@@ -1,47 +1,19 @@
 package main
 
 import (
-	"forum/internal/service"
 	"forum/pkg/mids"
-	"forum/pkg/sesm"
-	"html/template"
-	"log"
 	"net/http"
 )
 
-/*
-	TODO:
-	- Checkout comments in each registered handlers
-*/
-
-type routes struct {
-	service   *service.Services
-	tempCache map[string]*template.Template
-	sesm      *sesm.SessionManager
-}
-
 // NewRouter returns http.Handler type router with registered routes
-func NewRouter(s *service.Services, sesm *sesm.SessionManager) http.Handler {
+func (r *routes) newRouter() http.Handler {
 	router := http.NewServeMux()
-
-	// Temporary cache for one-time template initialization and subsequent
-	// storage in templates map
-	tempCache, err := newTemplateCache()
-	if err != nil {
-		log.Fatalf("Error creating cached templates:%v", err)
-	}
-
-	r := &routes{
-		service:   s,
-		tempCache: tempCache,
-		sesm:      sesm,
-	}
 
 	// Serve static files
 	router.Handle("/static/", r.preventDirListing(fileServer))
 
 	// Dynamic middleware chain for routes that don't require authentication
-	dynamic := mids.New(sesm.LoadAndSave)
+	dynamic := mids.New(r.sesm.LoadAndSave)
 
 	router.Handle("/", dynamic.ThenFunc(r.home))
 	router.Handle("/sortByTags/", dynamic.ThenFunc(r.sortedByTag))

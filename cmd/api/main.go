@@ -5,6 +5,7 @@ import (
 	"forum/config"
 	"forum/pkg/sesm"
 	"forum/pkg/sesm/sqlite3store"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -17,6 +18,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type routes struct {
+	service   *service.Services
+	tempCache map[string]*template.Template
+	sesm      *sesm.SessionManager
+}
+
 func main() {
 	// Parse config
 	cfg := config.NewConfig()
@@ -27,6 +34,14 @@ func main() {
 		log.Fatalf("Error opening database connection:%v", err)
 	}
 
+	// Temporary cache for one-time template initialization and subsequent
+	// storage in templates map
+	tempCache, err := newTemplateCache()
+	if err != nil {
+		log.Fatalf("Error creating cached templates:%v", err)
+	}
+
+	// Repos and Services init
 	r := repository.New(db)
 	s := service.New(r)
 
@@ -34,10 +49,17 @@ func main() {
 	sesm := sesm.New()
 	sesm.Store = sqlite3store.New(db)
 
+	// Routes init
+	routes := &routes{
+		service:   s,
+		tempCache: tempCache,
+		sesm:      sesm,
+	}
+
 	// Server creation
 	server := &http.Server{
 		Addr:    "0.0.0.0" + cfg.Http.Addr,
-		Handler: NewRouter(s, sesm),
+		Handler: routes.newRouter(),
 	}
 
 	// Graceful shutdown
