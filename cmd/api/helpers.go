@@ -8,7 +8,6 @@ import (
 	"forum/internal/validator"
 	"forum/web"
 	"html/template"
-	"log"
 	"net/http"
 	"runtime/debug"
 	"strconv"
@@ -32,7 +31,7 @@ func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error
 		trace  = string(debug.Stack())
 	)
 
-	log.Printf(err.Error()+"; method - %s, uri - %s, stack - %s", method, uri, trace)
+	r.logger.Printf(err.Error()+"; method - %s, uri - %s, stack - %s", method, uri, trace)
 
 	errInfo := errData{
 		ErrCode: http.StatusInternalServerError,
@@ -41,7 +40,7 @@ func (r *routes) serverError(w http.ResponseWriter, req *http.Request, err error
 
 	// Custom render of error template for server error
 	// (to avoid infinite recursion of original render function)
-	renderErrorPage(w, errInfo)
+	r.renderErrorPage(w, errInfo)
 }
 
 func (r *routes) clientError(w http.ResponseWriter, status int) {
@@ -49,7 +48,8 @@ func (r *routes) clientError(w http.ResponseWriter, status int) {
 		ErrCode: status,
 		ErrMsg:  http.StatusText(status),
 	}
-	renderErrorPage(w, errInfo)
+
+	r.renderErrorPage(w, errInfo)
 }
 
 func (r *routes) unauthorized(w http.ResponseWriter) {
@@ -91,17 +91,17 @@ func (r *routes) render(w http.ResponseWriter, req *http.Request, status int, pa
 }
 
 // renderErrorPage renders error page with given error code and message
-func renderErrorPage(w http.ResponseWriter, errInfo errData) {
+func (r *routes) renderErrorPage(w http.ResponseWriter, errInfo errData) {
 	tmpl, err := template.ParseFS(web.Files, "html/error.html")
 	if err != nil {
-		log.Print("the template error.html does not exist")
+		r.logger.Print("the template error.html does not exist")
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, errInfo); err != nil {
-		log.Print("error executing error.html template")
+		r.logger.Print("error executing error.html template")
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

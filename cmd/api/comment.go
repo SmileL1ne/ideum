@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
-	"log"
 	"net/http"
 )
 
@@ -28,10 +27,10 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Print("commentCreate: invalid url path")
+			r.logger.Print("commentCreate: invalid url path")
 			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidPathID):
-			log.Print("commentCreate: invalid id in request path")
+			r.logger.Print("commentCreate: invalid id in request path")
 			r.badRequest(w)
 		}
 		return
@@ -46,7 +45,7 @@ func (r *routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			log.Print("commentCreate: invalid form fill")
+			r.logger.Print("commentCreate: invalid form fill")
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, comment.FieldErrors["commentContent"])
 		default:

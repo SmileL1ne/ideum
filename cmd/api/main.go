@@ -22,11 +22,15 @@ type routes struct {
 	service   *service.Services
 	tempCache map[string]*template.Template
 	sesm      *sesm.SessionManager
+	logger    *log.Logger
 }
 
 func main() {
 	// Parse config
 	cfg := config.NewConfig()
+
+	// Logger init
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	// Database connection
 	db, err := OpenDB(cfg.Database.DSN)
@@ -54,6 +58,7 @@ func main() {
 		service:   s,
 		tempCache: tempCache,
 		sesm:      sesm,
+		logger:    logger,
 	}
 
 	// Server creation
@@ -68,16 +73,16 @@ func main() {
 		signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 
 		sig := <-sigCh
-		log.Printf("signal received:%s", sig.String())
+		routes.logger.Printf("signal received:%s", sig.String())
 		db.Close()
 
 		os.Exit(0)
 	}()
 
 	// Starting the server
-	log.Printf("starting the server on address - http://localhost%s", cfg.Addr)
+	routes.logger.Printf("starting the server on address - http://localhost%s", cfg.Addr)
 	err = server.ListenAndServe()
-	log.Fatalf("Listen and serve error:%v", err)
+	routes.logger.Fatalf("Listen and serve error:%v", err)
 }
 
 // OpenDB opens connection to the database using standard sql library

@@ -5,6 +5,7 @@ import (
 	"forum/internal/entity/mocks"
 	"forum/pkg/sesm"
 	"io"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -26,6 +27,7 @@ func newTestRoutes(t *testing.T) *routes {
 		service:   services,
 		tempCache: tempCache,
 		sesm:      sesm,
+		logger: log.New(io.Discard, "", 0),
 	}
 }
 

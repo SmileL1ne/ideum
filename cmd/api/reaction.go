@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -23,7 +22,7 @@ func (r *routes) postReaction(w http.ResponseWriter, req *http.Request) {
 
 	reaction := req.URL.Query().Get("reaction")
 	if reaction == "" {
-		log.Print("postReaction: invalid query parameter - reaction")
+		r.logger.Print("postReaction: invalid query parameter - reaction")
 		r.badRequest(w)
 		return
 	}
@@ -32,10 +31,10 @@ func (r *routes) postReaction(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Print("postReaction: invalid url path")
+			r.logger.Print("postReaction: invalid url path")
 			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidPathID):
-			log.Print("postReaction: invalid id in request path")
+			r.logger.Print("postReaction: invalid id in request path")
 			r.badRequest(w)
 		}
 		return
@@ -47,7 +46,7 @@ func (r *routes) postReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if !isPostExists {
-		log.Printf("postReaction: no post with id - %d", postID)
+		r.logger.Printf("postReaction: no post with id - %d", postID)
 		r.notFound(w)
 		return
 	}
@@ -56,7 +55,7 @@ func (r *routes) postReaction(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Printf("postReaction: invalid query parameter - '%s'", reaction)
+			r.logger.Printf("postReaction: invalid query parameter - '%s'", reaction)
 			r.badRequest(w)
 		default:
 			r.serverError(w, req, err)
@@ -75,7 +74,7 @@ func (r *routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 
 	reaction := req.URL.Query().Get("reaction")
 	if reaction == "" {
-		log.Print("postReaction: invalid query parameter - reaction")
+		r.logger.Print("postReaction: invalid query parameter - reaction")
 		r.badRequest(w)
 		return
 	}
@@ -84,10 +83,10 @@ func (r *routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Print("commentReaction: invalid url path")
+			r.logger.Print("commentReaction: invalid url path")
 			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidPathID):
-			log.Print("commentReaction: invalid id in request path")
+			r.logger.Print("commentReaction: invalid id in request path")
 			r.badRequest(w)
 		}
 		return
@@ -99,7 +98,7 @@ func (r *routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if !isCommentExists {
-		log.Printf("commentReaction: no comment with id - %d", commentID)
+		r.logger.Printf("commentReaction: no comment with id - %d", commentID)
 		r.notFound(w)
 		return
 	}
@@ -107,7 +106,7 @@ func (r *routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 	urls := strings.Split(req.URL.Path, "/")
 	postID, isValid := getValidID(urls[len(urls)-2])
 	if !isValid {
-		log.Print("commentReaction: invalid postID")
+		r.logger.Print("commentReaction: invalid postID")
 		r.badRequest(w)
 		return
 	}
@@ -122,7 +121,7 @@ func (r *routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Printf("postReaction: invalid query parameter - '%s'", reaction)
+			r.logger.Printf("postReaction: invalid query parameter - '%s'", reaction)
 			r.badRequest(w)
 		default:
 			r.serverError(w, req, err)

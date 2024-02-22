@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -31,7 +30,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			log.Print("userSignupPost: invalid form fill")
+			r.logger.Print("userSignupPost: invalid form fill")
 
 			w.WriteHeader(http.StatusBadRequest)
 			msg := getErrorMessage(&u.Validator)
@@ -52,7 +51,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if err := req.ParseForm(); err != nil {
-		log.Print("userLoginPost: invalid form fill (parse error)")
+		r.logger.Print("userLoginPost: invalid form fill (parse error)")
 		r.badRequest(w)
 		return
 	}
@@ -66,7 +65,7 @@ func (r *routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrInvalidCredentials):
-			log.Print("userSignupPost: invalid form fill")
+			r.logger.Print("userSignupPost: invalid form fill")
 
 			w.WriteHeader(http.StatusBadRequest)
 			msg := getErrorMessage(&u.Validator)

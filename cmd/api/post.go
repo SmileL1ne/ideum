@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -25,10 +24,10 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Print("postView: invalid url path")
+			r.logger.Print("postView: invalid url path")
 			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidPathID):
-			log.Print("postView: invalid id in request path")
+			r.logger.Print("postView: invalid id in request path")
 			r.badRequest(w)
 		}
 		return
@@ -38,7 +37,7 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidPostID):
-			log.Print("postView: invalid post id")
+			r.logger.Print("postView: invalid post id")
 			r.notFound(w)
 		default:
 			r.serverError(w, req, err)
@@ -90,7 +89,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if err := req.ParseForm(); err != nil {
-		log.Print("postCreatePost: invalid form fill (parse error)")
+		r.logger.Print("postCreatePost: invalid form fill (parse error)")
 		r.badRequest(w)
 		return
 	}
@@ -122,7 +121,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):
-			log.Print("postCreatePost: invalid form fill")
+			r.logger.Print("postCreatePost: invalid form fill")
 
 			w.WriteHeader(http.StatusBadRequest)
 			msg := getErrorMessage(&p.Validator)

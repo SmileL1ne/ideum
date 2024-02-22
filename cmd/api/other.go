@@ -4,7 +4,6 @@ import (
 	"errors"
 	"forum/internal/entity"
 	"forum/web"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -70,10 +69,10 @@ func (r *routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			log.Print("sortedByTag: invalid url path")
+			r.logger.Print("sortedByTag: invalid url path")
 			r.notFound(w)
 		case errors.Is(err, entity.ErrInvalidPathID):
-			log.Print("sortedByTag: invalid id in request path")
+			r.logger.Print("sortedByTag: invalid id in request path")
 			r.badRequest(w)
 		}
 		return
