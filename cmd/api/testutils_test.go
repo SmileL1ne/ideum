@@ -9,7 +9,14 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"net/url"
 	"testing"
+)
+
+const (
+	testUsername        = "nah"
+	testPassword        = "nahnahnah"
+	sessionNameInCookie = "session"
 )
 
 func newTestRoutes(t *testing.T) *routes {
@@ -27,7 +34,7 @@ func newTestRoutes(t *testing.T) *routes {
 		service:   services,
 		tempCache: tempCache,
 		sesm:      sesm,
-		logger: log.New(io.Discard, "", 0),
+		logger:    log.New(io.Discard, "", 0),
 	}
 }
 
@@ -66,4 +73,36 @@ func (ts *testServer) get(t *testing.T, url string) (int, http.Header, string) {
 	body = bytes.TrimSpace(body)
 
 	return rs.StatusCode, rs.Header, string(body)
+}
+
+func (ts *testServer) postForm(t *testing.T, url string, form url.Values) (int, http.Header, string) {
+	req, err := http.NewRequest("POST", ts.URL+url, bytes.NewBufferString(form.Encode()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	cookie := &http.Cookie{
+		Name: sessionNameInCookie,
+	}
+
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body = bytes.TrimSpace(body)
+
+	return rs.StatusCode, rs.Header, string(body)
+}
+
+func (ts *testServer) logIn(t *testing.T) string {
+	form := url.Values{}
+	form.Add("identifier", testUsername)
+	form.Add("password", testPassword)
+
+	rs, err := ts.Client().PostForm(ts.URL+"/user/login", form)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }

@@ -134,6 +134,7 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	redirectURL := fmt.Sprintf("/post/view/%d", id)
 	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, redirectURL)
 }
 
