@@ -71,6 +71,8 @@ func TestPostCreatePost(t *testing.T) {
 	ts := newTestServer(t, r.newRouter())
 	defer ts.Close()
 
+	_, _, body := ts.postForm()
+
 	const (
 		validTitle   = "Witcher"
 		validContent = "V: Wh... What are you doing??... G: Killing a monster"

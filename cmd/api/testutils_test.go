@@ -14,9 +14,8 @@ import (
 )
 
 const (
-	testUsername        = "nah"
-	testPassword        = "nahnahnah"
-	sessionNameInCookie = "session"
+	testUsername = "nah"
+	testPassword = "nahnahnah"
 )
 
 func newTestRoutes(t *testing.T) *routes {
@@ -76,15 +75,11 @@ func (ts *testServer) get(t *testing.T, url string) (int, http.Header, string) {
 }
 
 func (ts *testServer) postForm(t *testing.T, url string, form url.Values) (int, http.Header, string) {
-	req, err := http.NewRequest("POST", ts.URL+url, bytes.NewBufferString(form.Encode()))
+	rs, err := ts.Client().PostForm(ts.URL+url, form)
 	if err != nil {
 		t.Fatal(err)
 	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	cookie := &http.Cookie{
-		Name: sessionNameInCookie,
-	}
+	defer rs.Body.Close()
 
 	body, err := io.ReadAll(rs.Body)
 	if err != nil {
@@ -103,6 +98,17 @@ func (ts *testServer) logIn(t *testing.T) string {
 	rs, err := ts.Client().PostForm(ts.URL+"/user/login", form)
 	if err != nil {
 		t.Fatal(err)
+	}
+	
+	req, err := http.NewRequest("POST", ts.URL+url, bytes.NewBufferString(form.Encode()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	cookie := &http.Cookie{
+		Name: sessionNameInCookie,
+		Value: ,
 	}
 
 }
