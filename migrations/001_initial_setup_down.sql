@@ -6,3 +6,4 @@ DROP TABLE IF EXISTS comment_reactions;
 DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS posts_tags;
 DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS images;

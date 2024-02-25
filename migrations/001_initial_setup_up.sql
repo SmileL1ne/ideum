@@ -82,3 +82,10 @@ CREATE TABLE IF NOT EXISTS sessions (
 
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS images (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    post_id INTEGER NOT NULL,
+    FOREIGN KEY (post_id) REFERENCES posts(id)
+);

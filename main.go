@@ -15,7 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	setup, err := os.ReadFile("./migrations/002_add_indexes_up.sql")
+	setup, err := os.ReadFile("./migrations/001_initial_setup_up.sql")
 	if err != nil {
 		db.Close()
 		log.Fatal(err)

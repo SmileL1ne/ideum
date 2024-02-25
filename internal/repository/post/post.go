@@ -71,6 +71,9 @@ func (r *postRepository) SavePost(p entity.PostCreateForm, userID int, tagIDs []
 	return int(postID), nil
 }
 
+
+
+
 func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username,
