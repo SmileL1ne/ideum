@@ -30,6 +30,7 @@ type PostView struct {
 	Dislikes    int
 	PostTags    []string
 	CommentsLen int
+	Image       string
 }
 
 // PostCreateForm is accepted by services and repos. Services accept pointer only for

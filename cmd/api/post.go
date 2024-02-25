@@ -55,11 +55,17 @@ func (r *routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	img,err := r.service.Image.GetImage(postID)
+	if err != nil {
+		r.logger.Print("no image ")
+	}
+
 	data := r.newTemplateData(req)
 	data.Models.Post = post
 	data.Models.Comments = *comments
 	data.Models.Tags = *tags
 	data.Username = username
+	data.Models.Post.Image = img
 
 	r.render(w, req, http.StatusOK, "view.html", data)
 }
@@ -185,11 +191,11 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		io.Copy(newFile, file)
 		// insert to table
 		if err := r.service.Image.SaveImage(id, fname); err != nil {
-			r.logger.Print("Image no added to db")
+			r.logger.Print("Image not added to db")
 		}
 
 	}
-	
+
 	redirectURL := fmt.Sprintf("/post/view/%d", id)
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprint(w, redirectURL)

@@ -45,20 +45,22 @@
                 <div class="post-text">
                     <p>{{ .Models.Post.Content }}</p>
                 </div>
+
                 <div class="likes-frame post-tags">
                     {{range .Models.Post.PostTags}}
                     <button class="like-button tag" disabled>{{.}} </button>
                     {{end}}
                 </div>
-                <!-- <div class="post-img"><img src="/static/img/sample.png" alt="post-img">
-                    
-                </div> -->
+
+                {{ if .Models.Post.Image}}
+                <div class="post-img"><img src="/static/public/{{ .Models.Post.Image}}" alt="post-img"></div>
+                {{end}}
 
                 <div class="post-footer">
                     <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">
                         {{.Models.Post.CommentsLen}}
                     </div>
-                    
+
                 </div>
 
             </div>
@@ -84,8 +86,8 @@
 
                         <form action="/post/comment/reaction/{{.PostID}}/{{.ID}}?reaction=dislike" method="POST">
                             <button class="like-button" id="dislike">
-                                <img src="/static/img/svg/dislike.svg"
-                                    alt="dislike"><span class="rating-count">{{.Dislikes}}</span>
+                                <img src="/static/img/svg/dislike.svg" alt="dislike"><span
+                                    class="rating-count">{{.Dislikes}}</span>
                             </button>
                         </form>
                     </div>
@@ -95,6 +97,7 @@
                 <div class="post-text">
                     <p>{{.Content}}</p>
                 </div>
+
 
             </div>
         </div>
