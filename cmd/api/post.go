@@ -1,10 +1,14 @@
 package main
 
 import (
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"forum/internal/entity"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -88,16 +92,69 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		r.methodNotAllowed(w)
 		return
 	}
-	if err := req.ParseForm(); err != nil {
-		r.logger.Print("postCreatePost: invalid form fill (parse error)")
+
+	// if err := req.ParseForm(); err != nil {
+	// 	r.logger.Print("postCreatePost: invalid form fill (parse error)")
+	// 	r.badRequest(w)
+	// 	return
+	// }
+
+	// 10 means that file will be stored temporary 10 by
+	if err := req.ParseMultipartForm(10); err != nil {
+		r.logger.Print("postCreatePost: invalid form fill (parse error2)")
 		r.badRequest(w)
 		return
 	}
 
 	form := req.PostForm
-
 	title := form.Get("title")
 	content := form.Get("content")
+	// image := req.FormFile("image")
+
+	// take from file
+	file, fileHeader, err := req.FormFile("image")
+	if err != nil {
+		r.logger.Print("postCreatePost: cant get file")
+		r.badRequest(w)
+		return
+	}
+	defer file.Close()
+
+	// check content extention
+	contentType := fileHeader.Header.Get("Content-Type")
+	if contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/gif" && contentType != "image/jpg" {
+		w.WriteHeader(http.StatusBadRequest)
+		msg := "only jpeg,png,gif allowed"
+		fmt.Fprint(w, strings.TrimSpace(msg))
+		return
+	}
+
+	// check file size 20 << 20 |  20* 1024 * 1024
+	if fileHeader.Size > (20 << 20) {
+		w.WriteHeader(http.StatusBadRequest)
+		msg := "file size too big"
+		fmt.Fprint(w, strings.TrimSpace(msg))
+		return
+	}
+
+	//create sha256 file name to store one file if users loads the same file
+	ext := strings.Split(fileHeader.Filename, ".")[1]
+	h := sha256.New()
+	io.Copy(h, file)
+	fname := fmt.Sprintf("%x", h.Sum(nil)) + "." + ext
+	path := filepath.Join("./web/static/public/", fname)
+
+	newFile, err := os.Create(path)
+	if err != nil {
+		fmt.Println(err)
+		r.logger.Print("postCreatePost: cant create file")
+		r.badRequest(w) // TODO: intrnal server error?
+		return
+	}
+	defer newFile.Close()
+
+	file.Seek(0, 0)
+	io.Copy(newFile, file)
 
 	// Get all selected tags id
 	tags := form["tags"]
