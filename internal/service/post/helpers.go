@@ -36,6 +36,7 @@ func convertEntitiesToViews(posts *[]entity.PostEntity) (*[]entity.PostView, err
 			Dislikes:    p.Dislikes,
 			PostTags:    tags,
 			CommentsLen: p.CommentsLen,
+			Image:       p.Image,
 		}
 		pViews = append(pViews, post)
 	}

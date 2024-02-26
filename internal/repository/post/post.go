@@ -132,6 +132,11 @@ func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 				FROM tags t
 				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
 				WHERE pt.post_id = p.id
+			),
+			(
+				SELECT name
+				FROM images
+				WHERE images.post_id = p.id
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id

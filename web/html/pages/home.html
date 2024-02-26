@@ -35,15 +35,19 @@
                 </div>
                 <div class="likes-frame post-tags">
                     {{range .PostTags}}
-                    <button class="like-button tag" disabled >{{.}} </button>
+                    <button class="like-button tag" disabled>{{.}} </button>
                     {{end}}
                 </div>
+
+                {{ if .Image}}
+                <div class="post-img"><img src="/static/public/{{ .Image}}" alt="post-img"></div>
+                {{end}}
                 <!-- <div class="post-img"><img src="/img/sample.png" alt="post-img"></div> -->
                 <div class="post-footer">
                     <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">
                         {{.CommentsLen}}
                     </div>
-                   
+
                 </div>
 
             </div>

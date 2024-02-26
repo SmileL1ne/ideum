@@ -17,6 +17,7 @@ type PostEntity struct {
 	Dislikes    int
 	PostTags    string
 	CommentsLen int
+	Image       string
 }
 
 // PostView is returned to handlers from service and outputed in pages

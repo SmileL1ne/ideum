@@ -16,8 +16,9 @@ func getAllPostsByQuery(db *sql.DB, query string, args ...interface{}) (*[]entit
 	for rows.Next() {
 		var post entity.PostEntity
 		var tags sql.NullString
+		var image sql.NullString
 		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt,
-			&post.Username, &post.Likes, &post.Dislikes, &post.CommentsLen, &tags); err != nil {
+			&post.Username, &post.Likes, &post.Dislikes, &post.CommentsLen, &tags, &image); err != nil {
 
 			return nil, err
 		}
@@ -26,6 +27,13 @@ func getAllPostsByQuery(db *sql.DB, query string, args ...interface{}) (*[]entit
 		} else {
 			post.PostTags = ""
 		}
+
+		if image.Valid {
+			post.Image = image.String
+		} else {
+			post.Image = ""
+		}
+
 		posts = append(posts, post)
 	}
 
