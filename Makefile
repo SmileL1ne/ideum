@@ -1,5 +1,5 @@
 run:
-	go run ./cmd/app
+	go run ./cmd/api
 build:
 	docker build -t forum .
 docker-run:

@@ -5,25 +5,18 @@ import (
 	"forum/config"
 	"forum/pkg/sesm"
 	"forum/pkg/sesm/sqlite3store"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"forum/internal/handlers"
 	"forum/internal/repository"
 	"forum/internal/service"
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-type routes struct {
-	service   *service.Services
-	tempCache map[string]*template.Template
-	sesm      *sesm.SessionManager
-	logger    *log.Logger
-}
 
 func main() {
 	// Parse config
@@ -38,13 +31,6 @@ func main() {
 		log.Fatalf("Error opening database connection:%v", err)
 	}
 
-	// Temporary cache for one-time template initialization and subsequent
-	// storage in templates map
-	tempCache, err := newTemplateCache()
-	if err != nil {
-		log.Fatalf("Error creating cached templates:%v", err)
-	}
-
 	// Repos and Services init
 	r := repository.New(db)
 	s := service.New(r)
@@ -54,17 +40,16 @@ func main() {
 	sesm.Store = sqlite3store.New(db)
 
 	// Routes init
-	routes := &routes{
-		service:   s,
-		tempCache: tempCache,
-		sesm:      sesm,
-		logger:    logger,
-	}
+	routes := handlers.NewRouter(
+		s,
+		sesm,
+		logger,
+	)
 
 	// Server creation
 	server := &http.Server{
 		Addr:    "0.0.0.0" + cfg.Http.Addr,
-		Handler: routes.newRouter(),
+		Handler: routes.Register(),
 	}
 
 	// Graceful shutdown
@@ -73,16 +58,16 @@ func main() {
 		signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
 
 		sig := <-sigCh
-		routes.logger.Printf("signal received:%s", sig.String())
+		logger.Printf("signal received:%s", sig.String())
 		db.Close()
 
 		os.Exit(0)
 	}()
 
 	// Starting the server
-	routes.logger.Printf("starting the server on address - http://localhost%s", cfg.Addr)
+	logger.Printf("starting the server on address - http://localhost%s", cfg.Addr)
 	err = server.ListenAndServe()
-	routes.logger.Fatalf("Listen and serve error:%v", err)
+	logger.Fatalf("Listen and serve error:%v", err)
 }
 
 // OpenDB opens connection to the database using standard sql library
