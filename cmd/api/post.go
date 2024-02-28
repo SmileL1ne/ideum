@@ -102,7 +102,9 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	// 10 means that file will be stored temporary 10 by
 	if err := req.ParseMultipartForm(10); err != nil {
 		r.logger.Print("postCreatePost: invalid form fill (parse error)")
-		r.badRequest(w)
+		w.WriteHeader(http.StatusInternalServerError)
+		msg := "Internal Server Error"
+		fmt.Fprint(w, strings.TrimSpace(msg))
 		return
 	}
 
@@ -182,7 +184,9 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			fmt.Println(err)
 			r.logger.Print("postCreatePost: cant create file")
-			r.badRequest(w) // TODO: internal server error?
+			w.WriteHeader(http.StatusInternalServerError)
+			msg := "Internal Server Error"
+			fmt.Fprint(w, strings.TrimSpace(msg))
 			return
 		}
 		defer newFile.Close()
@@ -192,6 +196,9 @@ func (r *routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		// insert to table
 		if err := r.service.Image.SaveImage(id, fname); err != nil {
 			r.logger.Print("Image not added to db")
+			w.WriteHeader(http.StatusInternalServerError)
+			msg := "Internal Server Error"
+			fmt.Fprint(w, strings.TrimSpace(msg))
 		}
 
 	}
