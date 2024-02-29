@@ -9,6 +9,7 @@ import (
 type ITagService interface {
 	GetAllTags() (*[]entity.TagEntity, error)
 	AreTagsExist([]string) (bool, error)
+	IsExists(int) (bool, error)
 }
 
 type tagService struct {
@@ -38,4 +39,8 @@ func (ts *tagService) AreTagsExist(tags []string) (bool, error) {
 	}
 
 	return ts.tagRepo.AreTagsExist(tagIDs)
+}
+
+func (ts *tagService) IsExists(id int) (bool, error) {
+	return ts.tagRepo.IsExists(id)
 }

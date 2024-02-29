@@ -9,6 +9,7 @@ import (
 type ITagRepository interface {
 	GetAllTags() (*[]entity.TagEntity, error)
 	AreTagsExist([]int) (bool, error)
+	IsExists(int) (bool, error)
 }
 
 type tagRepo struct {
@@ -55,7 +56,7 @@ func (r *tagRepo) AreTagsExist(tagIDs []int) (bool, error) {
 		)
 	`
 
-	var exists []bool = make([]bool, len(tagIDs))
+	var exists = true
 
 	var wg sync.WaitGroup
 	var errCh = make(chan error, len(tagIDs))
@@ -65,10 +66,13 @@ func (r *tagRepo) AreTagsExist(tagIDs []int) (bool, error) {
 		go func(tagID int, it int) {
 			defer wg.Done()
 
-			if err := r.DB.QueryRow(query, tagID).Scan(&exists[it]); err != nil {
+			var tagExists bool
+
+			if err := r.DB.QueryRow(query, tagID).Scan(&tagExists); err != nil {
 				errCh <- err
 				return
 			}
+			exists = exists && tagExists
 		}(id, i)
 	}
 
@@ -83,11 +87,21 @@ func (r *tagRepo) AreTagsExist(tagIDs []int) (bool, error) {
 		}
 	}
 
-	for _, isTagExists := range exists {
-		if !isTagExists {
-			return false, nil
-		}
-	}
+	return exists, nil
+}
 
-	return true, nil
+func (r *tagRepo) IsExists(id int) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT true
+			FROM tags
+			WHERE tags.id = $1
+		)
+	`
+
+	var exists bool
+
+	err := r.DB.QueryRow(query, id).Scan(&exists)
+
+	return exists, err
 }

@@ -34,3 +34,7 @@ func (ts *TagServiceMock) AreTagsExist(tags []string) (bool, error) {
 	}
 	return ts.tr.AreTagsExist(tagIDs)
 }
+
+func (ts *TagServiceMock) IsExists(id int) (bool, error) {
+	return ts.tr.IsExists(id)
+}

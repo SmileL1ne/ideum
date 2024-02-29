@@ -78,6 +78,17 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	isTagExists, err := r.service.Tag.IsExists(tagID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+	if !isTagExists {
+		r.logger.Print("sortedByTag: invalid tag id (doen't exist)")
+		r.badRequest(w)
+		return
+	}
+
 	posts, err := r.service.Post.GetAllPostsByTagId(tagID)
 	if err != nil {
 		r.serverError(w, req, err)

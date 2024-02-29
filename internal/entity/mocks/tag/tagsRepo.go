@@ -30,3 +30,10 @@ func (r *TagRepoMock) AreTagsExist(tagIDs []int) (bool, error) {
 	}
 	return false, nil
 }
+
+func (r *TagRepoMock) IsExists(id int) (bool, error) {
+	if id == 1 {
+		return true, nil
+	}
+	return false, nil
+}
