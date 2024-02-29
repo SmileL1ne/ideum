@@ -36,6 +36,17 @@ func (r *Routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	isPostExists, err := r.service.Post.ExistsPost(postID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+	if !isPostExists {
+		r.logger.Printf("commentCreate: no post with id - %d", postID)
+		r.notFound(w)
+		return
+	}
+
 	content := req.PostForm.Get("commentContent")
 	comment := &entity.CommentCreateForm{
 		Content: content,

@@ -85,7 +85,7 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 	}
 	if !isTagExists {
 		r.logger.Print("sortedByTag: invalid tag id (doen't exist)")
-		r.badRequest(w)
+		r.notFound(w)
 		return
 	}
 
