@@ -36,6 +36,16 @@ func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 		return 0, err
 	}
 
+	user, err := r.GetUserByUsername(u.Username)
+	if err != nil && !errors.Is(err, entity.ErrInvalidCredentials) {
+		return 0, err
+	}
+	if user != (entity.UserEntity{}) {
+		if strings.EqualFold(u.Username, user.Username) {
+			return 0, entity.ErrDuplicateUsername
+		}
+	}
+
 	query := `INSERT INTO users (username, email, hashed_password, created_at) 
 		VALUES ($1, $2, $3, datetime('now', 'localtime'))`
 
@@ -66,6 +76,7 @@ func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 }
 
 func (r *userRepository) GetUserByEmail(email string) (entity.UserEntity, error) {
+	fmt.Println("nah")
 	return r.getUserByField("email", email)
 }
 
@@ -81,7 +92,7 @@ func (r *userRepository) GetUsernameByID(userID int) (string, error) {
 func (r *userRepository) getUserByField(field string, value interface{}) (entity.UserEntity, error) {
 	var u entity.UserEntity
 
-	query := fmt.Sprintf(`SELECT * FROM users WHERE %s = $1`, field)
+	query := fmt.Sprintf(`SELECT * FROM users WHERE %s = $1 COLLATE NOCASE`, field)
 
 	err := r.DB.QueryRow(query, value).Scan(&u.Id, &u.Username, &u.Email, &u.Password, &u.CreatedAt)
 	if err != nil {

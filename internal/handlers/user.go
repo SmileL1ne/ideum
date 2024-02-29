@@ -21,7 +21,7 @@ func (r *Routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	form := req.PostForm
 
 	username := form.Get("username")
-	email := form.Get("email")
+	email := strings.ToLower(form.Get("email"))
 	password := form.Get("password")
 
 	u := entity.UserSignupForm{Username: username, Email: email, Password: password}
@@ -57,7 +57,7 @@ func (r *Routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	}
 
 	form := req.PostForm
-	identifier := form.Get("identifier")
+	identifier := strings.ToLower(form.Get("identifier"))
 	password := form.Get("password")
 
 	u := entity.UserLoginForm{Identifier: identifier, Password: password}

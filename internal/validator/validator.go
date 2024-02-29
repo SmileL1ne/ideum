@@ -60,3 +60,12 @@ func MinChar(str string, n int) bool {
 func Matches(str string, rx *regexp.Regexp) bool {
 	return rx.MatchString(str)
 }
+
+func ValidString(str string) bool {
+	for _, ch := range str {
+		if ch < 32 || ch > 126 {
+			return false
+		}
+	}
+	return true
+}
