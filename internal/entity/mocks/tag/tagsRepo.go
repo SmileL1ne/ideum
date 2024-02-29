@@ -23,3 +23,10 @@ var _ tag.ITagRepository = (*TagRepoMock)(nil)
 func (r *TagRepoMock) GetAllTags() (*[]entity.TagEntity, error) {
 	return &[]entity.TagEntity{mockTag}, nil
 }
+
+func (r *TagRepoMock) AreTagsExist(tagIDs []int) (bool, error) {
+	if tagIDs[0] == 1 {
+		return true, nil
+	}
+	return false, nil
+}

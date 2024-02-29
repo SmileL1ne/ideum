@@ -102,8 +102,33 @@ func (r *Routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	// Get all selected tags id
 	tags := form["tags"]
 	if len(tags) == 0 {
+		r.logger.Print("postCreatePost: no tags selected")
 		w.WriteHeader(http.StatusBadRequest)
 		msg := "tags: At least one tag should be selected"
+		fmt.Fprint(w, strings.TrimSpace(msg))
+		return
+	}
+
+	fmt.Println(tags[0])
+	areTagsExist, err := r.service.Tag.AreTagsExist(tags)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidFormData):
+			r.logger.Print("postCreatePost: invalid post tags")
+
+			w.WriteHeader(http.StatusBadRequest)
+			msg := "invalid post tags"
+			fmt.Fprint(w, strings.TrimSpace(msg))
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+	if !areTagsExist {
+		r.logger.Print("postCreatePost: post tags don't exist")
+
+		w.WriteHeader(http.StatusBadRequest)
+		msg := "invalid post tags (don't exist)"
 		fmt.Fprint(w, strings.TrimSpace(msg))
 		return
 	}

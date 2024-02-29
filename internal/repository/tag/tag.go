@@ -3,10 +3,12 @@ package tag
 import (
 	"database/sql"
 	"forum/internal/entity"
+	"sync"
 )
 
 type ITagRepository interface {
 	GetAllTags() (*[]entity.TagEntity, error)
+	AreTagsExist([]int) (bool, error)
 }
 
 type tagRepo struct {
@@ -42,4 +44,50 @@ func (r *tagRepo) GetAllTags() (*[]entity.TagEntity, error) {
 	}
 
 	return &tags, nil
+}
+
+func (r *tagRepo) AreTagsExist(tagIDs []int) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT true
+			FROM tags
+			WHERE tags.id = $1
+		)
+	`
+
+	var exists []bool = make([]bool, len(tagIDs))
+
+	var wg sync.WaitGroup
+	var errCh = make(chan error, len(tagIDs))
+
+	wg.Add(len(tagIDs))
+	for i, id := range tagIDs {
+		go func(tagID int, it int) {
+			defer wg.Done()
+
+			if err := r.DB.QueryRow(query, tagID).Scan(&exists[it]); err != nil {
+				errCh <- err
+				return
+			}
+		}(id, i)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errCh)
+	}()
+
+	for err := range errCh {
+		if err != nil {
+			return false, err
+		}
+	}
+
+	for _, isTagExists := range exists {
+		if !isTagExists {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }

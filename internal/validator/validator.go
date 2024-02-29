@@ -10,7 +10,7 @@ import (
 	Validator is package that provides tools for validating
 	data.
 
-	Validator struct holds 2 structures that holds field and
+	Validator struct holds 2 structures that saves field and
 	non-field error messages if there any
 */
 
@@ -48,10 +48,12 @@ func NotBlank(str string) bool {
 }
 
 func MaxChar(str string, n int) bool {
+	str = strings.TrimSpace(str)
 	return utf8.RuneCountInString(str) <= n
 }
 
 func MinChar(str string, n int) bool {
+	str = strings.TrimSpace(str)
 	return utf8.RuneCountInString(str) >= n
 }
 

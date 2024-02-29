@@ -34,12 +34,10 @@ func (ps *postService) SavePost(p *entity.PostCreateForm, userID int, tags []str
 	if !isRightPost(p) {
 		return 0, entity.ErrInvalidFormData
 	}
+
 	var tagIDs []int
 	for _, tagIDStr := range tags {
-		tagID, err := strconv.Atoi(tagIDStr)
-		if err != nil {
-			return 0, entity.ErrInvalidFormData
-		}
+		tagID, _ := strconv.Atoi(tagIDStr) // Don't handle error because we know Id's are valid (checked before)
 		tagIDs = append(tagIDs, tagID)
 	}
 
