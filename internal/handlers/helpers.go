@@ -161,7 +161,7 @@ func getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
 // getValidID parses string id to int and checks if it is valid
 func getValidID(idStr string) (int, bool) {
 	id, _ := strconv.Atoi(idStr)
-	if id <= 0 {
+	if id < 0 {
 		return 0, false
 	}
 	return id, true

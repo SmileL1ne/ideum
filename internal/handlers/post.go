@@ -109,7 +109,6 @@ func (r *Routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println(tags[0])
 	areTagsExist, err := r.service.Tag.AreTagsExist(tags)
 	if err != nil {
 		switch {

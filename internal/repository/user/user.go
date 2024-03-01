@@ -76,7 +76,6 @@ func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 }
 
 func (r *userRepository) GetUserByEmail(email string) (entity.UserEntity, error) {
-	fmt.Println("nah")
 	return r.getUserByField("email", email)
 }
 
