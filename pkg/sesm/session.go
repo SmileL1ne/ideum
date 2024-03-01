@@ -2,7 +2,6 @@ package sesm
 
 import (
 	"context"
-	sqlit3store "forum/pkg/sesm/sqlite3store"
 	"log"
 	"net/http"
 	"time"
@@ -14,7 +13,7 @@ import (
 */
 
 type SessionManager struct {
-	Store      *sqlit3store.SQLite3Store
+	Store      Store
 	Lifetime   time.Duration
 	CookieName string
 	ContextKey contextKey

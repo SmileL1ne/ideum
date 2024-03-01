@@ -147,6 +147,7 @@ func (r *Routes) getUsername(req *http.Request) (string, error) {
 func getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
 	urlParts := strings.Split(req.URL.Path, "/")
 	if len(urlParts) != urlPartsNum {
+		fmt.Println("nah")
 		return 0, entity.ErrInvalidURLPath
 	}
 
@@ -160,8 +161,8 @@ func getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
 
 // getValidID parses string id to int and checks if it is valid
 func getValidID(idStr string) (int, bool) {
-	id, _ := strconv.Atoi(idStr)
-	if id < 0 {
+	id, err := strconv.Atoi(idStr)
+	if id < 0 || err != nil {
 		return 0, false
 	}
 	return id, true

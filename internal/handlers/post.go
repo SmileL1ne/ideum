@@ -33,6 +33,7 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	fmt.Println(postID)
 	post, err := r.service.Post.GetPost(postID)
 	if err != nil {
 		switch {

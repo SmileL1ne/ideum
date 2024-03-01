@@ -46,7 +46,7 @@ func (c Chain) ThenFunc(fn http.HandlerFunc) http.Handler {
 	return c.Then(fn)
 }
 
-// Appends appends existing chain with inputed middlewares
+// Append appends existing chain with inputed middlewares
 func (c Chain) Append(mids ...Mid) Chain {
 	newMids := make([]Mid, 0, len(c.mids)+len(mids))
 	newMids = append(newMids, c.mids...)

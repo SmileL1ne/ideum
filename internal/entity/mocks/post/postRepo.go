@@ -28,12 +28,12 @@ func NewPostRepoMock() *PostRepoMock {
 var _ post.IPostRepository = (*PostRepoMock)(nil)
 
 func (r *PostRepoMock) SavePost(p entity.PostCreateForm, userID int, tagIDs []int) (int, error) {
-	return 2, nil
+	return mockPost.ID, nil
 }
 
 func (r *PostRepoMock) GetPost(postID int) (entity.PostEntity, error) {
 	switch postID {
-	case 1:
+	case mockPost.ID:
 		return mockPost, nil
 	default:
 		return entity.PostEntity{}, entity.ErrNoRecord
