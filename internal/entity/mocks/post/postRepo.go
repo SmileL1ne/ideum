@@ -36,24 +36,24 @@ func (r *PostRepoMock) GetPost(postID int) (entity.PostEntity, error) {
 	case mockPost.ID:
 		return mockPost, nil
 	default:
-		return entity.PostEntity{}, entity.ErrNoRecord
+		return mockPost, entity.ErrNoRecord
 	}
 }
 
 func (r *PostRepoMock) GetAllPosts() (*[]entity.PostEntity, error) {
-	return nil, nil
+	return &[]entity.PostEntity{mockPost}, nil
 }
 
 func (r *PostRepoMock) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, error) {
-	return nil, nil
+	return &[]entity.PostEntity{mockPost}, nil
 }
 
 func (r *PostRepoMock) GetAllPostsByUserID(userID int) (*[]entity.PostEntity, error) {
-	return nil, nil
+	return &[]entity.PostEntity{mockPost}, nil
 }
 
 func (r *PostRepoMock) GetAllPostsByUserReaction(userID int) (*[]entity.PostEntity, error) {
-	return nil, nil
+	return &[]entity.PostEntity{mockPost}, nil
 }
 
 func (r *PostRepoMock) ExistsPost(postID int) (bool, error) {

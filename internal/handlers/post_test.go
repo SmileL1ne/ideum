@@ -9,7 +9,6 @@ import (
 
 func TestPostView(t *testing.T) {
 	r := newTestRoutes(t)
-
 	ts := newTestServer(t, r.Register())
 	defer ts.Close()
 
@@ -67,7 +66,6 @@ func TestPostView(t *testing.T) {
 
 func TestPostCreatePost(t *testing.T) {
 	r := newTestRoutes(t)
-
 	ts := newTestServer(t, r.Register())
 	defer ts.Close()
 

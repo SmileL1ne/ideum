@@ -10,7 +10,6 @@ import (
 
 func TestCommentCreate(t *testing.T) {
 	r := newTestRoutes(t)
-
 	ts := newTestServer(t, r.Register())
 	defer ts.Close()
 
