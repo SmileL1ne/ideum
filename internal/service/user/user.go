@@ -13,6 +13,7 @@ type IUserService interface {
 	SaveUser(*entity.UserSignupForm) (int, error)
 	Authenticate(*entity.UserLoginForm) (int, error)
 	GetUsernameById(int) (string, error)
+	GetUserByEmail(string) (entity.UserEntity, error)
 }
 
 type userService struct {
@@ -37,10 +38,10 @@ func (us *userService) SaveUser(u *entity.UserSignupForm) (int, error) {
 		switch {
 		case errors.Is(err, entity.ErrDuplicateEmail):
 			u.AddFieldError("email", "Email address is already in use")
-			return 0, entity.ErrInvalidFormData
+			return 0, entity.ErrDuplicateEmail
 		case errors.Is(err, entity.ErrDuplicateUsername):
 			u.AddFieldError("username", "Username is already in use")
-			return 0, entity.ErrInvalidFormData
+			return 0, entity.ErrDuplicateUsername
 		default:
 			return 0, err
 		}
@@ -86,4 +87,8 @@ func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
 
 func (us *userService) GetUsernameById(userID int) (string, error) {
 	return us.userRepo.GetUsernameByID(userID)
+}
+
+func (r *userService) GetUserByEmail(email string) (entity.UserEntity, error) {
+	return r.userRepo.GetUserByEmail(email)
 }
