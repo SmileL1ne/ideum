@@ -25,7 +25,7 @@ func NewCommentService(r comment.ICommentRepository) *commentService {
 }
 
 func (cs *commentService) SaveComment(c *entity.CommentCreateForm, postID int, userID int) error {
-	if !isRightComment(c) {
+	if !IsRightComment(c) {
 		return entity.ErrInvalidFormData
 	}
 

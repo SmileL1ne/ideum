@@ -28,7 +28,7 @@ func NewUserService(u user.IUserRepository) *userService {
 var _ IUserService = (*userService)(nil)
 
 func (us *userService) SaveUser(u *entity.UserSignupForm) (int, error) {
-	if !isRightSignUp(u) {
+	if !IsRightSignUp(u) {
 		return 0, entity.ErrInvalidFormData
 	}
 
@@ -50,7 +50,7 @@ func (us *userService) SaveUser(u *entity.UserSignupForm) (int, error) {
 }
 
 func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
-	if !isRightLogin(u) {
+	if !IsRightLogin(u) {
 		return 0, entity.ErrInvalidFormData
 	}
 

@@ -96,8 +96,8 @@ func (r *Routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	form := req.PostForm
 
-	title := form.Get("title")
-	content := form.Get("content")
+	title := strings.TrimSpace(form.Get("title"))
+	content := strings.TrimSpace(form.Get("content"))
 
 	// Get all selected tags id
 	tags := form["tags"]
@@ -139,7 +139,10 @@ func (r *Routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	p := entity.PostCreateForm{Title: title, Content: content}
+	p := entity.PostCreateForm{
+		Title:   title,
+		Content: content,
+	}
 
 	id, err := r.service.Post.SavePost(&p, userID, tags)
 	if err != nil {

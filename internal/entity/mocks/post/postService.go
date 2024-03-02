@@ -21,7 +21,7 @@ func NewPostServiceMock(r repo.IPostRepository) *PostServiceMock {
 var _ service.IPostService = (*PostServiceMock)(nil)
 
 func (ps *PostServiceMock) SavePost(p *entity.PostCreateForm, userID int, tags []string) (int, error) {
-	if !isRightPost(p) {
+	if !service.IsRightPost(p) {
 		return 0, entity.ErrInvalidFormData
 	}
 
@@ -46,29 +46,29 @@ func (ps *PostServiceMock) GetPost(postID int) (entity.PostView, error) {
 		Username:    postEntity.Username,
 		Likes:       postEntity.Likes,
 		Dislikes:    postEntity.Dislikes,
-		PostTags:    convertToStrArr(postEntity.PostTags),
+		PostTags:    service.ConvertToStrArr(postEntity.PostTags),
 		CommentsLen: postEntity.CommentsLen,
 	}, nil
 }
 
 func (ps *PostServiceMock) GetAllPosts() (*[]entity.PostView, error) {
 	posts, _ := ps.pr.GetAllPosts()
-	return convertEntitiesToViews(posts)
+	return service.ConvertEntitiesToViews(posts)
 }
 
 func (ps *PostServiceMock) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
 	posts, _ := ps.pr.GetAllPostsByTagId(tagID)
-	return convertEntitiesToViews(posts)
+	return service.ConvertEntitiesToViews(posts)
 }
 
 func (ps *PostServiceMock) GetAllPostsByUserId(userID int) (*[]entity.PostView, error) {
 	posts, _ := ps.pr.GetAllPostsByUserID(userID)
-	return convertEntitiesToViews(posts)
+	return service.ConvertEntitiesToViews(posts)
 }
 
 func (ps *PostServiceMock) GetAllPostsByUserReaction(userID int) (*[]entity.PostView, error) {
 	posts, _ := ps.pr.GetAllPostsByUserReaction(userID)
-	return convertEntitiesToViews(posts)
+	return service.ConvertEntitiesToViews(posts)
 }
 
 func (ps *PostServiceMock) ExistsPost(postID int) (bool, error) {

@@ -12,7 +12,7 @@ const (
 	maxContentLen = 5000
 )
 
-func isRightPost(p *entity.PostCreateForm) bool {
+func IsRightPost(p *entity.PostCreateForm) bool {
 	p.CheckField(validator.NotBlank(p.Title), "title", "This field cannot be blank")
 	p.CheckField(validator.MaxChar(p.Title, maxTitleLen), "title", fmt.Sprintf("Maximum characters length exceeded - %d", maxTitleLen))
 	p.CheckField(validator.NotBlank(p.Content), "content", "This field cannot be blank")
@@ -21,11 +21,11 @@ func isRightPost(p *entity.PostCreateForm) bool {
 	return p.Valid()
 }
 
-func convertEntitiesToViews(posts *[]entity.PostEntity) (*[]entity.PostView, error) {
+func ConvertEntitiesToViews(posts *[]entity.PostEntity) (*[]entity.PostView, error) {
 	// Convert received PostEntity's to PostView's
 	var pViews []entity.PostView
 	for _, p := range *posts {
-		tags := convertToStrArr(p.PostTags)
+		tags := ConvertToStrArr(p.PostTags)
 		post := entity.PostView{
 			ID:          p.ID,
 			Title:       p.Title,
@@ -43,7 +43,7 @@ func convertEntitiesToViews(posts *[]entity.PostEntity) (*[]entity.PostView, err
 	return &pViews, nil
 }
 
-func convertToStrArr(tagsStr string) []string {
+func ConvertToStrArr(tagsStr string) []string {
 	if tagsStr == "" {
 		return []string{}
 	}

@@ -31,7 +31,7 @@ func NewPostsService(r post.IPostRepository) *postService {
 var _ IPostService = (*postService)(nil)
 
 func (ps *postService) SavePost(p *entity.PostCreateForm, userID int, tags []string) (int, error) {
-	if !isRightPost(p) {
+	if !IsRightPost(p) {
 		return 0, entity.ErrInvalidFormData
 	}
 
@@ -58,7 +58,7 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 		return entity.PostView{}, err
 	}
 
-	tags := convertToStrArr(post.PostTags)
+	tags := ConvertToStrArr(post.PostTags)
 	pView := entity.PostView{
 		ID:          post.ID,
 		Title:       post.Title,
@@ -80,7 +80,7 @@ func (pc *postService) GetAllPosts() (*[]entity.PostView, error) {
 		return nil, err
 	}
 
-	return convertEntitiesToViews(posts)
+	return ConvertEntitiesToViews(posts)
 }
 
 func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
@@ -89,7 +89,7 @@ func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error)
 		return nil, err
 	}
 
-	return convertEntitiesToViews(posts)
+	return ConvertEntitiesToViews(posts)
 }
 
 func (pc *postService) GetAllPostsByUserId(userID int) (*[]entity.PostView, error) {
@@ -98,7 +98,7 @@ func (pc *postService) GetAllPostsByUserId(userID int) (*[]entity.PostView, erro
 		return nil, err
 	}
 
-	return convertEntitiesToViews(posts)
+	return ConvertEntitiesToViews(posts)
 }
 
 func (pc *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView, error) {
@@ -107,7 +107,7 @@ func (pc *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView
 		return nil, err
 	}
 
-	return convertEntitiesToViews(posts)
+	return ConvertEntitiesToViews(posts)
 }
 
 func (pc *postService) ExistsPost(postID int) (bool, error) {

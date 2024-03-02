@@ -19,17 +19,11 @@ func NewTagServiceMock(r repo.ICommentRepository) *CommentServiceMock {
 var _ service.ICommentService = (*CommentServiceMock)(nil)
 
 func (cs *CommentServiceMock) SaveComment(c *entity.CommentCreateForm, postID int, userID int) error {
+	if !service.IsRightComment(c) {
+		return entity.ErrInvalidFormData
+	}
 
-	/*
-		TODO:
-		- add comment fieds check and return ErrInvalidFormData
-	*/
-
-	// if !isRightComment(c) {
-	// 	return entity.ErrInvalidFormData
-	// }
-
-	return nil
+	return cs.cr.SaveComment(*c, postID, userID)
 }
 
 func (cs *CommentServiceMock) GetAllCommentsForPost(postID int) (*[]entity.CommentView, error) {

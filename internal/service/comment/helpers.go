@@ -10,7 +10,7 @@ const (
 	commentMaxLen = 500
 )
 
-func isRightComment(c *entity.CommentCreateForm) bool {
+func IsRightComment(c *entity.CommentCreateForm) bool {
 	c.CheckField(validator.NotBlank(c.Content), "commentContent", "This field cannot be blank")
 	c.CheckField(validator.MaxChar(c.Content, commentMaxLen), "commentContent", fmt.Sprintf("This cannot be longer than %d characters", commentMaxLen))
 

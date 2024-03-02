@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"forum/internal/entity"
 	"net/http"
+	"strings"
 )
 
 func (r *Routes) commentCreate(w http.ResponseWriter, req *http.Request) {
@@ -58,7 +59,8 @@ func (r *Routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		case errors.Is(err, entity.ErrInvalidFormData):
 			r.logger.Print("commentCreate: invalid form fill")
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, comment.FieldErrors["commentContent"])
+			msg := getErrorMessage(&comment.Validator)
+			fmt.Fprint(w, strings.TrimSpace(msg))
 		default:
 			r.serverError(w, req, err)
 		}
