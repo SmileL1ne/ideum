@@ -5,7 +5,7 @@ import (
 	"forum/internal/entity"
 	repo "forum/internal/repository/post"
 	service "forum/internal/service/post"
-	"strings"
+	"strconv"
 )
 
 type PostServiceMock struct {
@@ -20,8 +20,17 @@ func NewPostServiceMock(r repo.IPostRepository) *PostServiceMock {
 
 var _ service.IPostService = (*PostServiceMock)(nil)
 
-func (ps *PostServiceMock) SavePost(*entity.PostCreateForm, int, []string) (int, error) {
-	return ps.pr.SavePost(entity.PostCreateForm{}, 0, nil)
+func (ps *PostServiceMock) SavePost(p *entity.PostCreateForm, userID int, tags []string) (int, error) {
+	if !isRightPost(p) {
+		return 0, entity.ErrInvalidFormData
+	}
+
+	var tagIDs []int
+	for _, tagIDStr := range tags {
+		tagID, _ := strconv.Atoi(tagIDStr) // Don't handle error because we know Id's are valid (checked before)
+		tagIDs = append(tagIDs, tagID)
+	}
+	return ps.pr.SavePost(entity.PostCreateForm{}, 0, tagIDs)
 }
 
 func (ps *PostServiceMock) GetPost(postID int) (entity.PostView, error) {
@@ -64,32 +73,4 @@ func (ps *PostServiceMock) GetAllPostsByUserReaction(userID int) (*[]entity.Post
 
 func (ps *PostServiceMock) ExistsPost(postID int) (bool, error) {
 	return ps.pr.ExistsPost(postID)
-}
-
-func convertEntitiesToViews(posts *[]entity.PostEntity) (*[]entity.PostView, error) {
-	var pViews []entity.PostView
-	for _, p := range *posts {
-		tags := convertToStrArr(p.PostTags)
-		post := entity.PostView{
-			ID:          p.ID,
-			Title:       p.Title,
-			Content:     p.Content,
-			CreatedAt:   p.CreatedAt,
-			Username:    p.Username,
-			Likes:       p.Likes,
-			Dislikes:    p.Dislikes,
-			PostTags:    tags,
-			CommentsLen: p.CommentsLen,
-		}
-		pViews = append(pViews, post)
-	}
-
-	return &pViews, nil
-}
-
-func convertToStrArr(tagsStr string) []string {
-	if tagsStr == "" {
-		return []string{}
-	}
-	return strings.Split(tagsStr, ", ")
 }

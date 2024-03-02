@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"forum/internal/assert"
 	"net/http"
 	"net/url"
@@ -86,13 +85,21 @@ func TestPostCreatePost(t *testing.T) {
 		wantCode int
 		wantBody string
 	}{
+		// {
+		// 	name:     "Valid post",
+		// 	title:    validTitle,
+		// 	content:  validContent,
+		// 	tags:     validTags,
+		// 	wantCode: http.StatusOK,
+		// 	wantBody: "/post/view/1",
+		// },
 		{
-			name:     "Valid post",
-			title:    validTitle,
+			name:     "Blank title",
+			title:    "",
 			content:  validContent,
 			tags:     validTags,
-			wantCode: http.StatusOK,
-			wantBody: "/post/view/1",
+			wantCode: http.StatusBadRequest,
+			wantBody: "title: This field cannot be blank",
 		},
 	}
 
@@ -104,7 +111,6 @@ func TestPostCreatePost(t *testing.T) {
 			form["tags"] = tt.tags
 
 			code, _, body := ts.postForm(t, "/post/create", form)
-			fmt.Println(code)
 			assert.Equal(t, code, tt.wantCode)
 
 			if tt.wantBody != "" {

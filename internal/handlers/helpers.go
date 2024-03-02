@@ -147,7 +147,6 @@ func (r *Routes) getUsername(req *http.Request) (string, error) {
 func getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
 	urlParts := strings.Split(req.URL.Path, "/")
 	if len(urlParts) != urlPartsNum {
-		fmt.Println("nah")
 		return 0, entity.ErrInvalidURLPath
 	}
 
