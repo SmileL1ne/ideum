@@ -20,6 +20,9 @@ func (r *routes) newRouter() http.Handler {
 	router.Handle("/user/login", dynamic.ThenFunc(r.userLoginPost))
 	router.Handle("/user/signup", dynamic.ThenFunc(r.userSignupPost))
 	router.Handle("/post/view/", dynamic.ThenFunc(r.postView)) // postID at the end
+	// SSO
+	router.Handle("/login/google", dynamic.ThenFunc(r.googlelogin))
+	router.Handle("/callbackGoogle", dynamic.ThenFunc(r.googleCallback))
 
 	// Protected appends dynamic middleware chain and used for routes
 	// that require authentication
