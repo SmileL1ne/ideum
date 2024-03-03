@@ -18,7 +18,7 @@ type UserEntity struct {
 // errors purpose only. It accepted as copy by repos because it is read only
 // at that stage
 type UserSignupForm struct {
-	Username string
+	Name     string
 	Email    string
 	Password string
 	validator.Validator

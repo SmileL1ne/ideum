@@ -24,7 +24,7 @@ func (r *routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	email := form.Get("email")
 	password := form.Get("password")
 
-	u := entity.UserSignupForm{Username: username, Email: email, Password: password}
+	u := entity.UserSignupForm{Name: username, Email: email, Password: password}
 
 	_, err := r.service.User.SaveUser(&u) // Put user id in context
 	if err != nil {

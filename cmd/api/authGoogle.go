@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"forum/internal/entity"
 	"net/http"
@@ -19,7 +20,6 @@ var (
 )
 
 func init() {
-
 	file, err := os.Open(".env")
 	if err != nil {
 		fmt.Println(err)
@@ -81,6 +81,13 @@ func (r *routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 
 	defer userInfoResp.Body.Close()
 
+	// contents, err := ioutil.ReadAll(userInfoResp.Body)
+	// if err != nil {
+	// 	fmt.Fprintf(w, "failed read response: %s", err.Error())
+	// 	return
+	// }
+	// fmt.Fprintln(w, string(contents))
+
 	form := entity.UserSignupForm{}
 
 	if err := json.NewDecoder(userInfoResp.Body).Decode(&form); err != nil {
@@ -89,7 +96,7 @@ func (r *routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	form.Password, err = generateRandomPassword(8)
+	form.Password, err = RandomPassword(8)
 	if err != nil {
 		http.Error(w, "Failed to generate password", http.StatusInternalServerError)
 		r.serverError(w, req, err)
@@ -98,12 +105,8 @@ func (r *routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Println("inFO", form)
 
-	// if form.Username == "" {
-	// 	form.Username = form.Email + "!"
-	// }
 
 	r.Sso(w, req, form)
-
 }
 
 func (r *routes) Sso(w http.ResponseWriter, req *http.Request, form entity.UserSignupForm) {
@@ -112,34 +115,34 @@ func (r *routes) Sso(w http.ResponseWriter, req *http.Request, form entity.UserS
 	fmt.Println("OPA", form)
 	if err != nil {
 		fmt.Println("OI", err)
-		// switch {
-		// case errors.Is(err, entity.ErrDuplicateEmail) || errors.Is(err, entity.ErrDuplicateUsername):
+		switch {
+		case errors.Is(err, entity.ErrDuplicateEmail) || errors.Is(err, entity.ErrDuplicateUsername):
 
-		user, err := r.service.User.GetUserByEmail(form.Email)
-		fmt.Println("-", user.Id)
-		if err != nil {
-			fmt.Println("line109")
+			user, err := r.service.User.GetUserByEmail(form.Email)
+			fmt.Println("-", user.Id)
+			if err != nil {
+				fmt.Println("line109")
+				r.serverError(w, req, err)
+				return
+			}
+
+			err = r.sesm.RenewToken(req.Context(), user.Id)
+			if err != nil {
+				fmt.Println("line116")
+				r.serverError(w, req, err)
+				return
+			}
+
+			r.sesm.PutUserID(req.Context(), user.Id)
+			http.Redirect(w, req, "/", http.StatusSeeOther)
+			return
+
+		default:
 			r.serverError(w, req, err)
+			fmt.Println(err)
+			fmt.Println("line 127")
 			return
 		}
-
-		err = r.sesm.RenewToken(req.Context(), user.Id)
-		if err != nil {
-			fmt.Println("line116")
-			r.serverError(w, req, err)
-			return
-		}
-
-		r.sesm.PutUserID(req.Context(), user.Id)
-		http.Redirect(w, req, "/", http.StatusSeeOther)
-		return
-
-		// default:
-		// 	r.serverError(w, req, err)
-		// 	fmt.Println(err)
-		// 	fmt.Println("line 127")
-		// 	return
-		// }
 
 	}
 	// login here
@@ -157,7 +160,7 @@ func (r *routes) Sso(w http.ResponseWriter, req *http.Request, form entity.UserS
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
 
-func generateRandomPassword(length int) (string, error) {
+func RandomPassword(length int) (string, error) {
 	bytes := make([]byte, length)
 	_, err := rand.Read(bytes)
 	if err != nil {

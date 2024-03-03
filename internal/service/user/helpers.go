@@ -17,8 +17,8 @@ const (
 var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:.[a-zA-Z0-9](?:[a-zA-Z0-9]{0, 61}[a-zA-Z0-9])?)*$")
 
 func isRightSignUp(u *entity.UserSignupForm) bool {
-	u.CheckField(validator.NotBlank(u.Username), "username", "This field cannot be blank")
-	u.CheckField(validator.MaxChar(u.Username, maxUsernameLen), "username", fmt.Sprintf("Maximum characters length exceeded - %d", maxUsernameLen))
+	u.CheckField(validator.NotBlank(u.Name), "username", "This field cannot be blank")
+	u.CheckField(validator.MaxChar(u.Name, maxUsernameLen), "username", fmt.Sprintf("Maximum characters length exceeded - %d", maxUsernameLen))
 	u.CheckField(validator.NotBlank(u.Email), "email", "This field cannot be blank")
 	u.CheckField(validator.MaxChar(u.Email, maxEmailLen), "email", fmt.Sprintf("Maximum characters length exceeded - %d", maxEmailLen))
 	u.CheckField(validator.Matches(u.Email, EmailRX), "email", "Invalid email address")
