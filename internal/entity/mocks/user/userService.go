@@ -20,7 +20,7 @@ func NewUserServiceMock(r repo.IUserRepository) *UserServiceMock {
 var _ service.IUserService = (*UserServiceMock)(nil)
 
 func (us *UserServiceMock) SaveUser(u *entity.UserSignupForm) (int, error) {
-	if u.Username == "satoru" && u.Email == "satoru@gmail.com" {
+	if !service.IsRightSignUp(u) {
 		return 0, entity.ErrInvalidFormData
 	}
 

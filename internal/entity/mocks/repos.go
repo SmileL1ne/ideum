@@ -12,7 +12,7 @@ import (
 func NewReposMock() *repository.Repositories {
 	return &repository.Repositories{
 		Post:     post.NewPostRepoMock(),
-		User:     user.NewTagRepoMock(),
+		User:     user.NewUserRepoMock(),
 		Tag:      tag.NewTagRepoMock(),
 		Comment:  comment.NewCommentRepoMock(),
 		Reaction: reaction.NewReactionRepoMock(),

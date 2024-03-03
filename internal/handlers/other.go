@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"errors"
-	"forum/internal/entity"
 	"forum/web"
 	"net/http"
 	"strings"
@@ -29,7 +27,7 @@ func (r *Routes) home(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.Method != http.MethodGet {
-		r.notFound(w)
+		r.methodNotAllowed(w)
 		return
 	}
 
@@ -65,16 +63,10 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	tagID, err := getIdFromPath(req, 3)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidURLPath):
-			r.logger.Print("sortedByTag: invalid url path")
-			r.notFound(w)
-		case errors.Is(err, entity.ErrInvalidPathID):
-			r.logger.Print("sortedByTag: invalid id in request path")
-			r.badRequest(w)
-		}
+	tagID, ok := getIdFromPath(req, 3)
+	if !ok {
+		r.logger.Print("sortedByTag: invalid url path")
+		r.notFound(w)
 		return
 	}
 

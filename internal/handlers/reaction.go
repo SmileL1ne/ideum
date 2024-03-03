@@ -27,16 +27,10 @@ func (r *Routes) postReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	postID, err := getIdFromPath(req, 4)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidURLPath):
-			r.logger.Print("postReaction: invalid url path")
-			r.notFound(w)
-		case errors.Is(err, entity.ErrInvalidPathID):
-			r.logger.Print("postReaction: invalid id in request path")
-			r.badRequest(w)
-		}
+	postID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("postReaction: invalid url path")
+		r.notFound(w)
 		return
 	}
 
@@ -74,30 +68,24 @@ func (r *Routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 
 	reaction := req.URL.Query().Get("reaction")
 	if reaction == "" {
-		r.logger.Print("postReaction: invalid query parameter - reaction")
+		r.logger.Print("commentReaction: invalid query parameter - reaction")
 		r.badRequest(w)
 		return
 	}
 
-	commentID, err := getIdFromPath(req, 6)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidURLPath):
-			r.logger.Print("commentReaction: invalid url path")
-			r.notFound(w)
-		case errors.Is(err, entity.ErrInvalidPathID):
-			r.logger.Print("commentReaction: invalid id in request path")
-			r.badRequest(w)
-		}
+	commentID, ok := getIdFromPath(req, 6)
+	if !ok {
+		r.logger.Print("commentReaction: invalid url path")
+		r.notFound(w)
 		return
 	}
 
-	isCommentExists, err := r.service.Comment.ExistsComment(commentID)
+	isCommentExist, err := r.service.Comment.ExistsComment(commentID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
-	if !isCommentExists {
+	if !isCommentExist {
 		r.logger.Printf("commentReaction: no comment with id - %d", commentID)
 		r.notFound(w)
 		return
@@ -121,7 +109,7 @@ func (r *Routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
-			r.logger.Printf("postReaction: invalid query parameter - '%s'", reaction)
+			r.logger.Printf("commentReaction: invalid query parameter - '%s'", reaction)
 			r.badRequest(w)
 		default:
 			r.serverError(w, req, err)

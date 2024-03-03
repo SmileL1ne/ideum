@@ -43,13 +43,13 @@ func TestCommentCreate(t *testing.T) {
 			name:     "Invalid postID (negative)",
 			content:  validContent,
 			postID:   "-1",
-			wantCode: http.StatusBadRequest,
+			wantCode: http.StatusNotFound,
 		},
 		{
 			name:     "Invalid postID (non-digit)",
 			content:  validContent,
 			postID:   "nah",
-			wantCode: http.StatusBadRequest,
+			wantCode: http.StatusNotFound,
 		},
 		{
 			name:     "Invalid postID (non-existent)",

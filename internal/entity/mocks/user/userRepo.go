@@ -16,7 +16,7 @@ var mockUser = entity.UserEntity{
 
 type UserRepoMock struct{}
 
-func NewTagRepoMock() *UserRepoMock {
+func NewUserRepoMock() *UserRepoMock {
 	return &UserRepoMock{}
 }
 

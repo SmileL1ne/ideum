@@ -20,16 +20,10 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	postID, err := getIdFromPath(req, 4)
-	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrInvalidURLPath):
-			r.logger.Print("postView: invalid url path")
-			r.notFound(w)
-		case errors.Is(err, entity.ErrInvalidPathID):
-			r.logger.Print("postView: invalid id in request path")
-			r.badRequest(w)
-		}
+	postID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("postView: invalid url path")
+		r.notFound(w)
 		return
 	}
 

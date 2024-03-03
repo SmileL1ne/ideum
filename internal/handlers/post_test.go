@@ -32,17 +32,17 @@ func TestPostView(t *testing.T) {
 		{
 			name:     "Negative ID",
 			url:      "/post/view/-1",
-			wantCode: http.StatusBadRequest,
+			wantCode: http.StatusNotFound,
 		},
 		{
 			name:     "Decimal ID",
 			url:      "/post/view/1.77",
-			wantCode: http.StatusBadRequest,
+			wantCode: http.StatusNotFound,
 		},
 		{
 			name:     "String ID",
 			url:      "/post/view/bruh",
-			wantCode: http.StatusBadRequest,
+			wantCode: http.StatusNotFound,
 		},
 		{
 			name:     "Empty ID",

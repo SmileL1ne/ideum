@@ -144,18 +144,18 @@ func (r *Routes) getUsername(req *http.Request) (string, error) {
 //
 // It returns empty string if number of splitted parts doesn't match with
 // given number
-func getIdFromPath(req *http.Request, urlPartsNum int) (int, error) {
+func getIdFromPath(req *http.Request, urlPartsNum int) (int, bool) {
 	urlParts := strings.Split(req.URL.Path, "/")
 	if len(urlParts) != urlPartsNum {
-		return 0, entity.ErrInvalidURLPath
+		return 0, false
 	}
 
 	id, isValid := getValidID(urlParts[len(urlParts)-1])
 	if !isValid {
-		return 0, entity.ErrInvalidPathID
+		return 0, false
 	}
 
-	return id, nil
+	return id, true
 }
 
 // getValidID parses string id to int and checks if it is valid
