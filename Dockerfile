@@ -4,7 +4,7 @@ LABEL Team="msarvaro nmagau" Project="Rabbit"
 RUN apk add build-base 
 WORKDIR /app 
 COPY . .
-RUN go build -o forum ./cmd/api/
+RUN go build -o forum ./cmd/app/
 
 FROM alpine:3.16
 WORKDIR /app
