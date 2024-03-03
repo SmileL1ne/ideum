@@ -32,17 +32,17 @@ func (r *UserRepoMock) SaveUser(u entity.UserSignupForm) (int, error) {
 }
 
 func (r *UserRepoMock) GetUserByEmail(email string) (entity.UserEntity, error) {
-	if email == "satoru@gmail.com" {
-		return entity.UserEntity{}, entity.ErrInvalidCredentials
+	if email == "yuta@gmail.com" {
+		return mockUser, nil
 	}
-	return mockUser, nil
+	return entity.UserEntity{}, entity.ErrInvalidCredentials
 }
 
 func (r *UserRepoMock) GetUserByUsername(username string) (entity.UserEntity, error) {
-	if username == "satoru" {
-		return entity.UserEntity{}, entity.ErrInvalidCredentials
+	if username == "yuta" {
+		return mockUser, nil
 	}
-	return mockUser, nil
+	return entity.UserEntity{}, entity.ErrInvalidCredentials
 }
 
 func (r *UserRepoMock) GetUsernameByID(userID int) (string, error) {

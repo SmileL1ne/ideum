@@ -61,6 +61,7 @@ Regular user:
 ## NOTES 📝
 
 - You can react on post only from post page
+- You CANNOT create new user using non-ascii symbols in either username or email
 - You can authorize either with **username** or **email**
 - If don't have make installed, you may run the app with next command (**run from root directory**):
 ```go

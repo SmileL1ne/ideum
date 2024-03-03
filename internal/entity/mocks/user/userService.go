@@ -5,6 +5,7 @@ import (
 	"forum/internal/entity"
 	repo "forum/internal/repository/user"
 	service "forum/internal/service/user"
+	"forum/internal/validator"
 )
 
 type UserServiceMock struct {
@@ -25,25 +26,41 @@ func (us *UserServiceMock) SaveUser(u *entity.UserSignupForm) (int, error) {
 	}
 
 	id, err := us.ur.SaveUser(*u)
-	if errors.Is(err, entity.ErrDuplicateEmail) {
-		return 0, entity.ErrInvalidFormData
-	} else if errors.Is(err, entity.ErrDuplicateUsername) {
-		return 0, entity.ErrInvalidFormData
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrDuplicateEmail):
+			u.AddFieldError("email", "Email address is already in use")
+			return 0, entity.ErrInvalidFormData
+		case errors.Is(err, entity.ErrDuplicateUsername):
+			u.AddFieldError("username", "Username is already in use")
+			return 0, entity.ErrInvalidFormData
+		default:
+			return 0, err
+		}
 	}
-
 	return id, nil
 }
 
 func (us *UserServiceMock) Authenticate(u *entity.UserLoginForm) (int, error) {
-	if u.Identifier == "satoru" || u.Identifier == "satoru@gmail.com" {
+	if !service.IsRightLogin(u) {
 		return 0, entity.ErrInvalidFormData
 	}
 
-	if u.Password == "satoruNumberOne" {
+	var userFromDB entity.UserEntity
+	var err error
+
+	if validator.Matches(u.Identifier, service.EmailRX) {
+		userFromDB, err = us.ur.GetUserByEmail(u.Identifier)
+	} else {
+		userFromDB, err = us.ur.GetUserByUsername(u.Identifier)
+	}
+
+	if errors.Is(err, entity.ErrInvalidCredentials) || u.Password == "SatoruIsTheBest" {
+		u.AddNonFieldError("Email or password is incorrect")
 		return 0, entity.ErrInvalidCredentials
 	}
 
-	return mockUser.Id, nil // Avoid getting to repository, because it would return the same id, but more complicated way
+	return userFromDB.Id, nil
 }
 
 func (us *UserServiceMock) GetUsernameById(userID int) (string, error) {
