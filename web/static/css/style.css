@@ -836,3 +836,14 @@ dialog::backdrop {
 p {
     word-wrap: break-word;
 }
+
+
+.post-header h1 {
+    max-width: 500px;
+    word-wrap: break-word;
+}
+
+.user-bar-role-info p{
+    max-width: 110px;
+    word-wrap: break-word;
+}
