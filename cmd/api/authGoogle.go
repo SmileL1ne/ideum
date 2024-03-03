@@ -8,15 +8,20 @@ import (
 	"errors"
 	"fmt"
 	"forum/internal/entity"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
 
 var (
-	RedirectURI  string
-	ClientID     string
-	ClientSecret string
+	RedirectURI        string
+	ClientID           string
+	ClientSecret       string
+	GithubRedirectURI  string
+	GithubClientID     string
+	GithubClientSecret string
 )
 
 func init() {
@@ -40,6 +45,11 @@ func init() {
 	RedirectURI = variables["Redirect_URI"]
 	ClientID = variables["Client_id"]
 	ClientSecret = variables["Client_secret"]
+
+	GithubRedirectURI = variables["GithubRedirect_URI"]
+	GithubClientID = variables["GithubClient_id"]
+	GithubClientSecret = variables["GithubClient_secret"]
+
 }
 
 func (r *routes) googlelogin(w http.ResponseWriter, req *http.Request) {
@@ -103,18 +113,14 @@ func (r *routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println("inFO", form)
-
-
 	r.Sso(w, req, form)
 }
 
 func (r *routes) Sso(w http.ResponseWriter, req *http.Request, form entity.UserSignupForm) {
 	id, err := r.service.User.SaveUser(&form)
 
-	fmt.Println("OPA", form)
 	if err != nil {
-		fmt.Println("OI", err)
+
 		switch {
 		case errors.Is(err, entity.ErrDuplicateEmail) || errors.Is(err, entity.ErrDuplicateUsername):
 
@@ -150,6 +156,7 @@ func (r *routes) Sso(w http.ResponseWriter, req *http.Request, form entity.UserS
 	// Renew session token whenever user logs in
 	err = r.sesm.RenewToken(req.Context(), id)
 	if err != nil {
+		fmt.Println("asda")
 		r.serverError(w, req, err)
 		return
 	}
@@ -167,4 +174,116 @@ func RandomPassword(length int) (string, error) {
 		return "", err
 	}
 	return base64.URLEncoding.EncodeToString(bytes), nil
+}
+
+// git hub
+
+func (r *routes) githublogin(w http.ResponseWriter, req *http.Request) {
+	// Create the dynamic redirect URL for login
+	redirectURL := fmt.Sprintf(
+		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s",
+		GithubClientID, GithubRedirectURI,
+	)
+
+	http.Redirect(w, req, redirectURL, http.StatusTemporaryRedirect)
+
+}
+
+func (r *routes) githubCallback(w http.ResponseWriter, req *http.Request) {
+	code := req.URL.Query().Get("code")
+
+	// Обмен code на access_token
+	tokenURL := "https://github.com/login/oauth/access_token"
+	payload := url.Values{
+		"client_id":     {GithubClientID},
+		"client_secret": {GithubClientSecret},
+		"code":          {code},
+		"redirect_uri":  {GithubRedirectURI},
+	}
+	resp, err := http.PostForm(tokenURL, payload)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Чтение тела ответа
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Парсинг строки, чтобы получить токен
+	tokenResp, err := url.ParseQuery(string(body))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	accessToken := tokenResp.Get("access_token")
+
+	// Используйте accessToken для запросов к API GitHub от имени пользователя
+
+	// Пример: получение информации о пользователе
+	userInfoURL := "https://api.github.com/user"
+	newreq, err := http.NewRequest("GET", userInfoURL, nil) // Вот здесь возникла ошибка
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	newreq.Header.Set("Authorization", "token "+accessToken)
+	client := &http.Client{}
+	resp, err = client.Do(newreq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Обработка ответа с информацией о пользователе
+	// В этом примере мы просто выводим ответ на страницу
+
+	/* userInfo, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, "GitHub User Info: %s", userInfo) */
+
+	GitHubData := struct {
+		Login string
+		Name  string
+		Email string
+	}{}
+
+	form := entity.UserSignupForm{}
+
+	if err := json.NewDecoder(resp.Body).Decode(&GitHubData); err != nil {
+		http.Error(w, "Failed to decode user info response", http.StatusInternalServerError)
+		r.serverError(w, req, err)
+		return
+	}
+
+	fmt.Println("+", GitHubData)
+
+	if GitHubData.Email == "" {
+		GitHubData.Email = GitHubData.Login + "@github.com"
+	}
+
+	// fmt.Println("res-->", GitHubData)
+
+	form.Name = GitHubData.Login
+	form.Email = GitHubData.Email
+
+	form.Password, err = RandomPassword(8)
+	if err != nil {
+		http.Error(w, "Failed to generate password", http.StatusInternalServerError)
+		r.serverError(w, req, err)
+		return
+	}
+
+	fmt.Println("inFO", form)
+	r.Sso(w, req, form)
+
 }

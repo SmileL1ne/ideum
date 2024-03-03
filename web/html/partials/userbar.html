@@ -44,46 +44,51 @@
         <form class="loginQuery">
             <div class="user-bar-sign-up" id="SignUp">
                 <h1>Welcome back!</h1>
-                <input class="dark-input" type="text" placeholder="Email or username" name="identifier" required autocomplete="off">
+                <input class="dark-input" type="text" placeholder="Email or username" name="identifier" required
+                    autocomplete="off">
                 <input class="dark-input" type="password" placeholder="Password" name="password" required>
                 <button class="light-button" type="submit">Sign in</button>
                 <p class="error-msg"></p>
                 <div class="user-bar-line"></div>
-            </form>
-                <form action="/login/google">
-                    <button class="dark-button"><img src="/static/img/svg/Google_logo.svg"
-                            alt="Google_logo">Google</button>
-                </form>
-                <!-- <button class="dark-button" disabled><img src="/static/img/svg/github_logo.svg"
-                        alt="github_logo">GitHub</button>  -->
-                <a class="user-bar-link" id="SignUpBtn" href="#">Don`t have an account?<span> Sign up
-                        now</span> </a>
-            </div>
-        
+        </form>
 
-        <form class="singupQuery"> 
-            <div class="user-bar-register" id="SignIn">
-                <h1>Sign up</h1>
-                <input class="dark-input" type="text" placeholder="Username" name="username" required minlength="3" autocomplete="off">
-                <input class="dark-input" type="text" placeholder="Email" name="email" required autocomplete="off">
-                <input class="dark-input" type="password" placeholder="Password" name="password" required minlength="8">
-                <button class="light-button" type="submit">Sign up</button>
-                <p class="error-msg"></p>
-                <div class="user-bar-line"></div>
-                <!-- <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
+        <form action="/login/google">
+            <button class="dark-button"><img src="/static/img/svg/Google_logo.svg" alt="Google_logo">Google</button>
+        </form>
+
+        <form action="/login/github">
+            <button class="dark-button"><img src="/static/img/svg/github_logo.svg" alt="github_logo">GitHub</button>
+        </form>
+
+        <a class="user-bar-link" id="SignUpBtn" href="#">Don`t have an account?<span> Sign up
+                now</span> </a>
+    </div>
+
+
+    <form class="singupQuery">
+        <div class="user-bar-register" id="SignIn">
+            <h1>Sign up</h1>
+            <input class="dark-input" type="text" placeholder="Username" name="username" required minlength="3"
+                autocomplete="off">
+            <input class="dark-input" type="text" placeholder="Email" name="email" required autocomplete="off">
+            <input class="dark-input" type="password" placeholder="Password" name="password" required minlength="8">
+            <button class="light-button" type="submit">Sign up</button>
+            <p class="error-msg"></p>
+            <div class="user-bar-line"></div>
+            <!-- <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
                         alt="Google_logo">Google</button>
                 <button class="dark-button" disabled><img src="/static/img/svg/github_logo.svg"
                         alt="github_logo">GitHub</button> -->
-                <a class="user-bar-link" id="SignInBtn" href="#">Already have an account? <span>Sign
-                        in</span>
-                </a>
-            </div>
-        </form>
+            <a class="user-bar-link" id="SignInBtn" href="#">Already have an account? <span>Sign
+                    in</span>
+            </a>
+        </div>
+    </form>
 
 
-        <script src="/static/js/register.js"></script>
-    </div>
-    {{end}}
+    <script src="/static/js/register.js"></script>
+</div>
+{{end}}
 
 </div>
 

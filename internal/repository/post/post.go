@@ -71,9 +71,6 @@ func (r *postRepository) SavePost(p entity.PostCreateForm, userID int, tagIDs []
 	return int(postID), nil
 }
 
-
-
-
 func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username,
@@ -163,6 +160,11 @@ func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, er
 				FROM tags t
 				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
 				WHERE pt.post_id = p.id
+			),
+			(
+				SELECT name
+				FROM images
+				WHERE images.post_id = p.id
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id

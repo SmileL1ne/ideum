@@ -24,6 +24,9 @@ func (r *routes) newRouter() http.Handler {
 	// SSO
 	router.Handle("/login/google", dynamic.ThenFunc(r.googlelogin))
 	router.Handle("/callbackGoogle", dynamic.ThenFunc(r.googleCallback))
+	//git hub sso
+	router.Handle("/login/github",dynamic.ThenFunc(r.githublogin))
+	router.Handle("/callbackGithub",dynamic.ThenFunc(r.githubCallback))
 
 	// Protected appends dynamic middleware chain and used for routes
 	// that require authentication
