@@ -9,7 +9,7 @@ import (
 type ITagRepository interface {
 	GetAllTags() (*[]entity.TagEntity, error)
 	AreTagsExist([]int) (bool, error)
-	IsExists(int) (bool, error)
+	IsExist(int) (bool, error)
 }
 
 type tagRepo struct {
@@ -90,7 +90,7 @@ func (r *tagRepo) AreTagsExist(tagIDs []int) (bool, error) {
 	return exists, nil
 }
 
-func (r *tagRepo) IsExists(id int) (bool, error) {
+func (r *tagRepo) IsExist(id int) (bool, error) {
 	query := `
 		SELECT EXISTS(
 			SELECT true

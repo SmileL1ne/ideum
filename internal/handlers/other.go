@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"forum/web"
 	"net/http"
 	"strings"
 )
 
-var fileServer = http.FileServer(http.FS(web.Files))
+// var fileServer = http.FileServer(http.FS(web.Files))
 
 // prevenetDirListing is a middleware that prevents access to directories
 // in static handler, so only full path to static files would be available
@@ -70,7 +69,7 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	isTagExists, err := r.service.Tag.IsExists(tagID)
+	isTagExists, err := r.service.Tag.IsExist(tagID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return

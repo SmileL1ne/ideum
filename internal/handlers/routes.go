@@ -42,7 +42,8 @@ func (r *Routes) Register() http.Handler {
 	router := http.NewServeMux()
 
 	// Serve static files
-	router.Handle("/static/", r.preventDirListing(fileServer))
+	fileServer := http.FileServer(http.Dir("./web/static/"))
+	router.Handle("/static/", r.preventDirListing(http.StripPrefix("/static", fileServer)))
 
 	// Dynamic middleware chain for routes that don't require authentication
 	dynamic := mids.New(r.sesm.LoadAndSave)

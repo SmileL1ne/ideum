@@ -9,9 +9,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', form.action);
 
-        
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
         xhr.onload = function () {
             if (xhr.status === 200) {
                 console.log(xhr.responseText)
@@ -24,9 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
 
-        
-        var encodedFormData = new URLSearchParams(formData).toString();
-
-        xhr.send(encodedFormData);
+        xhr.send(formData);
     });
 });

@@ -55,14 +55,6 @@ CREATE TABLE IF NOT EXISTS tags (
     created_at DATETIME NOT NULL
 );
 
--- Insert prepared tags
-INSERT INTO tags (name, created_at)
-VALUES ('Gaming', DATETIME('now', 'localtime')),
-       ('Travel', DATETIME('now', 'localtime')),
-       ('Sport', DATETIME('now', 'localtime')),
-       ('Art', DATETIME('now', 'localtime')),
-       ('Music', DATETIME('now', 'localtime'));
-
 -- Bridge table, connects posts and tags tables
 CREATE TABLE IF NOT EXISTS posts_tags (
     post_id INTEGER NOT NULL,
@@ -82,3 +74,11 @@ CREATE TABLE IF NOT EXISTS sessions (
 
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS images (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    post_id INTEGER NOT NULL,
+    
+    FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
+)

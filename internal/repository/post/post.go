@@ -7,7 +7,7 @@ import (
 )
 
 type IPostRepository interface {
-	SavePost(entity.PostCreateForm, int, []int) (int, error)
+	SavePost(entity.PostCreateForm, []int) (int, error)
 	GetPost(int) (entity.PostEntity, error)
 	GetAllPosts() (*[]entity.PostEntity, error)
 	GetAllPostsByTagId(int) (*[]entity.PostEntity, error)
@@ -28,40 +28,42 @@ func NewPostRepo(db *sql.DB) *postRepository {
 
 var _ IPostRepository = (*postRepository)(nil)
 
-func (r *postRepository) SavePost(p entity.PostCreateForm, userID int, tagIDs []int) (int, error) {
+func (r *postRepository) SavePost(p entity.PostCreateForm, tagIDs []int) (int, error) {
 	tx, err := r.DB.Begin()
 	if err != nil {
 		return 0, err
 	}
+	defer tx.Rollback()
 
-	query1 := `
+	posts := `
 		INSERT INTO posts (title, content, user_id, created_at) 
 		VALUES ($1, $2, $3, datetime('now', 'localtime'))
+		RETURNING id
 	`
-
-	result, err := tx.Exec(query1, p.Title, p.Content, userID)
+	var postID int
+	err = tx.QueryRow(posts, p.Title, p.Content, p.UserID).Scan(&postID)
 	if err != nil {
-		tx.Rollback()
 		return 0, err
 	}
 
-	postID, err := result.LastInsertId()
-	if err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-
-	query2 := `
+	posts_tags := `
 		INSERT INTO posts_tags (post_id, tag_id, created_at)
 		VALUES ($1, $2, datetime('now', 'localtime'))
 	`
-
 	for _, tagID := range tagIDs {
-		_, err := tx.Exec(query2, postID, tagID)
+		_, err := tx.Exec(posts_tags, postID, tagID)
 		if err != nil {
-			tx.Rollback()
 			return 0, err
 		}
+	}
+
+	images := `
+		INSERT INTO images (name, post_id)
+		VALUES ($1, $2)
+	`
+	_, err = tx.Exec(images, p.ImageName, postID)
+	if err != nil {
+		return 0, err
 	}
 
 	if err = tx.Commit(); err != nil {
@@ -86,7 +88,12 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 				FROM tags t
 				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
 				WHERE pt.post_id = p.id
-			)  
+			),
+			(
+				SELECT name
+				FROM images
+				WHERE post_id = p.id
+			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
 		LEFT JOIN post_reactions pr ON p.id = pr.post_id
@@ -96,8 +103,9 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 
 	var post entity.PostEntity
 	var tags sql.NullString
+	var imageName sql.NullString
 	if err := r.DB.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content,
-		&post.CreatedAt, &post.Username, &post.Likes, &post.Dislikes, &post.CommentsLen, &tags); err != nil {
+		&post.CreatedAt, &post.Username, &post.Likes, &post.Dislikes, &post.CommentsLen, &tags, &imageName); err != nil {
 
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.PostEntity{}, entity.ErrNoRecord
@@ -107,8 +115,9 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 
 	if tags.Valid {
 		post.PostTags = tags.String
-	} else {
-		post.PostTags = ""
+	}
+	if imageName.Valid {
+		post.ImageName = imageName.String
 	}
 
 	return post, nil
@@ -129,6 +138,11 @@ func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 				FROM tags t
 				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
 				WHERE pt.post_id = p.id
+			),
+			(
+				SELECT name
+				FROM images
+				WHERE post_id = p.id
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
@@ -155,6 +169,11 @@ func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, er
 				FROM tags t
 				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
 				WHERE pt.post_id = p.id
+			),
+			(
+				SELECT name
+				FROM images
+				WHERE post_id = p.id
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
@@ -186,6 +205,11 @@ func (r *postRepository) GetAllPostsByUserID(userID int) (*[]entity.PostEntity, 
 				FROM tags t
 				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
 				WHERE pt.post_id = p.id
+			),
+			(
+				SELECT name
+				FROM images
+				WHERE post_id = p.id
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
@@ -213,6 +237,11 @@ func (r *postRepository) GetAllPostsByUserReaction(userID int) (*[]entity.PostEn
 				FROM tags t
 				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
 				WHERE pt.post_id = p.id 
+			),
+			(
+				SELECT name
+				FROM images
+				WHERE post_id = p.id
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id

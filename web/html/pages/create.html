@@ -3,7 +3,7 @@
 {{define "main"}}
 <script src="/static/js/create.js"></script>
 
-<form action="/post/create" method="POST" id="postForm">
+<form action="/post/create" method="POST" enctype="multipart/form-data" id="postForm">
     <div class="base">
 
         <div class="post-feed">
@@ -26,10 +26,11 @@
 
                     </div>
                     
+                    <input class="upload" type="file" name="image" lang="en" accept="image/png,image/gif,image/jpeg,image/jpg">
+
                     <div class="user-bar-line"></div>
                     <div class="confirm-section">
                         <button class="light-button">Submit</button>
-                        <!-- <button class="dark-button">Cancel</button> -->
                     </div>
 
                 </div>

@@ -45,14 +45,16 @@
                 <div class="post-text">
                     <p>{{ .Models.Post.Content }}</p>
                 </div>
+                
                 <div class="likes-frame post-tags">
                     {{range .Models.Post.PostTags}}
                     <button class="like-button tag" disabled>{{.}} </button>
                     {{end}}
                 </div>
-                <!-- <div class="post-img"><img src="/static/img/sample.png" alt="post-img">
-                    
-                </div> -->
+                
+                {{with .Models.Post.ImageName}}
+                <div class="post-img"><img src="/static/public/{{.}}" alt="post-img"></div>
+                {{end}}
 
                 <div class="post-footer">
                     <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">

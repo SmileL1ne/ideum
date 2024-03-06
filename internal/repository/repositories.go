@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"forum/internal/repository/comment"
+	"forum/internal/repository/image"
 	"forum/internal/repository/post"
 	"forum/internal/repository/reaction"
 	"forum/internal/repository/tag"
@@ -15,6 +16,7 @@ type Repositories struct {
 	Comment  comment.ICommentRepository
 	Reaction reaction.IReactionRepository
 	Tag      tag.ITagRepository
+	Image    image.IImageRepository
 }
 
 func New(db *sql.DB) *Repositories {
@@ -24,5 +26,6 @@ func New(db *sql.DB) *Repositories {
 		Comment:  comment.NewCommentRepo(db),
 		Reaction: reaction.NewReactionRepo(db),
 		Tag:      tag.NewTagRepo(db),
+		Image:    image.NewImageRepo(db),
 	}
 }

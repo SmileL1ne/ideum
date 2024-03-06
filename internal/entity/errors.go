@@ -12,11 +12,11 @@ var (
 
 // Post related errors
 var (
-	ErrInvalidPostID = errors.New("entity: invalid post id")
+	ErrInvalidPostID    = errors.New("entity: invalid post id")
+	ErrInvalidImageType = errors.New("entity: invalid image type")
+	ErrTooLargeImage    = errors.New("entity: too large image")
+	ErrInvalidTags      = errors.New("entity: tags don't exist")
 )
-
-// Comment related errors
-var ()
 
 // User related errors
 var (

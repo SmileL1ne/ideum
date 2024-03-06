@@ -27,7 +27,7 @@ func NewPostRepoMock() *PostRepoMock {
 
 var _ post.IPostRepository = (*PostRepoMock)(nil)
 
-func (r *PostRepoMock) SavePost(p entity.PostCreateForm, userID int, tagIDs []int) (int, error) {
+func (r *PostRepoMock) SavePost(p entity.PostCreateForm, tagIDs []int) (int, error) {
 	return mockPost.ID, nil
 }
 

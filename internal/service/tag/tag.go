@@ -9,7 +9,7 @@ import (
 type ITagService interface {
 	GetAllTags() (*[]entity.TagEntity, error)
 	AreTagsExist([]string) (bool, error)
-	IsExists(int) (bool, error)
+	IsExist(int) (bool, error)
 }
 
 type tagService struct {
@@ -33,7 +33,7 @@ func (ts *tagService) AreTagsExist(tags []string) (bool, error) {
 	for _, tagIDStr := range tags {
 		tagID, err := strconv.Atoi(tagIDStr)
 		if err != nil {
-			return false, entity.ErrInvalidFormData
+			return false, entity.ErrInvalidTags
 		}
 		tagIDs = append(tagIDs, tagID)
 	}
@@ -41,6 +41,6 @@ func (ts *tagService) AreTagsExist(tags []string) (bool, error) {
 	return ts.tagRepo.AreTagsExist(tagIDs)
 }
 
-func (ts *tagService) IsExists(id int) (bool, error) {
-	return ts.tagRepo.IsExists(id)
+func (ts *tagService) IsExist(id int) (bool, error) {
+	return ts.tagRepo.IsExist(id)
 }

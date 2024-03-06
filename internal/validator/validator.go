@@ -69,3 +69,16 @@ func ValidString(str string) bool {
 	}
 	return true
 }
+
+func NotZero(n int) bool {
+	return n != 0
+}
+
+func ExistsInSet(item interface{}, set map[interface{}]struct{}) bool {
+	_, ok := set[item]
+	return ok
+}
+
+func LessThan(a int64, b int64) bool {
+	return a <= b
+}

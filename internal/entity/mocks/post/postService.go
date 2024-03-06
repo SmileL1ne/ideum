@@ -4,33 +4,36 @@ import (
 	"errors"
 	"forum/internal/entity"
 	repo "forum/internal/repository/post"
+	"forum/internal/service/image"
 	service "forum/internal/service/post"
+	"forum/internal/service/tag"
 	"strconv"
 )
 
 type PostServiceMock struct {
-	pr repo.IPostRepository
+	imgService image.IImageService
+	tagService tag.ITagService
+	pr         repo.IPostRepository
 }
 
-func NewPostServiceMock(r repo.IPostRepository) *PostServiceMock {
+func NewPostServiceMock(r repo.IPostRepository, is image.IImageService, ts tag.ITagService) *PostServiceMock {
 	return &PostServiceMock{
-		pr: r,
+		imgService: is,
+		tagService: ts,
+		pr:         r,
 	}
 }
 
 var _ service.IPostService = (*PostServiceMock)(nil)
 
-func (ps *PostServiceMock) SavePost(p *entity.PostCreateForm, userID int, tags []string) (int, error) {
-	if !service.IsRightPost(p) {
-		return 0, entity.ErrInvalidFormData
-	}
+func (ps *PostServiceMock) SavePost(p entity.PostCreateForm) (int, error) {
 
 	var tagIDs []int
-	for _, tagIDStr := range tags {
+	for _, tagIDStr := range p.Tags {
 		tagID, _ := strconv.Atoi(tagIDStr) // Don't handle error because we know Id's are valid (checked before)
 		tagIDs = append(tagIDs, tagID)
 	}
-	return ps.pr.SavePost(entity.PostCreateForm{}, 0, tagIDs)
+	return ps.pr.SavePost(entity.PostCreateForm{}, tagIDs)
 }
 
 func (ps *PostServiceMock) GetPost(postID int) (entity.PostView, error) {
@@ -73,4 +76,18 @@ func (ps *PostServiceMock) GetAllPostsByUserReaction(userID int) (*[]entity.Post
 
 func (ps *PostServiceMock) ExistsPost(postID int) (bool, error) {
 	return ps.pr.ExistsPost(postID)
+}
+
+// TODO: Add mock checks here
+func (ps *PostServiceMock) CheckPostAttrs(p *entity.PostCreateForm, withImage bool) (bool, error) {
+	if !service.IsRightPost(p, withImage) {
+		return false, entity.ErrInvalidFormData
+	}
+
+	areTagsExist, err := ps.tagService.AreTagsExist(p.Tags)
+	if !areTagsExist || err != nil {
+		return false, err
+	}
+
+	return false, nil
 }

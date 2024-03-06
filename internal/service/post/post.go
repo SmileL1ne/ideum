@@ -4,44 +4,47 @@ import (
 	"errors"
 	"forum/internal/entity"
 	"forum/internal/repository/post"
+	"forum/internal/service/image"
+	"forum/internal/service/tag"
 	"strconv"
 )
 
 type IPostService interface {
-	SavePost(*entity.PostCreateForm, int, []string) (int, error)
+	SavePost(entity.PostCreateForm) (int, error)
 	GetPost(int) (entity.PostView, error)
 	GetAllPosts() (*[]entity.PostView, error)
 	GetAllPostsByTagId(int) (*[]entity.PostView, error)
 	GetAllPostsByUserId(int) (*[]entity.PostView, error)
 	GetAllPostsByUserReaction(int) (*[]entity.PostView, error)
 	ExistsPost(int) (bool, error)
+	CheckPostAttrs(*entity.PostCreateForm, bool) (bool, error)
 }
 
 type postService struct {
-	postRepo post.IPostRepository
+	imgService image.IImageService
+	tagService tag.ITagService
+	postRepo   post.IPostRepository
 }
 
 // Constructor for post service
-func NewPostsService(r post.IPostRepository) *postService {
+func NewPostsService(r post.IPostRepository, is image.IImageService, ts tag.ITagService) *postService {
 	return &postService{
-		postRepo: r,
+		imgService: is,
+		tagService: ts,
+		postRepo:   r,
 	}
 }
 
 var _ IPostService = (*postService)(nil)
 
-func (ps *postService) SavePost(p *entity.PostCreateForm, userID int, tags []string) (int, error) {
-	if !IsRightPost(p) {
-		return 0, entity.ErrInvalidFormData
-	}
-
+func (ps *postService) SavePost(p entity.PostCreateForm) (int, error) {
 	var tagIDs []int
-	for _, tagIDStr := range tags {
-		tagID, _ := strconv.Atoi(tagIDStr) // Don't handle error because we know Id's are valid (checked before)
+	for _, tagIDStr := range p.Tags {
+		tagID, _ := strconv.Atoi(tagIDStr) // Don't handle error because we know Ids are valid (checked before)
 		tagIDs = append(tagIDs, tagID)
 	}
 
-	id, err := ps.postRepo.SavePost(*p, userID, tagIDs)
+	id, err := ps.postRepo.SavePost(p, tagIDs)
 	if err != nil {
 		return 0, err
 	}
@@ -58,6 +61,11 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 		return entity.PostView{}, err
 	}
 
+	imgName, err := ps.imgService.Get(postId)
+	if err != nil {
+		return entity.PostView{}, err
+	}
+
 	tags := ConvertToStrArr(post.PostTags)
 	pView := entity.PostView{
 		ID:          post.ID,
@@ -69,13 +77,14 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 		Dislikes:    post.Dislikes,
 		CommentsLen: post.CommentsLen,
 		PostTags:    tags,
+		ImageName:   imgName,
 	}
 
 	return pView, nil
 }
 
-func (pc *postService) GetAllPosts() (*[]entity.PostView, error) {
-	posts, err := pc.postRepo.GetAllPosts()
+func (ps *postService) GetAllPosts() (*[]entity.PostView, error) {
+	posts, err := ps.postRepo.GetAllPosts()
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +92,8 @@ func (pc *postService) GetAllPosts() (*[]entity.PostView, error) {
 	return ConvertEntitiesToViews(posts)
 }
 
-func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
-	posts, err := pc.postRepo.GetAllPostsByTagId(tagID)
+func (ps *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
+	posts, err := ps.postRepo.GetAllPostsByTagId(tagID)
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +101,8 @@ func (pc *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error)
 	return ConvertEntitiesToViews(posts)
 }
 
-func (pc *postService) GetAllPostsByUserId(userID int) (*[]entity.PostView, error) {
-	posts, err := pc.postRepo.GetAllPostsByUserID(userID)
+func (ps *postService) GetAllPostsByUserId(userID int) (*[]entity.PostView, error) {
+	posts, err := ps.postRepo.GetAllPostsByUserID(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +110,8 @@ func (pc *postService) GetAllPostsByUserId(userID int) (*[]entity.PostView, erro
 	return ConvertEntitiesToViews(posts)
 }
 
-func (pc *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView, error) {
-	posts, err := pc.postRepo.GetAllPostsByUserReaction(userID)
+func (ps *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView, error) {
+	posts, err := ps.postRepo.GetAllPostsByUserReaction(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +119,19 @@ func (pc *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView
 	return ConvertEntitiesToViews(posts)
 }
 
-func (pc *postService) ExistsPost(postID int) (bool, error) {
-	return pc.postRepo.ExistsPost(postID)
+func (ps *postService) ExistsPost(postID int) (bool, error) {
+	return ps.postRepo.ExistsPost(postID)
+}
+
+func (ps *postService) CheckPostAttrs(p *entity.PostCreateForm, withImage bool) (bool, error) {
+	if !IsRightPost(p, withImage) {
+		return false, nil
+	}
+
+	areTagsExist, err := ps.tagService.AreTagsExist(p.Tags)
+	if !areTagsExist || err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
