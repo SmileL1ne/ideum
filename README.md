@@ -65,7 +65,7 @@ Regular user:
 - You can authorize either with **username** or **email**
 - If don't have make installed, you may run the app with next command (**run from root directory**):
 ```go
-    go run ./cmd/api
+    go run ./cmd/app
 ```
 
 ## Authors 👁️👅👁️
