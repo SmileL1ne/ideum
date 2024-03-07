@@ -69,17 +69,24 @@
                             <button class="light-button" type="submit">Sign in</button>
                             <p class="error-msg"></p>
                             <div class="user-bar-line"></div>
-                            <!-- <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
-                                    alt="Google_logo">Google</button>
-                            <button class="dark-button" disabled><img src="/static/img/svg/github_logo.svg"
-                                    alt="github_logo">GitHub</button> -->
-                            <a class="user-bar-link" id="SignUpBtnP" href="#">Don`t have an account?<span> Sign up
-                                    Now</span> </a>
-                        </div>
                     </form>
 
+
+                    <form action="/login/google">
+                        <button class="dark-button"><img src="/static/img/svg/Google_logo.svg"
+                                alt="Google_logo">Google</button>
+                    </form>
+                    <form action="/login/github">
+                        <button class="dark-button"><img src="/static/img/svg/github_logo.svg"
+                                alt="github_logo">GitHub</button>
+                    </form>
+
+                    <a class="user-bar-link" id="SignUpBtnP" href="#">Don`t have an account?<span> Sign up
+                            Now</span> </a>
+                    </div>
+
                     <form class="singupQuery"> 
-                        <div class="user-bar-register" id="SignInP">
+                        <div class="use r-bar-register" id="SignInP">
                             <h1>Sign up</h1>
                             <input class="dark-input" type="text" placeholder="Username" name="username" autocomplete="off">
                             <input class="dark-input" type="text" placeholder="Email" name="email" autocomplete="off">

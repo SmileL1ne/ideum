@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"forum/config"
 	"forum/pkg/database/sqlite3"
 	"forum/pkg/sesm"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"forum/internal/handlers"
 	"forum/internal/repository"
@@ -46,10 +48,22 @@ func main() {
 		logger,
 	)
 
+	// tls config
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+		MinVersion:       tls.VersionTLS12,
+		MaxVersion:       tls.VersionTLS12,
+	}
+
 	// Server creation
 	server := &http.Server{
-		Addr:    "0.0.0.0" + cfg.Http.Addr,
-		Handler: routes.Register(),
+		Addr:           "0.0.0.0" + cfg.Http.Addr,
+		Handler:        routes.Register(),
+		MaxHeaderBytes: 1 << 20, // 1 mb
+		TLSConfig:      tlsConfig,
+		IdleTimeout:    time.Minute,
+		ReadTimeout:    20 * time.Second,
+		WriteTimeout:   35 * time.Second,
 	}
 
 	// Graceful shutdown
@@ -66,6 +80,6 @@ func main() {
 
 	// Starting the server
 	logger.Printf("starting the server on address - http://localhost%s", cfg.Addr)
-	err = server.ListenAndServe()
+	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	logger.Fatalf("Listen and serve error:%v", err)
 }

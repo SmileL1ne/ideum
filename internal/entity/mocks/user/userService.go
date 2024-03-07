@@ -66,3 +66,7 @@ func (us *UserServiceMock) Authenticate(u *entity.UserLoginForm) (int, error) {
 func (us *UserServiceMock) GetUsernameById(userID int) (string, error) {
 	return us.ur.GetUsernameByID(userID)
 }
+
+func (us *UserServiceMock) GetUserByEmail(email string) (entity.UserEntity, error) {
+	return us.ur.GetUserByEmail(email)
+}
