@@ -38,10 +38,10 @@ func (us *userService) SaveUser(u *entity.UserSignupForm) (int, error) {
 		switch {
 		case errors.Is(err, entity.ErrDuplicateEmail):
 			u.AddFieldError("email", "Email address is already in use")
-			return 0, entity.ErrInvalidFormData
+			return 0, entity.ErrDuplicateEmail
 		case errors.Is(err, entity.ErrDuplicateUsername):
 			u.AddFieldError("username", "Username is already in use")
-			return 0, entity.ErrInvalidFormData
+			return 0, entity.ErrDuplicateUsername
 		default:
 			return 0, err
 		}

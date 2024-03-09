@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"forum/config"
 	"forum/internal/service"
 	"forum/pkg/mids"
 	"forum/pkg/sesm"
@@ -14,12 +15,14 @@ type Routes struct {
 	tempCache map[string]*template.Template
 	sesm      *sesm.SessionManager
 	logger    *log.Logger
+	exAuth    *config.ExternalAuth
 }
 
 func NewRouter(
 	services *service.Services,
 	sesm *sesm.SessionManager,
 	logger *log.Logger,
+	exAuth *config.ExternalAuth,
 ) *Routes {
 
 	// Temporary cache for one-time template initialization and subsequent
@@ -34,6 +37,7 @@ func NewRouter(
 		tempCache: tempCache,
 		sesm:      sesm,
 		logger:    logger,
+		exAuth:    exAuth,
 	}
 }
 

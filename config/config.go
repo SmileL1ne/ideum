@@ -1,22 +1,25 @@
 package config
 
-// TODO: parse config info from .yml config file -> change NewConfig() to use 'cleanenv' package to parse config file
+import (
+	"bufio"
+	"log"
+	"os"
+	"strings"
+)
 
 type (
-	// Project config
 	Config struct {
 		App
 		Http
 		Database
+		ExternalAuth
 	}
 
-	// Information about the app
 	App struct {
 		Name    string
 		Version string
 	}
 
-	// Http related info
 	Http struct {
 		Addr      string
 		StaticDir string
@@ -25,22 +28,68 @@ type (
 	Database struct {
 		DSN string
 	}
+
+	ExternalAuth struct {
+		GoogleRedirectURL  string
+		GoogleClientID     string
+		GoogleClientSecret string
+		GithubRedirectURL  string
+		GithubClientID     string
+		GithubClientSecret string
+	}
 )
 
-// NewConfig returns config
-func NewConfig() *Config {
-	cfg := &Config{
+// Load loads all required environments and returns ready config
+func Load() *Config {
+	return &Config{
 		App{
-			Name:    "Idearoom",
-			Version: "1.0.0",
+			Name:    os.Getenv("APP_NAME"),
+			Version: os.Getenv("APP_VERSION"),
 		},
 		Http{
-			Addr:      ":5000",
-			StaticDir: "./web/static",
+			Addr: os.Getenv("HTTP_ADDR"),
 		},
 		Database{
-			DSN: "file:./internal/database/rabbit.db?foreign_keys=on",
+			DSN: os.Getenv("SQLITE3_DSN"),
+		},
+		ExternalAuth{
+			GoogleRedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
+			GoogleClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+			GoogleClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+
+			GithubRedirectURL:  os.Getenv("GITHUB_REDIRECT_URL"),
+			GithubClientID:     os.Getenv("GITHUB_CLIENT_ID"),
+			GithubClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 		},
 	}
-	return cfg
+}
+
+// Parse ".env" file and sets key-value pairs in it into system environment
+func init() {
+	file, err := os.Open(".env")
+	if err != nil {
+		log.Fatalf("open env file: %v", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) > 0 && !strings.HasPrefix(line, "#") {
+			parts := strings.SplitN(line, "=", 2)
+			if len(parts) != 2 {
+				log.Print("ignoring .env line (invalid format):", line)
+			}
+
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			if err := os.Setenv(key, value); err != nil {
+				log.Fatalf("set env variable: %v", err)
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatalf("env parse scanner error: %v", err)
+	}
 }

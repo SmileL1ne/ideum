@@ -29,7 +29,7 @@ func (r *Routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 	_, err := r.service.User.SaveUser(&u) // Put user id in context
 	if err != nil {
 		switch {
-		case errors.Is(err, entity.ErrInvalidFormData):
+		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrDuplicateUsername), errors.Is(err, entity.ErrDuplicateEmail):
 			r.logger.Print("userSignupPost: invalid form fill")
 
 			w.WriteHeader(http.StatusBadRequest)
@@ -76,14 +76,11 @@ func (r *Routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Renew session token whenever user logs in
 	err = r.sesm.RenewToken(req.Context(), id)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
-
-	// Add authenticated user's id to the session data
 	r.sesm.PutUserID(req.Context(), id)
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)

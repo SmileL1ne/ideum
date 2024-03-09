@@ -21,41 +21,37 @@ import (
 )
 
 func main() {
-	// Parse config
-	cfg := config.NewConfig()
+	cfg := config.Load()
 
-	// Logger init
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
-	// Database connection
 	db, err := sqlite3.OpenDB(cfg.Database.DSN)
 	if err != nil {
 		log.Fatalf("Error opening database connection:%v", err)
 	}
 
-	// Repos and Services init
 	r := repository.New(db)
 	s := service.New(r)
 
-	// Session Manager creation
 	sesm := sesm.New()
 	sesm.Store = sqlite3store.New(db)
 
-	// Routes init
 	routes := handlers.NewRouter(
 		s,
 		sesm,
 		logger,
+		&cfg.ExternalAuth,
 	)
 
-	// tls config
 	tlsConfig := &tls.Config{
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 		MinVersion:       tls.VersionTLS12,
 		MaxVersion:       tls.VersionTLS12,
 	}
 
-	// Server creation
+	tlsCert := "./tls/cert.pem"
+	tlsKey := "./tls/key.pem"
+
 	server := &http.Server{
 		Addr:           "0.0.0.0" + cfg.Http.Addr,
 		Handler:        routes.Register(),
@@ -66,7 +62,6 @@ func main() {
 		WriteTimeout:   35 * time.Second,
 	}
 
-	// Graceful shutdown
 	go func() {
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, syscall.SIGTERM, syscall.SIGINT)
@@ -78,8 +73,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-	// Starting the server
 	logger.Printf("starting the server on address - http://localhost%s", cfg.Addr)
-	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	err = server.ListenAndServeTLS(tlsCert, tlsKey)
 	logger.Fatalf("Listen and serve error:%v", err)
 }
