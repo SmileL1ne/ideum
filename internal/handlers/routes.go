@@ -8,21 +8,30 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sync"
+	"time"
 )
 
+type userRateLimit struct {
+	lastReq time.Time
+	penalty time.Duration
+}
+
 type Routes struct {
-	service   *service.Services
-	tempCache map[string]*template.Template
-	sesm      *sesm.SessionManager
-	logger    *log.Logger
-	exAuth    *config.ExternalAuth
+	service        *service.Services
+	tempCache      map[string]*template.Template
+	sesm           *sesm.SessionManager
+	logger         *log.Logger
+	cfg            *config.Config
+	userRateLimits map[string]userRateLimit
+	rateMu         *sync.Mutex
 }
 
 func NewRouter(
 	services *service.Services,
 	sesm *sesm.SessionManager,
 	logger *log.Logger,
-	exAuth *config.ExternalAuth,
+	cfg *config.Config,
 ) *Routes {
 
 	// Temporary cache for one-time template initialization and subsequent
@@ -33,11 +42,13 @@ func NewRouter(
 	}
 
 	return &Routes{
-		service:   services,
-		tempCache: tempCache,
-		sesm:      sesm,
-		logger:    logger,
-		exAuth:    exAuth,
+		service:        services,
+		tempCache:      tempCache,
+		sesm:           sesm,
+		logger:         logger,
+		cfg:            cfg,
+		userRateLimits: make(map[string]userRateLimit),
+		rateMu:         &sync.Mutex{},
 	}
 }
 
@@ -78,7 +89,7 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
 
 	// Standard middleware chain applied to router itself -> used in all routes
-	standard := mids.New(r.recoverPanic, secureHeaders)
+	standard := mids.New(r.recoverPanic, r.limitRate, r.secureHeaders)
 
 	return standard.Then(router)
 }

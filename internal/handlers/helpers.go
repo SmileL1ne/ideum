@@ -12,6 +12,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (r *Routes) newTemplateData(req *http.Request) templateData {
@@ -66,6 +67,15 @@ func (r *Routes) badRequest(w http.ResponseWriter) {
 
 func (r *Routes) methodNotAllowed(w http.ResponseWriter) {
 	r.clientError(w, http.StatusMethodNotAllowed)
+}
+
+func (r *Routes) rateLimitExceeded(w http.ResponseWriter, timeLeft time.Duration) {
+	errInfo := errData{
+		ErrCode: http.StatusTooManyRequests,
+		ErrMsg:  fmt.Sprintf("You're blocked!\nWait - %.1fs", timeLeft.Seconds()),
+	}
+
+	r.renderErrorPage(w, errInfo)
 }
 
 // Render templates by retrieving necessary template from template cache.

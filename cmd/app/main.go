@@ -40,7 +40,7 @@ func main() {
 		s,
 		sesm,
 		logger,
-		&cfg.ExternalAuth,
+		cfg,
 	)
 
 	tlsConfig := &tls.Config{

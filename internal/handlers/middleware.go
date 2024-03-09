@@ -2,7 +2,10 @@ package handlers
 
 import (
 	"fmt"
+	"forum/pkg/rate"
 	"net/http"
+	"strings"
+	"time"
 )
 
 // requireAuthentication middleware checks if user if authenticated
@@ -24,7 +27,7 @@ func (r *Routes) requireAuthentication(next http.Handler) http.Handler {
 }
 
 // secureHeaders middleware sets several headers to secure every response
-func secureHeaders(next http.Handler) http.Handler {
+func (r *Routes) secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self'")
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
@@ -48,4 +51,52 @@ func (r *Routes) recoverPanic(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, req)
 	})
+}
+
+func (r *Routes) limitRate(next http.Handler) http.Handler {
+	rl := rate.NewRateLimiter(time.Duration(r.cfg.RateInterval)*time.Second, r.cfg.RateLimit)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if strings.HasPrefix(req.URL.Path, "/static/") {
+			next.ServeHTTP(w, req)
+			return
+		}
+
+		ip := req.RemoteAddr
+
+		r.rateMu.Lock()
+		user, ok := r.userRateLimits[ip]
+		r.rateMu.Unlock()
+
+		if ok {
+			r.rateMu.Lock()
+
+			if time.Since(user.lastReq) < user.penalty {
+				r.rateMu.Unlock()
+				r.rateLimitExceeded(w, user.penalty-time.Since(user.lastReq))
+				return
+			}
+			r.rateMu.Unlock()
+		}
+
+		if rl.Limit() {
+			r.updateRateLimit(ip, time.Now(), time.Duration(r.cfg.RatePenalty)*time.Second)
+			r.rateLimitExceeded(w, time.Duration(r.cfg.RatePenalty)*time.Second)
+			return
+		}
+
+		r.updateRateLimit(ip, time.Now(), 0)
+
+		next.ServeHTTP(w, req)
+	})
+}
+
+func (r *Routes) updateRateLimit(ip string, lastReq time.Time, penalty time.Duration) {
+	r.rateMu.Lock()
+	defer r.rateMu.Unlock()
+
+	r.userRateLimits[ip] = userRateLimit{
+		lastReq: lastReq,
+		penalty: penalty,
+	}
 }

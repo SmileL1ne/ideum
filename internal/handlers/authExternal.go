@@ -50,7 +50,7 @@ func (r *Routes) SSO(w http.ResponseWriter, req *http.Request, form *entity.User
 
 func (r *Routes) googlelogin(w http.ResponseWriter, req *http.Request) {
 	url := fmt.Sprintf("https://accounts.google.com/o/oauth2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=email profile",
-		r.exAuth.GoogleClientID, r.exAuth.GoogleRedirectURL)
+		r.cfg.ExternalAuth.GoogleClientID, r.cfg.ExternalAuth.GoogleRedirectURL)
 
 	http.Redirect(w, req, url, http.StatusTemporaryRedirect)
 }
@@ -58,7 +58,7 @@ func (r *Routes) googlelogin(w http.ResponseWriter, req *http.Request) {
 func (r *Routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 	code := req.URL.Query().Get("code")
 	clientData := fmt.Sprintf("code=%s&client_id=%s&client_secret=%s&redirect_uri=%s&grant_type=authorization_code",
-		code, r.exAuth.GoogleClientID, r.exAuth.GoogleClientSecret, r.exAuth.GoogleRedirectURL)
+		code, r.cfg.ExternalAuth.GoogleClientID, r.cfg.ExternalAuth.GoogleClientSecret, r.cfg.ExternalAuth.GoogleRedirectURL)
 
 	resp, err := http.Post(GOOGLE_TOKEN_URL, "application/x-www-form-urlencoded", strings.NewReader(clientData))
 	if err != nil {
@@ -113,7 +113,7 @@ func (r *Routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 func (r *Routes) githublogin(w http.ResponseWriter, req *http.Request) {
 	redirectURL := fmt.Sprintf(
 		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s",
-		r.exAuth.GithubClientID, r.exAuth.GithubRedirectURL,
+		r.cfg.ExternalAuth.GithubClientID, r.cfg.ExternalAuth.GithubRedirectURL,
 	)
 
 	http.Redirect(w, req, redirectURL, http.StatusTemporaryRedirect)
@@ -123,10 +123,10 @@ func (r *Routes) githublogin(w http.ResponseWriter, req *http.Request) {
 func (r *Routes) githubCallback(w http.ResponseWriter, req *http.Request) {
 	code := req.URL.Query().Get("code")
 	payload := url.Values{
-		"client_id":     {r.exAuth.GithubClientID},
-		"client_secret": {r.exAuth.GithubClientSecret},
+		"client_id":     {r.cfg.ExternalAuth.GithubClientID},
+		"client_secret": {r.cfg.ExternalAuth.GithubClientSecret},
 		"code":          {code},
-		"redirect_uri":  {r.exAuth.GithubRedirectURL},
+		"redirect_uri":  {r.cfg.ExternalAuth.GithubRedirectURL},
 	}
 	resp, err := http.PostForm(GITHUB_TOKEN_URL, payload)
 	if err != nil {

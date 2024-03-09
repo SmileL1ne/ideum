@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -21,8 +22,10 @@ type (
 	}
 
 	Http struct {
-		Addr      string
-		StaticDir string
+		Addr         string
+		RateInterval int
+		RateLimit    int
+		RatePenalty  int
 	}
 
 	Database struct {
@@ -41,13 +44,28 @@ type (
 
 // Load loads all required environments and returns ready config
 func Load() *Config {
+	rateInterval, err := strconv.Atoi(os.Getenv("HTTP_RATE_INTERVAL"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	rateLimit, err := strconv.Atoi(os.Getenv("HTTP_RATE_LIMIT"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ratePenalty, err := strconv.Atoi(os.Getenv("HTTP_RATE_PENALTY"))
+	if err != nil {
+		log.Fatal(err)
+	}
 	return &Config{
 		App{
 			Name:    os.Getenv("APP_NAME"),
 			Version: os.Getenv("APP_VERSION"),
 		},
 		Http{
-			Addr: os.Getenv("HTTP_ADDR"),
+			Addr:         os.Getenv("HTTP_ADDR"),
+			RateInterval: rateInterval,
+			RateLimit:    rateLimit,
+			RatePenalty:  ratePenalty,
 		},
 		Database{
 			DSN: os.Getenv("SQLITE3_DSN"),
