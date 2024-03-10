@@ -69,6 +69,10 @@ func (r *Routes) methodNotAllowed(w http.ResponseWriter) {
 	r.clientError(w, http.StatusMethodNotAllowed)
 }
 
+func (r *Routes) forbidden(w http.ResponseWriter) {
+	r.clientError(w, http.StatusForbidden)
+}
+
 func (r *Routes) rateLimitExceeded(w http.ResponseWriter, timeLeft time.Duration) {
 	errInfo := errData{
 		ErrCode: http.StatusTooManyRequests,

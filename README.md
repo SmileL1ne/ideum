@@ -35,7 +35,7 @@ Forum is a web application that allows authorized users to create, comment, like
     make docker-run
 ```
 
-4. By default the server would run by next address - http://localhost:5000
+4. By default the server would run by next address - https://localhost:5000
 
 - If you've finished reviewing, please delete the docker image and container by running next command:
 ```bash

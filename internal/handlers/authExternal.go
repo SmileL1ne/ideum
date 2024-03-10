@@ -79,7 +79,12 @@ func (r *Routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	accessToken := tokenResponse[ACCESS_TOKEN].(string)
+	accessToken, ok := tokenResponse[ACCESS_TOKEN].(string)
+	if !ok {
+		r.forbidden(w)
+		return
+	}
+
 	newReq, err := http.NewRequest("GET", GOOGLE_USER_INFO_URL, nil)
 	if err != nil {
 		r.serverError(w, req, err)
@@ -112,6 +117,7 @@ func (r *Routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 		r.serverError(w, req, err)
 		return
 	}
+	fmt.Println(form.Password)
 
 	r.SSO(w, req, &form)
 }

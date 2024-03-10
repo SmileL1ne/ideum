@@ -73,7 +73,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-	logger.Printf("starting the server on address - http://localhost%s", cfg.Addr)
+	logger.Printf("starting the server on address - https://localhost%s", cfg.Addr)
 	err = server.ListenAndServeTLS(tlsCert, tlsKey)
 	logger.Fatalf("Listen and serve error:%v", err)
 }
