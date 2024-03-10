@@ -11,6 +11,8 @@ Forum is a web application that allows authorized users to create, comment, like
 - Registration
 - Authorization
 - Database connection
+- Image upload (.jpg, .png, .gif, .jpeg)
+- Authentication through Google or Github
 
 ## Requirements 🥺
 
