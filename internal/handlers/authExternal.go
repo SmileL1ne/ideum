@@ -20,6 +20,8 @@ const (
 	GITHUB_TOKEN_URL     = "https://github.com/login/oauth/access_token"
 )
 
+// SSO is external auth login handler that handles registration (or authorization if user
+// already exists) to the website
 func (r *Routes) SSO(w http.ResponseWriter, req *http.Request, form *entity.UserSignupForm) {
 	id, err := r.service.User.SaveUser(form)
 	if err != nil {
@@ -47,6 +49,10 @@ func (r *Routes) SSO(w http.ResponseWriter, req *http.Request, form *entity.User
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
+
+/*
+	GOOGLE LOGIN
+*/
 
 func (r *Routes) googlelogin(w http.ResponseWriter, req *http.Request) {
 	url := fmt.Sprintf("https://accounts.google.com/o/oauth2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=email profile",
@@ -109,6 +115,10 @@ func (r *Routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 
 	r.SSO(w, req, &form)
 }
+
+/*
+	GITHUB LOGIN
+*/
 
 func (r *Routes) githublogin(w http.ResponseWriter, req *http.Request) {
 	redirectURL := fmt.Sprintf(

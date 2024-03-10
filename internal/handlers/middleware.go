@@ -53,6 +53,8 @@ func (r *Routes) recoverPanic(next http.Handler) http.Handler {
 	})
 }
 
+// limitRate middleware checks every request's rate, if it is more than limit that set it
+// would block user for given amount of time (in seconds)
 func (r *Routes) limitRate(next http.Handler) http.Handler {
 	rl := rate.NewRateLimiter(time.Duration(r.cfg.RateInterval)*time.Second, r.cfg.RateLimit)
 
