@@ -27,7 +27,7 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	post, err := r.service.Post.GetPost(postID)
+	post, err := r.services.Post.GetPost(postID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidPostID):
@@ -39,7 +39,7 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	comments, err := r.service.Comment.GetAllCommentsForPost(postID)
+	comments, err := r.services.Comment.GetAllCommentsForPost(postID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -118,7 +118,7 @@ func (r *Routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		FileHeader: fileHeader,
 	}
 
-	isPostValid, err := r.service.Post.CheckPostAttrs(&p, withImage)
+	isPostValid, err := r.services.Post.CheckPostAttrs(&p, withImage)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidTags):
@@ -138,7 +138,7 @@ func (r *Routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if withImage {
-		imgName, err := r.service.Image.ProcessImage(file, fileHeader)
+		imgName, err := r.services.Image.ProcessImage(file, fileHeader)
 		if err != nil {
 			r.serverError(w, req, err)
 			return
@@ -146,7 +146,7 @@ func (r *Routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 		p.ImageName = imgName
 	}
 
-	id, err := r.service.Post.SavePost(p)
+	id, err := r.services.Post.SavePost(p)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -179,7 +179,7 @@ func (r *Routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userPosts, err := r.service.Post.GetAllPostsByUserId(userID)
+	userPosts, err := r.services.Post.GetAllPostsByUserId(userID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -215,7 +215,7 @@ func (r *Routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	reactedPosts, err := r.service.Post.GetAllPostsByUserReaction(userID)
+	reactedPosts, err := r.services.Post.GetAllPostsByUserReaction(userID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return

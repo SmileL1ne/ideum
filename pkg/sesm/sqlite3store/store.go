@@ -41,15 +41,15 @@ func (s *SQLite3Store) StoreFind(ctx context.Context, sessionID string) (int, ti
 	return userID, expiry, nil
 }
 
-func (s *SQLite3Store) StoreCommit(ctx context.Context, sessionID string, userID int, expiry time.Time) error {
+func (s *SQLite3Store) StoreCommit(ctx context.Context, sessionID string, userID int, userRole string, expiry time.Time) error {
 	query := `
-		REPLACE INTO sessions (session_id, user_id, expiry) 
-		VALUES($1, $2, datetime($3))
+		REPLACE INTO sessions (session_id, user_role, user_id, expiry) 
+		VALUES($1, $2, $3, datetime($4))
 	`
 
 	formattedExpiry := expiry.Format("2006-01-02T15:04:05.999")
 
-	_, err := s.db.Exec(query, sessionID, userID, formattedExpiry)
+	_, err := s.db.Exec(query, sessionID, userRole, userID, formattedExpiry)
 	if err != nil {
 		return err
 	}

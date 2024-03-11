@@ -36,7 +36,7 @@ func (r *Routes) home(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	posts, err := r.service.Post.GetAllPosts()
+	posts, err := r.services.Post.GetAllPosts()
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -69,7 +69,7 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	isTagExists, err := r.service.Tag.IsExist(tagID)
+	isTagExists, err := r.services.Tag.IsExist(tagID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -80,7 +80,7 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	posts, err := r.service.Post.GetAllPostsByTagId(tagID)
+	posts, err := r.services.Post.GetAllPostsByTagId(tagID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return

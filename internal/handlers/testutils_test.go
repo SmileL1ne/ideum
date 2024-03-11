@@ -33,7 +33,7 @@ func newTestRoutes(t *testing.T) *Routes {
 	sesm.Store = sqlite3store.New()
 
 	return &Routes{
-		service:   services,
+		services:  services,
 		tempCache: tempCache,
 		sesm:      sesm,
 		logger:    log.New(io.Discard, "", 0),

@@ -102,3 +102,23 @@ func (r *Routes) updateRateLimit(ip string, lastReq time.Time, penalty time.Dura
 		penalty: penalty,
 	}
 }
+
+func (r *Routes) detectUserRole(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if r.sesm.ExistsUserID(req.Context()) {
+			userID := r.sesm.GetUserID(req.Context())
+
+			role, err := r.services.User.GetUserRole(userID)
+			if err != nil {
+				r.serverError(w, req, err)
+				return
+			}
+
+			r.sesm.PutUserRole(req.Context(), role)
+		} else {
+			r.sesm.PutUserRoleWithoutStatusChange(req.Context(), GUEST)
+		}
+
+		next.ServeHTTP(w, req)
+	})
+}

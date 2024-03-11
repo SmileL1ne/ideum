@@ -70,3 +70,7 @@ func (us *UserServiceMock) GetUsernameById(userID int) (string, error) {
 func (us *UserServiceMock) GetUserByEmail(email string) (entity.UserEntity, error) {
 	return us.ur.GetUserByEmail(email)
 }
+
+func (us *UserServiceMock) GetUserRole(userID int) (string, error) {
+	return us.ur.GetUserRole(userID)
+}

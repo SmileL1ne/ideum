@@ -23,10 +23,10 @@ const (
 // SSO is external auth login handler that handles registration (or authorization if user
 // already exists) to the website
 func (r *Routes) SSO(w http.ResponseWriter, req *http.Request, form *entity.UserSignupForm) {
-	id, err := r.service.User.SaveUser(form)
+	id, err := r.services.User.SaveUser(form)
 	if err != nil {
 		if errors.Is(err, entity.ErrDuplicateEmail) || errors.Is(err, entity.ErrDuplicateUsername) {
-			user, err := r.service.User.GetUserByEmail(form.Email)
+			user, err := r.services.User.GetUserByEmail(form.Email)
 			if err != nil {
 				r.serverError(w, req, err)
 				return
@@ -112,12 +112,11 @@ func (r *Routes) googleCallback(w http.ResponseWriter, req *http.Request) {
 		Username: googleInfo.Name,
 		Email:    googleInfo.Email,
 	}
-	form.Password, err = pswd.RandomPassword(8)
+	form.Password, err = pswd.GenerateRandomPassword(8)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
-	fmt.Println(form.Password)
 
 	r.SSO(w, req, &form)
 }
@@ -195,7 +194,7 @@ func (r *Routes) githubCallback(w http.ResponseWriter, req *http.Request) {
 		Username: githubInfo.Login,
 		Email:    githubInfo.Email,
 	}
-	form.Password, err = pswd.RandomPassword(8)
+	form.Password, err = pswd.GenerateRandomPassword(8)
 	if err != nil {
 		r.serverError(w, req, err)
 		return

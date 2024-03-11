@@ -132,7 +132,7 @@ func (r *Routes) getBaseInfo(req *http.Request) (string, *[]entity.TagEntity, er
 		return "", nil, err
 	}
 
-	tags, err := r.service.Tag.GetAllTags()
+	tags, err := r.services.Tag.GetAllTags()
 	if err != nil {
 		return "", nil, err
 	}
@@ -147,7 +147,7 @@ func (r *Routes) getUsername(req *http.Request) (string, error) {
 		return "", nil
 	}
 
-	username, err := r.service.User.GetUsernameById(userID)
+	username, err := r.services.User.GetUsernameById(userID)
 	if errors.Is(err, entity.ErrInvalidCredentials) {
 		return "", nil
 	}

@@ -34,7 +34,7 @@ func (r *Routes) postReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	isPostExists, err := r.service.Post.ExistsPost(postID)
+	isPostExists, err := r.services.Post.ExistsPost(postID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -45,7 +45,7 @@ func (r *Routes) postReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = r.service.Reaction.SetPostReaction(reaction, postID, userID)
+	err = r.services.Reaction.SetPostReaction(reaction, postID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
@@ -80,7 +80,7 @@ func (r *Routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	isCommentExist, err := r.service.Comment.ExistsComment(commentID)
+	isCommentExist, err := r.services.Comment.ExistsComment(commentID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -105,7 +105,7 @@ func (r *Routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = r.service.Reaction.SetCommentReaction(reaction, commentID, userID)
+	err = r.services.Reaction.SetCommentReaction(reaction, commentID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):

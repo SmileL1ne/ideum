@@ -14,6 +14,7 @@ type IUserService interface {
 	Authenticate(*entity.UserLoginForm) (int, error)
 	GetUsernameById(int) (string, error)
 	GetUserByEmail(string) (entity.UserEntity, error)
+	GetUserRole(int) (string, error)
 }
 
 type userService struct {
@@ -91,4 +92,8 @@ func (us *userService) GetUsernameById(userID int) (string, error) {
 
 func (us *userService) GetUserByEmail(email string) (entity.UserEntity, error) {
 	return us.userRepo.GetUserByEmail(email)
+}
+
+func (us *userService) GetUserRole(userID int) (string, error) {
+	return us.userRepo.GetUserRole(userID)
 }

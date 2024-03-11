@@ -21,7 +21,7 @@ func (s *SQLite3StoreMock) StoreFind(ctx context.Context, sessionID string) (int
 	return userIDMock, expiryMock, nil
 }
 
-func (s *SQLite3StoreMock) StoreCommit(ctx context.Context, sessionID string, userID int, expiry time.Time) error {
+func (s *SQLite3StoreMock) StoreCommit(ctx context.Context, sessionID string, userID int, userRole string, expiry time.Time) error {
 	return nil
 }
 

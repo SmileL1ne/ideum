@@ -31,7 +31,7 @@ func (r *Routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	isPostExists, err := r.service.Post.ExistsPost(postID)
+	isPostExists, err := r.services.Post.ExistsPost(postID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -47,7 +47,7 @@ func (r *Routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		Content: content,
 	}
 
-	err = r.service.Comment.SaveComment(comment, postID, userID)
+	err = r.services.Comment.SaveComment(comment, postID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData):

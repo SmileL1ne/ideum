@@ -66,6 +66,7 @@ const (
 type sessionData struct {
 	sessionID  string
 	status     Status
+	userRole   string
 	userID     int
 	expiryTime time.Time
 	mu         sync.Mutex
@@ -139,9 +140,43 @@ func (sm *SessionManager) PutUserID(ctx context.Context, userID int) {
 	sd := sm.getSessionDataFromContext(ctx)
 
 	sd.mu.Lock()
+	defer sd.mu.Unlock()
+
 	sd.userID = userID
 	sd.status = Modified
-	sd.mu.Unlock()
+}
+
+// PutUserRole puts userRole in session data.
+//
+// It sets session status to Modified.
+func (sm *SessionManager) PutUserRole(ctx context.Context, userRole string) {
+	sd := sm.getSessionDataFromContext(ctx)
+
+	sd.mu.Lock()
+	defer sd.mu.Unlock()
+
+	sd.userRole = userRole
+	sd.status = Modified
+}
+
+// PutUserRoleWithoutStatusChange puts userRole in session data without changing session data status.
+func (sm *SessionManager) PutUserRoleWithoutStatusChange(ctx context.Context, userRole string) {
+	sd := sm.getSessionDataFromContext(ctx)
+
+	sd.mu.Lock()
+	defer sd.mu.Unlock()
+
+	sd.userRole = userRole
+	sd.status = Unmodified
+}
+
+// GetUserRole reads userRole from session data.
+func (sm *SessionManager) GetUserRole(ctx context.Context) string {
+	sd := sm.getSessionDataFromContext(ctx)
+
+	// No need to use mutex because operation is read
+
+	return sd.userRole
 }
 
 // GetUserID reads userID from session data.

@@ -12,13 +12,19 @@ import (
 	"time"
 )
 
+const (
+	GUEST     = "guest"
+	MODERATOR = "moderator"
+	ADMIN     = "admin"
+)
+
 type userRateLimit struct {
 	lastReq time.Time
 	penalty time.Duration
 }
 
 type Routes struct {
-	service        *service.Services
+	services       *service.Services
 	tempCache      map[string]*template.Template
 	sesm           *sesm.SessionManager
 	logger         *log.Logger
@@ -42,7 +48,7 @@ func NewRouter(
 	}
 
 	return &Routes{
-		service:        services,
+		services:       services,
 		tempCache:      tempCache,
 		sesm:           sesm,
 		logger:         logger,
@@ -61,7 +67,7 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/static/", r.preventDirListing(http.StripPrefix("/static", fileServer)))
 
 	// Dynamic middleware chain for routes that don't require authentication
-	dynamic := mids.New(r.sesm.LoadAndSave)
+	dynamic := mids.New(r.sesm.LoadAndSave, r.detectUserRole)
 
 	router.Handle("/", dynamic.ThenFunc(r.home))
 	router.Handle("/sortByTags/", dynamic.ThenFunc(r.sortedByTag))

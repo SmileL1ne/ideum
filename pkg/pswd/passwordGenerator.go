@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 )
 
-func RandomPassword(length int) (string, error) {
+func GenerateRandomPassword(length int) (string, error) {
 	bytes := make([]byte, length)
 	_, err := rand.Read(bytes)
 	if err != nil {

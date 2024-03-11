@@ -32,6 +32,7 @@ func New() *SessionManager {
 // to the request's context.
 func (sm *SessionManager) LoadAndSave(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+
 		w.Header().Add("Vary", "Cookie")
 
 		var sessionID string
@@ -106,9 +107,10 @@ func (sm *SessionManager) commit(ctx context.Context) (string, time.Time, error)
 	}
 
 	userID := sd.userID
+	userRole := sd.userRole
 	expiry := sd.expiryTime
 
-	if err := sm.Store.StoreCommit(ctx, sd.sessionID, userID, expiry); err != nil {
+	if err := sm.Store.StoreCommit(ctx, sd.sessionID, userID, userRole, expiry); err != nil {
 		return "", time.Time{}, err
 	}
 

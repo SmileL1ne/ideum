@@ -12,10 +12,11 @@ import (
 )
 
 type IUserRepository interface {
-	SaveUser(entity.UserSignupForm) (int, error)
+	SaveUser(user entity.UserSignupForm) (int, error)
 	GetUserByUsername(username string) (entity.UserEntity, error)
 	GetUserByEmail(email string) (entity.UserEntity, error)
 	GetUsernameByID(userID int) (string, error)
+	GetUserRole(userID int) (string, error)
 }
 
 type userRepository struct {
@@ -102,4 +103,21 @@ func (r *userRepository) getUserByField(field string, value interface{}) (entity
 	}
 
 	return u, nil
+}
+
+func (r *userRepository) GetUserRole(userID int) (string, error) {
+	query := `
+		SELECT role
+		FROM roles
+		WHERE user_id = $1
+	`
+
+	var role string
+
+	err := r.DB.QueryRow(query, userID).Scan(&role)
+	if err != nil {
+		return "", err
+	}
+
+	return role, nil
 }

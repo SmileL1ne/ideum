@@ -51,3 +51,14 @@ func (r *UserRepoMock) GetUsernameByID(userID int) (string, error) {
 	}
 	return mockUser.Username, nil
 }
+
+func (r *UserRepoMock) GetUserRole(userID int) (string, error) {
+	switch userID {
+	case 1:
+		return "admin", nil
+	case 2:
+		return "moderator", nil
+	default:
+		return "guest", nil
+	}
+}

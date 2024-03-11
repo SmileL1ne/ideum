@@ -26,7 +26,7 @@ func (r *Routes) userSignupPost(w http.ResponseWriter, req *http.Request) {
 
 	u := entity.UserSignupForm{Username: username, Email: email, Password: password}
 
-	_, err := r.service.User.SaveUser(&u) // Put user id in context
+	_, err := r.services.User.SaveUser(&u) // Put user id in context
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrDuplicateUsername), errors.Is(err, entity.ErrDuplicateEmail):
@@ -61,7 +61,7 @@ func (r *Routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 	password := form.Get("password")
 
 	u := entity.UserLoginForm{Identifier: identifier, Password: password}
-	id, err := r.service.User.Authenticate(&u)
+	id, err := r.services.User.Authenticate(&u)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidFormData), errors.Is(err, entity.ErrInvalidCredentials):
