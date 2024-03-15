@@ -29,7 +29,7 @@ func (cs *commentService) SaveComment(c *entity.CommentCreateForm, postID int, u
 		return entity.ErrInvalidFormData
 	}
 
-	err := cs.commentRepo.SaveComment(*c, postID, userID)
+	err := cs.commentRepo.Insert(*c, postID, userID)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (cs *commentService) SaveComment(c *entity.CommentCreateForm, postID int, u
 }
 
 func (cs *commentService) GetAllCommentsForPost(postID int) (*[]entity.CommentView, error) {
-	comments, err := cs.commentRepo.GetAllCommentsForPost(postID)
+	comments, err := cs.commentRepo.GetAllForPost(postID)
 	if err != nil {
 		return nil, err
 	}
@@ -62,5 +62,5 @@ func (cs *commentService) GetAllCommentsForPost(postID int) (*[]entity.CommentVi
 }
 
 func (cs *commentService) ExistsComment(commentID int) (bool, error) {
-	return cs.commentRepo.ExistsComment(commentID)
+	return cs.commentRepo.Exists(commentID)
 }

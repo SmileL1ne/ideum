@@ -84,6 +84,8 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/post/myPosts", protected.ThenFunc(r.postsPersonal))
 	router.Handle("/post/myReacted", protected.ThenFunc(r.postsReacted))
 	router.Handle("/post/create", protected.ThenFunc(r.postCreate))
+	router.Handle("/post/delete", protected.ThenFunc(r.postDelete))                 // postID at the end
+	router.Handle("/post/report/", protected.ThenFunc(r.postReport))                // postID at the end
 	router.Handle("/post/reaction/", protected.ThenFunc(r.postReaction))            // postID at the end
 	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))            // postID at the end
 	router.Handle("/post/comment/reaction/", protected.ThenFunc(r.commentReaction)) // postID at the end

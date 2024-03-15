@@ -35,7 +35,7 @@ func (us *userService) SaveUser(u *entity.UserSignupForm) (int, error) {
 		return 0, entity.ErrInvalidFormData
 	}
 
-	id, err := us.userRepo.SaveUser(*u)
+	id, err := us.userRepo.Insert(*u)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrDuplicateEmail):
@@ -61,9 +61,9 @@ func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
 	var err error
 
 	if validator.Matches(u.Identifier, EmailRX) {
-		userFromDB, err = us.userRepo.GetUserByEmail(u.Identifier)
+		userFromDB, err = us.userRepo.GetByEmail(u.Identifier)
 	} else {
-		userFromDB, err = us.userRepo.GetUserByUsername(u.Identifier)
+		userFromDB, err = us.userRepo.GetByUsername(u.Identifier)
 	}
 	if err != nil {
 		if errors.Is(err, entity.ErrInvalidCredentials) {
@@ -92,13 +92,32 @@ func (us *userService) GetUsernameById(userID int) (string, error) {
 }
 
 func (us *userService) GetUserByEmail(email string) (entity.UserEntity, error) {
-	return us.userRepo.GetUserByEmail(email)
+	return us.userRepo.GetByEmail(email)
 }
 
 func (us *userService) GetUserRole(userID int) (string, error) {
-	return us.userRepo.GetUserRole(userID)
+	return us.userRepo.GetRole(userID)
 }
 
-func (us *userService) SendNotification(notification entity.Notification) error {
-	return us.userRepo.CreateNotification(notification)
+func (us *userService) SendNotification(n entity.Notification) error {
+	switch n.Type {
+	case entity.PROMOTION:
+		n.Content = "requested promotion to moderator"
+	case entity.POST_LIKE:
+		n.Content = "liked your post"
+	case entity.POST_DISLIKE:
+		n.Content = "disliked your post"
+	case entity.COMMENT_LIKE:
+		n.Content = "liked your comment"
+	case entity.COMMENT_DISLIKE:
+		n.Content = "disliked your comment"
+	case entity.COMMENTED:
+		n.Content = "left a comment on your post"
+	case entity.REPORT:
+		n.Content = "reported this content as " + n.Content
+	default:
+		return entity.ErrInvalidNotificaitonType
+	}
+
+	return us.userRepo.CreateNotification(n)
 }

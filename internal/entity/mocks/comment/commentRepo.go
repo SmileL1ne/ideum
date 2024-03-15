@@ -24,14 +24,14 @@ func NewCommentRepoMock() *CommentRepoMock {
 
 var _ comment.ICommentRepository = (*CommentRepoMock)(nil)
 
-func (r *CommentRepoMock) SaveComment(c entity.CommentCreateForm, postID int, userID int) error {
+func (r *CommentRepoMock) Insert(c entity.CommentCreateForm, postID int, userID int) error {
 	return nil
 }
 
-func (r *CommentRepoMock) GetAllCommentsForPost(postID int) (*[]entity.CommentEntity, error) {
+func (r *CommentRepoMock) GetAllForPost(postID int) (*[]entity.CommentEntity, error) {
 	return &[]entity.CommentEntity{mockComment}, nil
 }
 
-func (r *CommentRepoMock) ExistsComment(commentID int) (bool, error) {
+func (r *CommentRepoMock) Exists(commentID int) (bool, error) {
 	return true, nil
 }

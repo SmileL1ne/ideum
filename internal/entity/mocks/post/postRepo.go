@@ -27,11 +27,11 @@ func NewPostRepoMock() *PostRepoMock {
 
 var _ post.IPostRepository = (*PostRepoMock)(nil)
 
-func (r *PostRepoMock) SavePost(p entity.PostCreateForm, tagIDs []int) (int, error) {
+func (r *PostRepoMock) Insert(p entity.PostCreateForm, tagIDs []int) (int, error) {
 	return mockPost.ID, nil
 }
 
-func (r *PostRepoMock) GetPost(postID int) (entity.PostEntity, error) {
+func (r *PostRepoMock) Get(postID int) (entity.PostEntity, error) {
 	switch postID {
 	case mockPost.ID:
 		return mockPost, nil
@@ -40,25 +40,29 @@ func (r *PostRepoMock) GetPost(postID int) (entity.PostEntity, error) {
 	}
 }
 
-func (r *PostRepoMock) GetAllPosts() (*[]entity.PostEntity, error) {
+func (r *PostRepoMock) GetAll() (*[]entity.PostEntity, error) {
 	return &[]entity.PostEntity{mockPost}, nil
 }
 
-func (r *PostRepoMock) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, error) {
+func (r *PostRepoMock) GetAllByTagId(tagID int) (*[]entity.PostEntity, error) {
 	return &[]entity.PostEntity{mockPost}, nil
 }
 
-func (r *PostRepoMock) GetAllPostsByUserID(userID int) (*[]entity.PostEntity, error) {
+func (r *PostRepoMock) GetAllByUserID(userID int) (*[]entity.PostEntity, error) {
 	return &[]entity.PostEntity{mockPost}, nil
 }
 
-func (r *PostRepoMock) GetAllPostsByUserReaction(userID int) (*[]entity.PostEntity, error) {
+func (r *PostRepoMock) GetAllByUserReaction(userID int) (*[]entity.PostEntity, error) {
 	return &[]entity.PostEntity{mockPost}, nil
 }
 
-func (r *PostRepoMock) ExistsPost(postID int) (bool, error) {
+func (r *PostRepoMock) Exists(postID int) (bool, error) {
 	if postID != mockPost.ID {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (r *PostRepoMock) Delete(postID int) error {
+	return nil
 }

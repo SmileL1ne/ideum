@@ -6,9 +6,9 @@ import (
 )
 
 type ICommentRepository interface {
-	SaveComment(entity.CommentCreateForm, int, int) error
-	GetAllCommentsForPost(int) (*[]entity.CommentEntity, error)
-	ExistsComment(int) (bool, error)
+	Insert(entity.CommentCreateForm, int, int) error
+	GetAllForPost(int) (*[]entity.CommentEntity, error)
+	Exists(int) (bool, error)
 }
 
 type commentRepository struct {
@@ -23,7 +23,7 @@ func NewCommentRepo(db *sql.DB) *commentRepository {
 	}
 }
 
-func (r *commentRepository) SaveComment(c entity.CommentCreateForm, postID int, userID int) error {
+func (r *commentRepository) Insert(c entity.CommentCreateForm, postID int, userID int) error {
 	query := `
 		INSERT INTO comments (content, post_id, user_id, created_at) 
 		VALUES ($1, $2, $3, datetime('now', 'localtime'))
@@ -34,7 +34,7 @@ func (r *commentRepository) SaveComment(c entity.CommentCreateForm, postID int, 
 	return err
 }
 
-func (r *commentRepository) GetAllCommentsForPost(postID int) (*[]entity.CommentEntity, error) {
+func (r *commentRepository) GetAllForPost(postID int) (*[]entity.CommentEntity, error) {
 	query := `
 		SELECT c.id, c.content, c.created_at, c.post_id, u.username, 
 			SUM(CASE WHEN cr.is_like = true THEN 1 ELSE 0 END) as likes_count,
@@ -70,7 +70,7 @@ func (r *commentRepository) GetAllCommentsForPost(postID int) (*[]entity.Comment
 	return &comments, nil
 }
 
-func (r *commentRepository) ExistsComment(commentID int) (bool, error) {
+func (r *commentRepository) Exists(commentID int) (bool, error) {
 	var exists bool
 
 	query := `

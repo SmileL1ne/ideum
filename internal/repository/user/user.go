@@ -12,11 +12,11 @@ import (
 )
 
 type IUserRepository interface {
-	SaveUser(user entity.UserSignupForm) (int, error)
-	GetUserByUsername(username string) (entity.UserEntity, error)
-	GetUserByEmail(email string) (entity.UserEntity, error)
+	Insert(user entity.UserSignupForm) (int, error)
+	GetByUsername(username string) (entity.UserEntity, error)
+	GetByEmail(email string) (entity.UserEntity, error)
 	GetUsernameByID(userID int) (string, error)
-	GetUserRole(userID int) (string, error)
+	GetRole(userID int) (string, error)
 	CreateNotification(notification entity.Notification) error
 }
 
@@ -32,13 +32,13 @@ func NewUserRepo(db *sql.DB) *userRepository {
 
 var _ IUserRepository = (*userRepository)(nil)
 
-func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
+func (r *userRepository) Insert(u entity.UserSignupForm) (int, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
 	if err != nil {
 		return 0, err
 	}
 
-	user, err := r.GetUserByUsername(u.Username)
+	user, err := r.GetByUsername(u.Username)
 	if err != nil && !errors.Is(err, entity.ErrInvalidCredentials) {
 		return 0, err
 	}
@@ -77,11 +77,11 @@ func (r *userRepository) SaveUser(u entity.UserSignupForm) (int, error) {
 	return int(id), nil
 }
 
-func (r *userRepository) GetUserByEmail(email string) (entity.UserEntity, error) {
+func (r *userRepository) GetByEmail(email string) (entity.UserEntity, error) {
 	return r.getUserByField("email", email)
 }
 
-func (r *userRepository) GetUserByUsername(username string) (entity.UserEntity, error) {
+func (r *userRepository) GetByUsername(username string) (entity.UserEntity, error) {
 	return r.getUserByField("username", username)
 }
 
@@ -106,7 +106,7 @@ func (r *userRepository) getUserByField(field string, value interface{}) (entity
 	return u, nil
 }
 
-func (r *userRepository) GetUserRole(userID int) (string, error) {
+func (r *userRepository) GetRole(userID int) (string, error) {
 	query := `
 		SELECT role
 		FROM roles
@@ -125,11 +125,11 @@ func (r *userRepository) GetUserRole(userID int) (string, error) {
 
 func (r *userRepository) CreateNotification(n entity.Notification) error {
 	query := `
-		INSERT INTO notifications (type, source_id user_from, user_to)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO notifications (type, content, source_id, user_from, user_to)
+		VALUES ($1, $2, $3, $4, $5)
 	`
 
-	_, err := r.DB.Exec(query, n.Type, n.SourceID, n.UserFrom, n.UserTo)
+	_, err := r.DB.Exec(query, n.Type, n.Content, n.SourceID, n.UserFrom, n.UserTo)
 	if err != nil {
 		var sqliteError sqlite3.Error
 		if errors.As(err, &sqliteError) {

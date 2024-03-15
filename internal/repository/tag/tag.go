@@ -7,7 +7,7 @@ import (
 )
 
 type ITagRepository interface {
-	GetAllTags() (*[]entity.TagEntity, error)
+	GetAll() (*[]entity.TagEntity, error)
 	AreTagsExist([]int) (bool, error)
 	IsExist(int) (bool, error)
 }
@@ -24,7 +24,7 @@ func NewTagRepo(db *sql.DB) *tagRepo {
 	}
 }
 
-func (r *tagRepo) GetAllTags() (*[]entity.TagEntity, error) {
+func (r *tagRepo) GetAll() (*[]entity.TagEntity, error) {
 	query := `
 		SELECT *
 		FROM tags

@@ -20,7 +20,7 @@ func NewTagRepoMock() *TagRepoMock {
 
 var _ tag.ITagRepository = (*TagRepoMock)(nil)
 
-func (r *TagRepoMock) GetAllTags() (*[]entity.TagEntity, error) {
+func (r *TagRepoMock) GetAll() (*[]entity.TagEntity, error) {
 	return &[]entity.TagEntity{mockTag}, nil
 }
 

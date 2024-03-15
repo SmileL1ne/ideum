@@ -20,7 +20,7 @@ func NewTagServiceMock(r repo.ITagRepository) *TagServiceMock {
 var _ service.ITagService = (*TagServiceMock)(nil)
 
 func (ts *TagServiceMock) GetAllTags() (*[]entity.TagEntity, error) {
-	return ts.tr.GetAllTags()
+	return ts.tr.GetAll()
 }
 
 func (ts *TagServiceMock) AreTagsExist(tags []string) (bool, error) {

@@ -25,7 +25,7 @@ func NewTagService(r tag.ITagRepository) *tagService {
 }
 
 func (ts *tagService) GetAllTags() (*[]entity.TagEntity, error) {
-	return ts.tagRepo.GetAllTags()
+	return ts.tagRepo.GetAll()
 }
 
 func (ts *tagService) AreTagsExist(tags []string) (bool, error) {

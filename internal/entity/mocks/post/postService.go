@@ -33,11 +33,11 @@ func (ps *PostServiceMock) SavePost(p entity.PostCreateForm) (int, error) {
 		tagID, _ := strconv.Atoi(tagIDStr) // Don't handle error because we know Id's are valid (checked before)
 		tagIDs = append(tagIDs, tagID)
 	}
-	return ps.pr.SavePost(entity.PostCreateForm{}, tagIDs)
+	return ps.pr.Insert(entity.PostCreateForm{}, tagIDs)
 }
 
 func (ps *PostServiceMock) GetPost(postID int) (entity.PostView, error) {
-	postEntity, err := ps.pr.GetPost(postID)
+	postEntity, err := ps.pr.Get(postID)
 	if errors.Is(err, entity.ErrNoRecord) {
 		return entity.PostView{}, entity.ErrInvalidPostID
 	}
@@ -55,27 +55,27 @@ func (ps *PostServiceMock) GetPost(postID int) (entity.PostView, error) {
 }
 
 func (ps *PostServiceMock) GetAllPosts() (*[]entity.PostView, error) {
-	posts, _ := ps.pr.GetAllPosts()
+	posts, _ := ps.pr.GetAll()
 	return service.ConvertEntitiesToViews(posts)
 }
 
 func (ps *PostServiceMock) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
-	posts, _ := ps.pr.GetAllPostsByTagId(tagID)
+	posts, _ := ps.pr.GetAllByTagId(tagID)
 	return service.ConvertEntitiesToViews(posts)
 }
 
 func (ps *PostServiceMock) GetAllPostsByUserId(userID int) (*[]entity.PostView, error) {
-	posts, _ := ps.pr.GetAllPostsByUserID(userID)
+	posts, _ := ps.pr.GetAllByUserID(userID)
 	return service.ConvertEntitiesToViews(posts)
 }
 
 func (ps *PostServiceMock) GetAllPostsByUserReaction(userID int) (*[]entity.PostView, error) {
-	posts, _ := ps.pr.GetAllPostsByUserReaction(userID)
+	posts, _ := ps.pr.GetAllByUserReaction(userID)
 	return service.ConvertEntitiesToViews(posts)
 }
 
 func (ps *PostServiceMock) ExistsPost(postID int) (bool, error) {
-	return ps.pr.ExistsPost(postID)
+	return ps.pr.Exists(postID)
 }
 
 // TODO: Add mock checks here
@@ -90,4 +90,8 @@ func (ps *PostServiceMock) CheckPostAttrs(p *entity.PostCreateForm, withImage bo
 	}
 
 	return false, nil
+}
+
+func (ps *PostServiceMock) DeletePost(postID int) error {
+	return ps.pr.Delete(postID)
 }

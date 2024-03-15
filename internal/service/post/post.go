@@ -18,6 +18,7 @@ type IPostService interface {
 	GetAllPostsByUserReaction(int) (*[]entity.PostView, error)
 	ExistsPost(int) (bool, error)
 	CheckPostAttrs(*entity.PostCreateForm, bool) (bool, error)
+	DeletePost(postID int) error
 }
 
 type postService struct {
@@ -44,7 +45,7 @@ func (ps *postService) SavePost(p entity.PostCreateForm) (int, error) {
 		tagIDs = append(tagIDs, tagID)
 	}
 
-	id, err := ps.postRepo.SavePost(p, tagIDs)
+	id, err := ps.postRepo.Insert(p, tagIDs)
 	if err != nil {
 		return 0, err
 	}
@@ -53,7 +54,7 @@ func (ps *postService) SavePost(p entity.PostCreateForm) (int, error) {
 }
 
 func (ps *postService) GetPost(postId int) (entity.PostView, error) {
-	post, err := ps.postRepo.GetPost(postId)
+	post, err := ps.postRepo.Get(postId)
 	if err != nil {
 		if errors.Is(err, entity.ErrNoRecord) {
 			return entity.PostView{}, entity.ErrInvalidPostID
@@ -84,7 +85,7 @@ func (ps *postService) GetPost(postId int) (entity.PostView, error) {
 }
 
 func (ps *postService) GetAllPosts() (*[]entity.PostView, error) {
-	posts, err := ps.postRepo.GetAllPosts()
+	posts, err := ps.postRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +94,7 @@ func (ps *postService) GetAllPosts() (*[]entity.PostView, error) {
 }
 
 func (ps *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error) {
-	posts, err := ps.postRepo.GetAllPostsByTagId(tagID)
+	posts, err := ps.postRepo.GetAllByTagId(tagID)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +103,7 @@ func (ps *postService) GetAllPostsByTagId(tagID int) (*[]entity.PostView, error)
 }
 
 func (ps *postService) GetAllPostsByUserId(userID int) (*[]entity.PostView, error) {
-	posts, err := ps.postRepo.GetAllPostsByUserID(userID)
+	posts, err := ps.postRepo.GetAllByUserID(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +112,7 @@ func (ps *postService) GetAllPostsByUserId(userID int) (*[]entity.PostView, erro
 }
 
 func (ps *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView, error) {
-	posts, err := ps.postRepo.GetAllPostsByUserReaction(userID)
+	posts, err := ps.postRepo.GetAllByUserReaction(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +121,7 @@ func (ps *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView
 }
 
 func (ps *postService) ExistsPost(postID int) (bool, error) {
-	return ps.postRepo.ExistsPost(postID)
+	return ps.postRepo.Exists(postID)
 }
 
 func (ps *postService) CheckPostAttrs(p *entity.PostCreateForm, withImage bool) (bool, error) {
@@ -134,4 +135,8 @@ func (ps *postService) CheckPostAttrs(p *entity.PostCreateForm, withImage bool) 
 	}
 
 	return true, nil
+}
+
+func (ps *postService) DeletePost(postID int) error {
+	return ps.postRepo.Delete(postID)
 }

@@ -25,7 +25,7 @@ func (us *UserServiceMock) SaveUser(u *entity.UserSignupForm) (int, error) {
 		return 0, entity.ErrInvalidFormData
 	}
 
-	id, err := us.ur.SaveUser(*u)
+	id, err := us.ur.Insert(*u)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrDuplicateEmail):
@@ -50,9 +50,9 @@ func (us *UserServiceMock) Authenticate(u *entity.UserLoginForm) (int, error) {
 	var err error
 
 	if validator.Matches(u.Identifier, service.EmailRX) {
-		userFromDB, err = us.ur.GetUserByEmail(u.Identifier)
+		userFromDB, err = us.ur.GetByEmail(u.Identifier)
 	} else {
-		userFromDB, err = us.ur.GetUserByUsername(u.Identifier)
+		userFromDB, err = us.ur.GetByUsername(u.Identifier)
 	}
 
 	if errors.Is(err, entity.ErrInvalidCredentials) || u.Password == "SatoruIsTheBest" {
@@ -68,11 +68,11 @@ func (us *UserServiceMock) GetUsernameById(userID int) (string, error) {
 }
 
 func (us *UserServiceMock) GetUserByEmail(email string) (entity.UserEntity, error) {
-	return us.ur.GetUserByEmail(email)
+	return us.ur.GetByEmail(email)
 }
 
 func (us *UserServiceMock) GetUserRole(userID int) (string, error) {
-	return us.ur.GetUserRole(userID)
+	return us.ur.GetRole(userID)
 }
 
 func (us *UserServiceMock) SendNotification(notification entity.Notification) error {

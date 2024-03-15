@@ -223,3 +223,73 @@ func (r *Routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }
+
+func (r *Routes) postDelete(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	postID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("postDelete: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	err := r.services.Post.DeletePost(postID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	http.Redirect(w, req, "/", http.StatusSeeOther)
+}
+
+func (r *Routes) postReport(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
+		return
+	}
+	if r.sesm.GetUserRole(req.Context()) != entity.MODERATOR {
+		r.forbidden(w)
+		return
+	}
+
+	postID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("postReport: invalid url path")
+		r.notFound(w)
+		return
+	}
+	message := req.PostFormValue("message")
+	userID := r.sesm.GetUserID(req.Context())
+
+	notification := entity.Notification{
+		Type:     entity.REPORT,
+		Content:  message,
+		SourceID: postID,
+		UserFrom: userID,
+	}
+
+	err := r.services.User.SendNotification(notification)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrDuplicateNotification):
+			r.logger.Print("postReport: request is already sent")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, strings.TrimSpace("Request is already sent"))
+		case errors.Is(err, entity.ErrInvalidNotificaitonType):
+			r.badRequest(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
+	http.Redirect(w, req, req.URL.Path, http.StatusOK)
+}

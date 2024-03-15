@@ -7,13 +7,14 @@ import (
 )
 
 type IPostRepository interface {
-	SavePost(entity.PostCreateForm, []int) (int, error)
-	GetPost(int) (entity.PostEntity, error)
-	GetAllPosts() (*[]entity.PostEntity, error)
-	GetAllPostsByTagId(int) (*[]entity.PostEntity, error)
-	GetAllPostsByUserID(int) (*[]entity.PostEntity, error)
-	GetAllPostsByUserReaction(int) (*[]entity.PostEntity, error)
-	ExistsPost(int) (bool, error)
+	Insert(entity.PostCreateForm, []int) (int, error)
+	Get(int) (entity.PostEntity, error)
+	GetAll() (*[]entity.PostEntity, error)
+	GetAllByTagId(int) (*[]entity.PostEntity, error)
+	GetAllByUserID(int) (*[]entity.PostEntity, error)
+	GetAllByUserReaction(int) (*[]entity.PostEntity, error)
+	Exists(int) (bool, error)
+	Delete(postID int) error
 }
 
 type postRepository struct {
@@ -28,7 +29,7 @@ func NewPostRepo(db *sql.DB) *postRepository {
 
 var _ IPostRepository = (*postRepository)(nil)
 
-func (r *postRepository) SavePost(p entity.PostCreateForm, tagIDs []int) (int, error) {
+func (r *postRepository) Insert(p entity.PostCreateForm, tagIDs []int) (int, error) {
 	tx, err := r.DB.Begin()
 	if err != nil {
 		return 0, err
@@ -73,7 +74,7 @@ func (r *postRepository) SavePost(p entity.PostCreateForm, tagIDs []int) (int, e
 	return int(postID), nil
 }
 
-func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
+func (r *postRepository) Get(postID int) (entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username,
 			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
@@ -123,7 +124,7 @@ func (r *postRepository) GetPost(postID int) (entity.PostEntity, error) {
 	return post, nil
 }
 
-func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
+func (r *postRepository) GetAll() (*[]entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username, 
 			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
@@ -154,7 +155,7 @@ func (r *postRepository) GetAllPosts() (*[]entity.PostEntity, error) {
 	return getAllPostsByQuery(r.DB, query)
 }
 
-func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, error) {
+func (r *postRepository) GetAllByTagId(tagID int) (*[]entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username, 
 			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
@@ -190,7 +191,7 @@ func (r *postRepository) GetAllPostsByTagId(tagID int) (*[]entity.PostEntity, er
 	return getAllPostsByQuery(r.DB, query, tagID)
 }
 
-func (r *postRepository) GetAllPostsByUserID(userID int) (*[]entity.PostEntity, error) {
+func (r *postRepository) GetAllByUserID(userID int) (*[]entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username,
 			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
@@ -222,7 +223,7 @@ func (r *postRepository) GetAllPostsByUserID(userID int) (*[]entity.PostEntity, 
 	return getAllPostsByQuery(r.DB, query, userID)
 }
 
-func (r *postRepository) GetAllPostsByUserReaction(userID int) (*[]entity.PostEntity, error) {
+func (r *postRepository) GetAllByUserReaction(userID int) (*[]entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username,
 			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
@@ -253,7 +254,7 @@ func (r *postRepository) GetAllPostsByUserReaction(userID int) (*[]entity.PostEn
 	return getAllPostsByQuery(r.DB, query, userID)
 }
 
-func (r *postRepository) ExistsPost(postID int) (bool, error) {
+func (r *postRepository) Exists(postID int) (bool, error) {
 	var exists bool
 
 	query := `
@@ -266,4 +267,15 @@ func (r *postRepository) ExistsPost(postID int) (bool, error) {
 
 	err := r.DB.QueryRow(query, postID).Scan(&exists)
 	return exists, err
+}
+
+func (r *postRepository) Delete(postID int) error {
+	query := `
+		DELETE FROM posts
+		WHERE id = $1
+	`
+
+	_, err := r.DB.Exec(query, postID)
+
+	return err
 }

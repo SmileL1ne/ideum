@@ -23,11 +23,11 @@ func (cs *CommentServiceMock) SaveComment(c *entity.CommentCreateForm, postID in
 		return entity.ErrInvalidFormData
 	}
 
-	return cs.cr.SaveComment(*c, postID, userID)
+	return cs.cr.Insert(*c, postID, userID)
 }
 
 func (cs *CommentServiceMock) GetAllCommentsForPost(postID int) (*[]entity.CommentView, error) {
-	comments, err := cs.cr.GetAllCommentsForPost(postID)
+	comments, err := cs.cr.GetAllForPost(postID)
 	if err != nil {
 		return nil, err
 	}
@@ -51,5 +51,5 @@ func (cs *CommentServiceMock) GetAllCommentsForPost(postID int) (*[]entity.Comme
 }
 
 func (cs *CommentServiceMock) ExistsComment(commentID int) (bool, error) {
-	return cs.cr.ExistsComment(commentID)
+	return cs.cr.Exists(commentID)
 }

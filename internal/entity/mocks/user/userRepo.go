@@ -22,7 +22,7 @@ func NewUserRepoMock() *UserRepoMock {
 
 var _ user.IUserRepository = (*UserRepoMock)(nil)
 
-func (r *UserRepoMock) SaveUser(u entity.UserSignupForm) (int, error) {
+func (r *UserRepoMock) Insert(u entity.UserSignupForm) (int, error) {
 	if u.Username == "satoru" {
 		return 0, entity.ErrDuplicateUsername
 	} else if u.Email == "satoru@gmail.com" {
@@ -31,14 +31,14 @@ func (r *UserRepoMock) SaveUser(u entity.UserSignupForm) (int, error) {
 	return mockUser.Id, nil
 }
 
-func (r *UserRepoMock) GetUserByEmail(email string) (entity.UserEntity, error) {
+func (r *UserRepoMock) GetByEmail(email string) (entity.UserEntity, error) {
 	if email == "yuta@gmail.com" {
 		return mockUser, nil
 	}
 	return entity.UserEntity{}, entity.ErrInvalidCredentials
 }
 
-func (r *UserRepoMock) GetUserByUsername(username string) (entity.UserEntity, error) {
+func (r *UserRepoMock) GetByUsername(username string) (entity.UserEntity, error) {
 	if username == "yuta" {
 		return mockUser, nil
 	}
@@ -52,7 +52,7 @@ func (r *UserRepoMock) GetUsernameByID(userID int) (string, error) {
 	return mockUser.Username, nil
 }
 
-func (r *UserRepoMock) GetUserRole(userID int) (string, error) {
+func (r *UserRepoMock) GetRole(userID int) (string, error) {
 	switch userID {
 	case 1:
 		return "admin", nil

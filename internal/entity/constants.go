@@ -14,4 +14,5 @@ const (
 	COMMENT_LIKE    = "comment_like"
 	COMMENT_DISLIKE = "comment_dislike"
 	COMMENTED       = "commented"
+	REPORT          = "report"
 )

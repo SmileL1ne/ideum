@@ -29,5 +29,6 @@ var (
 
 // Notification related errors
 var (
-	ErrDuplicateNotification = errors.New("entity: notification is already sent")
+	ErrDuplicateNotification   = errors.New("entity: notification is already sent")
+	ErrInvalidNotificaitonType = errors.New("entity: invalid notification type")
 )
