@@ -24,4 +24,10 @@ var (
 	ErrDuplicateUsername  = errors.New("entity: dupliate username")
 	ErrInvalidCredentials = errors.New("entity: invalid credentials")
 	ErrInvalidUserID      = errors.New("entity: non-existent user id")
+	ErrUnauthorized       = errors.New("entity: unauthorized")
+)
+
+// Notification related errors
+var (
+	ErrDuplicateNotification = errors.New("entity: notification is already sent")
 )

@@ -12,12 +12,6 @@ import (
 	"time"
 )
 
-const (
-	GUEST     = "guest"
-	MODERATOR = "moderator"
-	ADMIN     = "admin"
-)
-
 type userRateLimit struct {
 	lastReq time.Time
 	penalty time.Duration
@@ -73,6 +67,7 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/sortByTags/", dynamic.ThenFunc(r.sortedByTag))
 	router.Handle("/user/login", dynamic.ThenFunc(r.userLoginPost))
 	router.Handle("/user/signup", dynamic.ThenFunc(r.userSignupPost))
+	router.Handle("/user/promote", dynamic.ThenFunc(r.userPromote))
 	router.Handle("/post/view/", dynamic.ThenFunc(r.postView)) // postID at the end
 
 	// SSO

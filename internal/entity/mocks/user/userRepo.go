@@ -62,3 +62,7 @@ func (r *UserRepoMock) GetUserRole(userID int) (string, error) {
 		return "guest", nil
 	}
 }
+
+func (r *UserRepoMock) CreateNotification(n entity.Notification) error {
+	return nil
+}

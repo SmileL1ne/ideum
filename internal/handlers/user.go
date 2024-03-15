@@ -100,3 +100,27 @@ func (r *Routes) userLogout(w http.ResponseWriter, req *http.Request) {
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
+
+func (r *Routes) userPromote(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+	if r.sesm.GetUserRole(req.Context()) != entity.USER {
+		r.badRequest(w)
+		return
+	}
+
+	userID := r.sesm.GetUserID(req.Context())
+
+	notification := entity.Notification{
+		Type:     entity.PROMOTION,
+		UserFrom: userID,
+	}
+
+	err := r.services.User.SendNotification(notification)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+}

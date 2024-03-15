@@ -11,6 +11,7 @@ type UserEntity struct {
 	Username  string
 	Email     string
 	Password  string
+	Role      string
 	CreatedAt time.Time
 }
 

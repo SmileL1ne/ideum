@@ -14,8 +14,12 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, tags, err := r.getBaseInfo(req)
+	data, err := r.newTemplateData(req)
 	if err != nil {
+		if errors.Is(err, entity.ErrUnauthorized) {
+			r.unauthorized(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -45,11 +49,8 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	data := r.newTemplateData(req)
 	data.Models.Post = post
 	data.Models.Comments = *comments
-	data.Models.Tags = *tags
-	data.Username = username
 	data.Models.Post.ImageName = post.ImageName
 
 	r.render(w, req, http.StatusOK, "view.html", data)
@@ -65,15 +66,15 @@ func (r *Routes) postCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, tags, err := r.getBaseInfo(req)
+	data, err := r.newTemplateData(req)
 	if err != nil {
+		if errors.Is(err, entity.ErrUnauthorized) {
+			r.unauthorized(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
-
-	data := r.newTemplateData(req)
-	data.Models.Tags = *tags
-	data.Username = username
 
 	r.render(w, req, http.StatusOK, "create.html", data)
 }
@@ -169,13 +170,13 @@ func (r *Routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, tags, err := r.getBaseInfo(req)
+	data, err := r.newTemplateData(req)
 	if err != nil {
+		if errors.Is(err, entity.ErrUnauthorized) {
+			r.unauthorized(w)
+			return
+		}
 		r.serverError(w, req, err)
-		return
-	}
-	if username == "" { // This should never happen
-		r.unauthorized(w)
 		return
 	}
 
@@ -185,10 +186,7 @@ func (r *Routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	data := r.newTemplateData(req)
-	data.Models.Tags = *tags
 	data.Models.Posts = *userPosts
-	data.Username = username
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }
@@ -205,13 +203,13 @@ func (r *Routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, tags, err := r.getBaseInfo(req)
+	data, err := r.newTemplateData(req)
 	if err != nil {
+		if errors.Is(err, entity.ErrUnauthorized) {
+			r.unauthorized(w)
+			return
+		}
 		r.serverError(w, req, err)
-		return
-	}
-	if username == "" {
-		r.unauthorized(w)
 		return
 	}
 
@@ -221,10 +219,7 @@ func (r *Routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	data := r.newTemplateData(req)
-	data.Models.Tags = *tags
 	data.Models.Posts = *reactedPosts
-	data.Username = username
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }

@@ -17,6 +17,7 @@ type IUserRepository interface {
 	GetUserByEmail(email string) (entity.UserEntity, error)
 	GetUsernameByID(userID int) (string, error)
 	GetUserRole(userID int) (string, error)
+	CreateNotification(notification entity.Notification) error
 }
 
 type userRepository struct {
@@ -120,4 +121,29 @@ func (r *userRepository) GetUserRole(userID int) (string, error) {
 	}
 
 	return role, nil
+}
+
+func (r *userRepository) CreateNotification(n entity.Notification) error {
+	query := `
+		INSERT INTO notifications (type, source_id user_from, user_to)
+		VALUES ($1, $2, $3, $4)
+	`
+
+	_, err := r.DB.Exec(query, n.Type, n.SourceID, n.UserFrom, n.UserTo)
+	if err != nil {
+		var sqliteError sqlite3.Error
+		if errors.As(err, &sqliteError) {
+			if sqliteError.Code == 19 && strings.Contains(sqliteError.Error(), "UNIQUE constraint failed:") {
+				switch {
+				case strings.Contains(sqliteError.Error(), "notifications.type, notifications.source_id, notifications.user_from, notifications.user_to"):
+					return entity.ErrDuplicateNotification
+				default:
+					return fmt.Errorf("(repo) SaveUser: unknown field - %v", sqliteError)
+				}
+			}
+		}
+		return err
+	}
+
+	return nil
 }

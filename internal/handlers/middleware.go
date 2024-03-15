@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"forum/internal/entity"
 	"forum/pkg/rate"
 	"net/http"
 	"strings"
@@ -116,7 +117,7 @@ func (r *Routes) detectUserRole(next http.Handler) http.Handler {
 
 			r.sesm.PutUserRole(req.Context(), role)
 		} else {
-			r.sesm.PutUserRoleWithoutStatusChange(req.Context(), GUEST)
+			r.sesm.PutUserRoleWithoutStatusChange(req.Context(), entity.GUEST)
 		}
 
 		next.ServeHTTP(w, req)

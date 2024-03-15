@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"bytes"
-	"errors"
+	"context"
 	"fmt"
 	"forum/internal/entity"
 	"forum/internal/validator"
@@ -15,10 +15,27 @@ import (
 	"time"
 )
 
-func (r *Routes) newTemplateData(req *http.Request) templateData {
+func (r *Routes) newTemplateData(req *http.Request) (templateData, error) {
+	username, err := r.getUsername(req.Context())
+	if err != nil {
+		return templateData{}, err
+	} else if username == "" {
+		return templateData{}, entity.ErrUnauthorized
+	}
+
+	tags, err := r.services.Tag.GetAllTags()
+	if err != nil {
+		return templateData{}, err
+	}
+
+	userRole := r.sesm.GetUserRole(req.Context())
+
 	return templateData{
 		IsAuthenticated: r.isAuthenticated(req),
-	}
+		Models:          Models{Tags: *tags},
+		Username:        username,
+		UserRole:        userRole,
+	}, nil
 }
 
 func (r *Routes) isAuthenticated(req *http.Request) bool {
@@ -125,33 +142,14 @@ func (r *Routes) renderErrorPage(w http.ResponseWriter, errInfo errData) {
 	buf.WriteTo(w)
 }
 
-// getBaseInfo retrieves all information for base of the page (username and all tags)
-func (r *Routes) getBaseInfo(req *http.Request) (string, *[]entity.TagEntity, error) {
-	username, err := r.getUsername(req)
-	if err != nil {
-		return "", nil, err
-	}
-
-	tags, err := r.services.Tag.GetAllTags()
-	if err != nil {
-		return "", nil, err
-	}
-
-	return username, tags, nil
-}
-
 // getUsername retrieves username by user id from request context
-func (r *Routes) getUsername(req *http.Request) (string, error) {
-	userID := r.sesm.GetUserID(req.Context())
+func (r *Routes) getUsername(ctx context.Context) (string, error) {
+	userID := r.sesm.GetUserID(ctx)
 	if userID == 0 {
 		return "", nil
 	}
 
-	username, err := r.services.User.GetUsernameById(userID)
-	if errors.Is(err, entity.ErrInvalidCredentials) {
-		return "", nil
-	}
-	return username, err
+	return r.services.User.GetUsernameById(userID)
 }
 
 // getIdFromPath retrieves and returns id from request path.

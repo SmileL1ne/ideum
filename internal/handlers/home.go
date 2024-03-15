@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+	"forum/internal/entity"
 	"net/http"
 	"strings"
 )
@@ -30,8 +32,12 @@ func (r *Routes) home(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, tags, err := r.getBaseInfo(req)
+	data, err := r.newTemplateData(req)
 	if err != nil {
+		if errors.Is(err, entity.ErrUnauthorized) {
+			r.unauthorized(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -41,11 +47,7 @@ func (r *Routes) home(w http.ResponseWriter, req *http.Request) {
 		r.serverError(w, req, err)
 		return
 	}
-
-	data := r.newTemplateData(req)
 	data.Models.Posts = *posts
-	data.Models.Tags = *tags
-	data.Username = username
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }
@@ -56,8 +58,12 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	username, tags, err := r.getBaseInfo(req)
+	data, err := r.newTemplateData(req)
 	if err != nil {
+		if errors.Is(err, entity.ErrUnauthorized) {
+			r.unauthorized(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -86,10 +92,7 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	data := r.newTemplateData(req)
 	data.Models.Posts = *posts
-	data.Models.Tags = *tags
-	data.Username = username
 
 	r.render(w, req, http.StatusOK, "home.html", data)
 }

@@ -19,6 +19,7 @@ type Models struct {
 type templateData struct {
 	Models          Models
 	Username        string
+	UserRole        string
 	IsAuthenticated bool
 }
 
