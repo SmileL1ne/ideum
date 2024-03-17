@@ -84,12 +84,15 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/post/myReacted", protected.ThenFunc(r.postsReacted))
 	router.Handle("/post/myCommented", protected.ThenFunc(r.postsCommented))
 	router.Handle("/post/create", protected.ThenFunc(r.postCreate))
-	router.Handle("/post/delete", protected.ThenFunc(r.postDelete))                 // postID at the end
+	router.Handle("/post/delete/", protected.ThenFunc(r.postDelete))                // postID at the end
 	router.Handle("/post/report/", protected.ThenFunc(r.postReport))                // postID at the end
 	router.Handle("/post/reaction/", protected.ThenFunc(r.postReaction))            // postID at the end
 	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))            // postID at the end
 	router.Handle("/post/comment/reaction/", protected.ThenFunc(r.commentReaction)) // postID at the end
 	router.Handle("/user/promote", protected.ThenFunc(r.userPromote))
+	router.Handle("/admin/requests", protected.ThenFunc(r.requests))
+	router.Handle("/admin/promote/", protected.ThenFunc(r.adminPromote)) // userID at the end
+	router.Handle("/admin/reject/", protected.ThenFunc(r.adminReject))   // userID at the end
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
 
 	// Standard middleware chain applied to router itself -> used in all routes

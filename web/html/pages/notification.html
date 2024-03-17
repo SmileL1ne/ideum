@@ -1,0 +1,56 @@
+<!-- new -->
+{{define "title"}} Rabbit {{end}}
+
+{{define "main"}}
+
+<div class="base">
+    <!-- post feed-->
+    <div class="post-feed">
+        <!-- notification -->
+
+        <!-- messages Yes-No -->
+        <!-- only admin -->
+        <div class="feed-message-wrapper">
+            <div class="feed-message-frame">
+                <div class="feed-message-left">
+                    <div class="feed-message-from">
+                        <p>User001</p>
+                        <p class="post-date">28-10-2025</p>
+                    </div>
+                    <div class="message-content">Reported <a href="">post</a></div>
+                </div>
+
+                <div class="ok-frame">
+                    <div class="action-message">Delete post?</div>
+                    <form action="">
+                        <button class="ok-button" id="like">YES</button>
+                    </form>
+                    <form action="">
+                        <button class="ok-button" id="dislike">NO</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- messages, liked, commented, etc. -->
+        <div class="feed-message-wrapper">
+            <div class="feed-message-frame">
+                <div class="feed-message-left">
+                    <div class="feed-message-from">
+                        <p>User001</p>
+                        <p class="post-date">28-10-2025</p>
+                    </div>
+                    <div class="message-content">Liked your <a href="">post</a></div>
+                </div>
+
+                <button class="ok-button" id="like">OK
+                </button>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+{{end}}

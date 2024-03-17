@@ -10,36 +10,42 @@
             </div>
             <div class="interface-options">
                 <ul>
-                    <li> <a class="interface-link" href="/post/myPosts">
+
+                    <li> 
+                        <a class="interface-link" href="/post/myPosts">
                             <img src="/static/img/svg/my-posts.svg" alt="my-posts-icon">My posts
-                        </a></li>
-                    <li> <a class="interface-link" href="/post/myReacted">
+                        </a>
+                    </li>
+                    <li> 
+                        <a class="interface-link" href="/post/myReacted">
                             <img src="/static/img/svg/like-dislike.svg" alt="liked-icon">Liked/disliked posts
-                        </a></li>
-
-                    <li> <a class="interface-link" href="/post/myCommented">
+                        </a>
+                    </li>
+                    <li> 
+                        <a class="interface-link" href="/post/myCommented">
                             <img src="/static/img/svg/commented-post.svg" alt="commented-post"> Commented posts
-                        </a></li>
-
-                    <li> <a class="interface-link" href="#">
+                        </a>
+                    </li>
+                    <li> 
+                        <a class="interface-link" href="#">
                             <img src="/static/img/svg/notification.svg" alt="notification-icon"> Notifications
-                        </a></li>
-
+                        </a>
+                    </li>
                     <!-- if role admin -->
-                    <li> <a class="interface-link" href="#">
+                    <li> 
+                        <a class="interface-link" href="#">
                             <img src="/static/img/svg/requests.svg" alt="requests-icon"> Requests
-                        </a></li>
+                        </a>
+                    </li>
 
-                    <!-- if role user -->
-
-                    <li>
+                    {{if eq .UserRole "user"}}
                         <a class="interface-link" href="/user/promote">
                             <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
                         </a>
-                    </li>
-                    
-                </ul>
+                    {{end}}
 
+
+                </ul>
                 <form action="/post/create" method="get">
                     <button id="make-post-button" class="light-button">Create new post</button>
                 </form>

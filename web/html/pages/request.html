@@ -1,0 +1,43 @@
+<!-- new -->
+{{define "title"}} Rabbit {{end}}
+
+{{define "main"}}
+
+<div class="base">
+    <!-- post feed-->
+    <div class="post-feed">
+        <!-- requests -->
+
+         <!-- messages Yes-No -->
+         <!-- only admin -->
+         {{range .Models.Notifications}}
+            <div class="feed-message-wrapper" >
+
+                <div class="feed-message-frame">
+                    <div class="feed-message-left">
+                        <div class="feed-message-from">
+                            <p>{{.Username}}</p>
+                            <p class="post-date">{{.CreatedAt}}</p>
+                        </div>
+                        <div class="message-content">{{.UserFrom}} {{.Content}}
+                        </div>
+                    </div>
+
+                    <div class="ok-frame">
+                        <div class="action-message">Promote?</div>
+                        <form action="/admin/promote/{{.UserFrom}}">
+                            <button class="ok-button" id="like">YES</button>
+                        </form>
+                        <form action="/admin/reject/{{.UserFrom}}">
+                            <button class="ok-button" id="dislike">NO</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+         {{end}}
+
+    </div>
+
+</div>
+{{end}}

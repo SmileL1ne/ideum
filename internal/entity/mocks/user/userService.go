@@ -78,3 +78,15 @@ func (us *UserServiceMock) GetUserRole(userID int) (string, error) {
 func (us *UserServiceMock) SendNotification(notification entity.Notification) error {
 	return us.ur.CreateNotification(notification)
 }
+
+func (us *UserServiceMock) GetRequests(role string) (*[]entity.Notification, error) {
+	if role != entity.ADMIN {
+		return nil, entity.ErrForbiddenAccess
+	}
+
+	return us.ur.GetRequests()
+}
+
+func (us *UserServiceMock) PromoteUser(userID int) error {
+	return us.ur.Promote(userID)
+}

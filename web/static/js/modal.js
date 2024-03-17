@@ -5,9 +5,17 @@ modalButtons.forEach(button => {
     button.addEventListener('click', () => {
         const modalId = button.getAttribute('data-modal');
         const modal = document.getElementById(modalId);
+        const urlId = button.getAttribute('data-url-id');
 
         if (modal) {
-            modal.showModal();
+            if (urlId) {
+                const form = modal.querySelector('form');
+                form.action += `${urlId}`;
+                modal.showModal();
+            } else {
+                modal.showModal();
+            }
+
         }
     });
 });
@@ -33,3 +41,4 @@ document.querySelectorAll('dialog').forEach(modal => {
 
 // class="Btn" data-modal="signin"
 //  dialog -->id=signin
+

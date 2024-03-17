@@ -8,11 +8,12 @@ const (
 )
 
 const (
-	PROMOTION       = "promotion"
-	POST_LIKE       = "post_like"
-	POST_DISLIKE    = "post_dislike"
-	COMMENT_LIKE    = "comment_like"
-	COMMENT_DISLIKE = "comment_dislike"
-	COMMENTED       = "commented"
-	REPORT          = "report"
+	PROMOTION        = "promotion"
+	POST_LIKE        = "post_like"
+	POST_DISLIKE     = "post_dislike"
+	COMMENT_LIKE     = "comment_like"
+	COMMENT_DISLIKE  = "comment_dislike"
+	COMMENTED        = "commented"
+	REPORT           = "report"
+	REJECT_PROMOTION = "reject_promotion"
 )

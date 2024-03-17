@@ -57,7 +57,6 @@
                 {{end}}
 
                 <div class="post-footer">
-
                     <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">
                         {{.Models.Post.CommentsLen}}
                     </div>
@@ -66,28 +65,35 @@
                     <div class="post-options">
                         <!-- if owner -->
                         <form action="">
-                            <button type="submit">
-                                <img src="/img/svg/edit-icon.svg" alt="comment-icon">
+                            <button type="submit" class="clean-btn">
+                                <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
                             </button>
                         </form>
 
                         <!-- if owner or admin or moderator -->
-                        <form action="">
-                            <button type="submit">
-                                <a href="/"><img src="/img/svg/delete-icon.svg" alt="delete-icon"></a>
+
+                        {{if eq .Models.Post.Username .Username}}
+                            <button type="submit" class="Btn clean-btn" data-modal="delete-modal"
+                                data-url-id="{{.Models.Post.ID}}">
+                                <img src="/static/img/svg/delete-icon.svg" alt="delete-icon">
                             </button>
-                        </form>
+                        {{end}}
+
 
                         <!-- if moderator -->
-                        <form action="">
-                            <button type="submit">
-                                <img src="/img/svg/report-icon.svg" alt="report-icon">
-                            </button>
-                        </form>
+
+                        <button type="submit" class="Btn clean-btn" data-modal="report-modal"
+                            data-url-id="{{.Models.Post.ID}}">
+                            <img src="/static/img/svg/report-icon.svg" alt="report-icon">
+                        </button>
+
 
                     </div>
 
+
                 </div>
+
+
 
             </div>
         </div>
@@ -123,6 +129,35 @@
                 <div class="post-text">
                     <p>{{.Content}}</p>
                 </div>
+                <div class="post-footer comment-option">
+
+                    <div class="post-options">
+
+                        <!-- if owner -->
+                        <form action="">
+                            <button type="submit" class="clean-btn">
+                                <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
+                            </button>
+                        </form>
+
+                        {{if or (eq .Models.Post.Username .Username) (eq .UserRole "moderator") (eq .UserRole "admin")}}
+                            <button type="submit" class="Btn clean-btn" data-modal="delete-modal" data-url-id="{{.ID}}">
+                                <img src="/static/img/svg/delete-icon.svg" alt="delete-icon">
+                            </button>
+                        {{end}}
+
+
+                        <!-- if moderator -->
+
+                        <button type="submit" class="Btn clean-btn" data-modal="report-modal" data-url-id="{{.ID}}">
+                            <img src="/static/img/svg/report-icon.svg" alt="report-icon">
+                        </button>
+
+
+                    </div>
+
+                </div>
+
 
             </div>
         </div>
@@ -148,5 +183,47 @@
     </div>
 
 </div>
+
+<!-- modals here -->
+
+<!-- here ban reason -->
+<dialog id="report-modal" class="Mymodal">
+    <!-- paste id in form url -->
+    <form action="/report/" method="POST">
+        <div class="modal-frame-report">
+            <span>Report</span>
+            <div class="modal-list-frame">
+                <select name="" id="report-list">
+                    <option value="irrelevant">irrelevant</option>
+                    <option value="obscene">obscene</option>
+                    <option value="illegal">illegal</option>
+                    <option value="insulting">insulting</option>
+
+            </div>
+            </select>
+            <div class="modal-button rep">
+                <button class="light-button" type="submit">Submit</button>
+                <button class="dark-button BtnC" type="reset">Cancel</button>
+            </div>
+        </div>
+    </form>
+
+</dialog>
+
+<!-- delete modal -->
+<dialog id="delete-modal" class="Mymodal">
+    <form action="/post/delete/" method="POST">
+        <div class="modal-frame">
+            <img class="modal-icon" src="/static/img/svg/delete-icon.svg" alt="delete-icon">
+            <span>Delete post?</span>
+            <div class="modal-button">
+                <button class="light-button" type="submit">Yes</button>
+                <button class="dark-button BtnC" type="reset">No</button>
+            </div>
+        </div>
+    </form>
+</dialog>
+
+
 
 {{end}}

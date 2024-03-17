@@ -25,6 +25,7 @@ var (
 	ErrInvalidCredentials = errors.New("entity: invalid credentials")
 	ErrInvalidUserID      = errors.New("entity: non-existent user id")
 	ErrUnauthorized       = errors.New("entity: unauthorized")
+	ErrForbiddenAccess    = errors.New("entity: further access is forbidden")
 )
 
 // Notification related errors

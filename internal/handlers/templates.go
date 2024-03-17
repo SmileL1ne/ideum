@@ -10,9 +10,10 @@ import (
 )
 
 type Models struct {
-	Posts []entity.PostView
-	Post  entity.PostView
-	Tags  []entity.TagEntity
+	Posts         []entity.PostView
+	Post          entity.PostView
+	Tags          []entity.TagEntity
+	Notifications []entity.Notification
 }
 
 type templateData struct {

@@ -17,6 +17,8 @@ type IUserRepository interface {
 	GetUsernameByID(userID int) (string, error)
 	GetRole(userID int) (string, error)
 	CreateNotification(n entity.Notification) error
+	GetRequests() (*[]entity.Notification, error)
+	Promote(userID int) error
 }
 
 type userRepository struct {
@@ -129,8 +131,8 @@ func (r *userRepository) GetRole(userID int) (string, error) {
 
 func (r *userRepository) CreateNotification(n entity.Notification) error {
 	query := `
-		INSERT INTO notifications (type, content, source_id, user_from, user_to)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO notifications (type, content, source_id, user_from, user_to, created_at)
+		VALUES ($1, $2, $3, $4, $5, datetime('now', 'localtime'))
 	`
 
 	_, err := r.DB.Exec(query, n.Type, n.Content, n.SourceID, n.UserFrom, n.UserTo)
@@ -150,4 +152,42 @@ func (r *userRepository) CreateNotification(n entity.Notification) error {
 	}
 
 	return nil
+}
+
+func (r *userRepository) GetRequests() (*[]entity.Notification, error) {
+	query := `
+		SELECT n.type, n.content, n.user_from, n.created_at
+		FROM notifications n
+		WHERE n.type = $1
+	`
+
+	var requests []entity.Notification
+
+	rows, err := r.DB.Query(query, entity.PROMOTION)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var req entity.Notification
+		if err := rows.Scan(&req.Type, &req.Content, &req.UserFrom, &req.CreatedAt); err != nil {
+			return nil, err
+		}
+		requests = append(requests, req)
+	}
+
+	return &requests, nil
+}
+
+func (r *userRepository) Promote(userID int) error {
+	query := `
+		UPDATE roles
+		SET role = $1
+		WHERE user_id = $2
+	`
+
+	_, err := r.DB.Exec(query, entity.MODERATOR, userID)
+
+	return err
 }

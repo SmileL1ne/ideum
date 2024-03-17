@@ -8,51 +8,51 @@
     <div class="post-feed">
         <!-- post -->
         {{if .Models.Posts }}
-        {{range .Models.Posts }}
-        <div class="post">
-            <div class="post-content">
-                <div class="post-top-info">
-                    <div class="post-top-user"><img src="/static/img/ava/user.png" alt="user-ava">
-                        <p>{{.Username}}</p>
-                        <p class="post-date">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</p>
-                    </div>
-                    <div class="likes-frame">
-                        <button class="like-button tag" id="like">
-                            <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
-                        </button>
-                        <button class="like-button tag" id="dislike"><img src="/static/img/svg/dislike.svg"
-                                alt="dislike">{{.Dislikes}}
-                        </button>
-                    </div>
-                </div>
-                <div class="post-header">
-                    <a href="/post/view/{{.ID}}">
-                        <h1>{{ .Title}}</h1>
-                    </a>
-                </div>
-                <div class="post-text">
-                    <p>{{.Content}}</p>
-                </div>
-                <div class="likes-frame post-tags">
-                    {{range .PostTags}}
-                    <button class="like-button tag" disabled >{{.}} </button>
-                    {{end}}
-                </div>
+            {{range .Models.Posts }}
+                <div class="post">
+                    <div class="post-content">
+                        <div class="post-top-info">
+                            <div class="post-top-user"><img src="/static/img/ava/user.png" alt="user-ava">
+                                <p>{{.Username}}</p>
+                                <p class="post-date">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</p>
+                            </div>
+                            <div class="likes-frame">
+                                <button class="like-button tag" id="like">
+                                    <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
+                                </button>
+                                <button class="like-button tag" id="dislike"><img src="/static/img/svg/dislike.svg"
+                                        alt="dislike">{{.Dislikes}}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="post-header">
+                            <a href="/post/view/{{.ID}}">
+                                <h1>{{ .Title}}</h1>
+                            </a>
+                        </div>
+                        <div class="post-text">
+                            <p>{{.Content}}</p>
+                        </div>
+                        <div class="likes-frame post-tags">
+                            {{range .PostTags}}
+                                <button class="like-button tag" disabled >{{.}} </button>
+                            {{end}}
+                        </div>
 
-                {{with .ImageName}}
-                <div class="post-img"><img src="/static/public/{{.}}" alt="post-img"></div>
-                {{end}}
+                        {{with .ImageName}}
+                            <div class="post-img"><img src="/static/public/{{.}}" alt="post-img"></div>
+                        {{end}}
 
-                <div class="post-footer">
-                    <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">
-                        {{.CommentsLen}}
+                        <div class="post-footer">
+                            <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">
+                                {{.CommentsLen}}
+                            </div>
+                        
+                        </div>
+
                     </div>
-                   
                 </div>
-
-            </div>
-        </div>
-        {{end}}
+            {{end}}
         {{else}}
         <p>Nothing to see yet!</p>
         {{end}}

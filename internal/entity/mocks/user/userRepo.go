@@ -66,3 +66,11 @@ func (r *UserRepoMock) GetRole(userID int) (string, error) {
 func (r *UserRepoMock) CreateNotification(n entity.Notification) error {
 	return nil
 }
+
+func (r *UserRepoMock) GetRequests() (*[]entity.Notification, error) {
+	return nil, nil
+}
+
+func (r *UserRepoMock) Promote(userID int) error {
+	return nil
+}

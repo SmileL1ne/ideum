@@ -6,6 +6,7 @@ import (
 	"forum/internal/repository/user"
 	"forum/internal/validator"
 	"strings"
+	"sync"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,6 +18,8 @@ type IUserService interface {
 	GetUserByEmail(string) (entity.UserEntity, error)
 	GetUserRole(int) (string, error)
 	SendNotification(notification entity.Notification) error
+	GetRequests(role string) (*[]entity.Notification, error)
+	PromoteUser(userID int) error
 }
 
 type userService struct {
@@ -130,9 +133,52 @@ func (us *userService) SendNotification(n entity.Notification) error {
 		n.Content = "left a comment on your post"
 	case entity.REPORT:
 		n.Content = "reported this content as " + n.Content
+	case entity.REJECT_PROMOTION:
+		n.Content = "rejected your promotion to moderator"
 	default:
 		return entity.ErrInvalidNotificaitonType
 	}
 
 	return us.userRepo.CreateNotification(n)
+}
+
+func (us *userService) GetRequests(role string) (*[]entity.Notification, error) {
+	if role != entity.ADMIN {
+		return nil, entity.ErrForbiddenAccess
+	}
+
+	requests, err := us.userRepo.GetRequests()
+	if err != nil {
+		return nil, err
+	}
+
+	var wg sync.WaitGroup
+	var errCh = make(chan error, len(*requests))
+
+	for _, req := range *requests {
+		wg.Add(1)
+		go func(request entity.Notification) {
+			username, err := us.userRepo.GetUsernameByID(request.UserFrom)
+			if err != nil {
+				errCh <- err
+				return
+			}
+			request.Username = username
+		}(req)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errCh)
+	}()
+
+	for err := range errCh {
+		return nil, err
+	}
+
+	return requests, nil
+}
+
+func (us *userService) PromoteUser(userID int) error {
+	return us.userRepo.Promote(userID)
 }
