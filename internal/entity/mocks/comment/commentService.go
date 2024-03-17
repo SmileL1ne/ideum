@@ -10,7 +10,7 @@ type CommentServiceMock struct {
 	cr repo.ICommentRepository
 }
 
-func NewTagServiceMock(r repo.ICommentRepository) *CommentServiceMock {
+func NewCommentServiceMock(r repo.ICommentRepository) *CommentServiceMock {
 	return &CommentServiceMock{
 		cr: r,
 	}
@@ -32,22 +32,16 @@ func (cs *CommentServiceMock) GetAllCommentsForPost(postID int) (*[]entity.Comme
 		return nil, err
 	}
 
-	// Convert received CommentEntity's to CommentView's
-	var cViews []entity.CommentView
-	for _, c := range *comments {
-		comment := entity.CommentView{
-			ID:        c.ID,
-			Username:  c.Username,
-			Content:   c.Content,
-			CreatedAt: c.CreatedAt,
-			PostID:    c.PostID,
-			Likes:     c.Likes,
-			Dislikes:  c.Dislikes,
-		}
-		cViews = append(cViews, comment)
+	return service.ConvertEntitiesToViews(comments)
+}
+
+func (cs *CommentServiceMock) GetAllUserCommentsForPost(userID, postID int) (*[]entity.CommentView, error) {
+	comments, err := cs.cr.GetAllUserCommentsForPost(userID, postID)
+	if err != nil {
+		return nil, err
 	}
 
-	return &cViews, nil
+	return service.ConvertEntitiesToViews(comments)
 }
 
 func (cs *CommentServiceMock) ExistsComment(commentID int) (bool, error) {

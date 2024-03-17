@@ -56,6 +56,10 @@ func (r *PostRepoMock) GetAllByUserReaction(userID int) (*[]entity.PostEntity, e
 	return &[]entity.PostEntity{mockPost}, nil
 }
 
+func (r *PostRepoMock) GetAllCommentedPosts(userID int) (*[]entity.PostEntity, error) {
+	return &[]entity.PostEntity{mockPost}, nil
+}
+
 func (r *PostRepoMock) Exists(postID int) (bool, error) {
 	if postID != mockPost.ID {
 		return false, nil

@@ -5,6 +5,7 @@ import (
 	"forum/internal/entity"
 	"forum/internal/repository/user"
 	"forum/internal/validator"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -35,7 +36,21 @@ func (us *userService) SaveUser(u *entity.UserSignupForm) (int, error) {
 		return 0, entity.ErrInvalidFormData
 	}
 
-	id, err := us.userRepo.Insert(*u)
+	// Check if used with that username doesn't already exist
+	user, err := us.userRepo.GetByUsername(u.Username)
+	if err != nil && !errors.Is(err, entity.ErrInvalidCredentials) {
+		return 0, err
+	}
+	if user != (entity.UserEntity{}) && strings.EqualFold(u.Username, user.Username) {
+		return 0, entity.ErrDuplicateUsername
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := us.userRepo.Insert(*u, hashedPassword)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrDuplicateEmail):

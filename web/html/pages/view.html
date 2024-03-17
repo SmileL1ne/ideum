@@ -45,28 +45,54 @@
                 <div class="post-text">
                     <p>{{ .Models.Post.Content }}</p>
                 </div>
-                
+
                 <div class="likes-frame post-tags">
                     {{range .Models.Post.PostTags}}
                     <button class="like-button tag" disabled>{{.}} </button>
                     {{end}}
                 </div>
-                
+
                 {{with .Models.Post.ImageName}}
                 <div class="post-img"><img src="/static/public/{{.}}" alt="post-img"></div>
                 {{end}}
 
                 <div class="post-footer">
+
                     <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">
                         {{.Models.Post.CommentsLen}}
                     </div>
-                    
+
+
+                    <div class="post-options">
+                        <!-- if owner -->
+                        <form action="">
+                            <button type="submit">
+                                <img src="/img/svg/edit-icon.svg" alt="comment-icon">
+                            </button>
+                        </form>
+
+                        <!-- if owner or admin or moderator -->
+                        <form action="">
+                            <button type="submit">
+                                <a href="/"><img src="/img/svg/delete-icon.svg" alt="delete-icon"></a>
+                            </button>
+                        </form>
+
+                        <!-- if moderator -->
+                        <form action="">
+                            <button type="submit">
+                                <img src="/img/svg/report-icon.svg" alt="report-icon">
+                            </button>
+                        </form>
+
+                    </div>
+
                 </div>
 
             </div>
         </div>
         <!-- comments -->
-        {{range .Models.Comments}}
+        {{range .Models.Post.Comments}}
         <div class="post">
             <div class="post-content">
                 <div class="post-top-info">
@@ -86,8 +112,8 @@
 
                         <form action="/post/comment/reaction/{{.PostID}}/{{.ID}}?reaction=dislike" method="POST">
                             <button class="like-button" id="dislike">
-                                <img src="/static/img/svg/dislike.svg"
-                                    alt="dislike"><span class="rating-count">{{.Dislikes}}</span>
+                                <img src="/static/img/svg/dislike.svg" alt="dislike"><span
+                                    class="rating-count">{{.Dislikes}}</span>
                             </button>
                         </form>
                     </div>

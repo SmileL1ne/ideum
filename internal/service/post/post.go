@@ -4,6 +4,7 @@ import (
 	"errors"
 	"forum/internal/entity"
 	"forum/internal/repository/post"
+	"forum/internal/service/comment"
 	"forum/internal/service/image"
 	"forum/internal/service/tag"
 	"strconv"
@@ -16,23 +17,26 @@ type IPostService interface {
 	GetAllPostsByTagId(int) (*[]entity.PostView, error)
 	GetAllPostsByUserId(int) (*[]entity.PostView, error)
 	GetAllPostsByUserReaction(int) (*[]entity.PostView, error)
-	ExistsPost(int) (bool, error)
+	GetAllCommentedPostsWithComments(userID int) (*[]entity.PostView, *[][]entity.CommentView, error)
+	ExistsPost(postID int) (bool, error)
 	CheckPostAttrs(*entity.PostCreateForm, bool) (bool, error)
 	DeletePost(postID int) error
 }
 
 type postService struct {
-	imgService image.IImageService
-	tagService tag.ITagService
-	postRepo   post.IPostRepository
+	imgService     image.IImageService
+	tagService     tag.ITagService
+	commentService comment.ICommentService
+	postRepo       post.IPostRepository
 }
 
 // Constructor for post service
-func NewPostsService(r post.IPostRepository, is image.IImageService, ts tag.ITagService) *postService {
+func NewPostsService(r post.IPostRepository, is image.IImageService, ts tag.ITagService, cs comment.ICommentService) *postService {
 	return &postService{
-		imgService: is,
-		tagService: ts,
-		postRepo:   r,
+		imgService:     is,
+		tagService:     ts,
+		commentService: cs,
+		postRepo:       r,
 	}
 }
 
@@ -118,6 +122,27 @@ func (ps *postService) GetAllPostsByUserReaction(userID int) (*[]entity.PostView
 	}
 
 	return ConvertEntitiesToViews(posts)
+}
+
+func (ps *postService) GetAllCommentedPostsWithComments(userID int) (*[]entity.PostView, *[][]entity.CommentView, error) {
+	postsEntities, err := ps.postRepo.GetAllCommentedPosts(userID)
+	if err != nil {
+		return nil, nil, err
+	}
+	posts, _ := ConvertEntitiesToViews(postsEntities)
+
+	var allComments [][]entity.CommentView
+
+	for _, p := range *posts {
+		comments, err := ps.commentService.GetAllUserCommentsForPost(userID, p.ID)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		allComments = append(allComments, *comments)
+	}
+
+	return posts, &allComments, nil
 }
 
 func (ps *postService) ExistsPost(postID int) (bool, error) {

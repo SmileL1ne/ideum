@@ -8,6 +8,7 @@ import (
 type ICommentService interface {
 	SaveComment(*entity.CommentCreateForm, int, int) error
 	GetAllCommentsForPost(int) (*[]entity.CommentView, error)
+	GetAllUserCommentsForPost(userID, postID int) (*[]entity.CommentView, error)
 	ExistsComment(int) (bool, error)
 }
 
@@ -43,22 +44,16 @@ func (cs *commentService) GetAllCommentsForPost(postID int) (*[]entity.CommentVi
 		return nil, err
 	}
 
-	// Convert received CommentEntity's to CommentView's
-	var cViews []entity.CommentView
-	for _, c := range *comments {
-		comment := entity.CommentView{
-			ID:        c.ID,
-			Username:  c.Username,
-			Content:   c.Content,
-			CreatedAt: c.CreatedAt,
-			PostID:    c.PostID,
-			Likes:     c.Likes,
-			Dislikes:  c.Dislikes,
-		}
-		cViews = append(cViews, comment)
+	return ConvertEntitiesToViews(comments)
+}
+
+func (cs *commentService) GetAllUserCommentsForPost(userID, postID int) (*[]entity.CommentView, error) {
+	comments, err := cs.commentRepo.GetAllUserCommentsForPost(userID, postID)
+	if err != nil {
+		return nil, err
 	}
 
-	return &cViews, nil
+	return ConvertEntitiesToViews(comments)
 }
 
 func (cs *commentService) ExistsComment(commentID int) (bool, error) {

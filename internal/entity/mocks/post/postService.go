@@ -4,6 +4,7 @@ import (
 	"errors"
 	"forum/internal/entity"
 	repo "forum/internal/repository/post"
+	"forum/internal/service/comment"
 	"forum/internal/service/image"
 	service "forum/internal/service/post"
 	"forum/internal/service/tag"
@@ -11,16 +12,18 @@ import (
 )
 
 type PostServiceMock struct {
-	imgService image.IImageService
-	tagService tag.ITagService
-	pr         repo.IPostRepository
+	imgService     image.IImageService
+	tagService     tag.ITagService
+	commentService comment.ICommentService
+	pr             repo.IPostRepository
 }
 
-func NewPostServiceMock(r repo.IPostRepository, is image.IImageService, ts tag.ITagService) *PostServiceMock {
+func NewPostServiceMock(r repo.IPostRepository, is image.IImageService, ts tag.ITagService, cs comment.ICommentService) *PostServiceMock {
 	return &PostServiceMock{
-		imgService: is,
-		tagService: ts,
-		pr:         r,
+		imgService:     is,
+		tagService:     ts,
+		commentService: cs,
+		pr:             r,
 	}
 }
 
@@ -72,6 +75,27 @@ func (ps *PostServiceMock) GetAllPostsByUserId(userID int) (*[]entity.PostView, 
 func (ps *PostServiceMock) GetAllPostsByUserReaction(userID int) (*[]entity.PostView, error) {
 	posts, _ := ps.pr.GetAllByUserReaction(userID)
 	return service.ConvertEntitiesToViews(posts)
+}
+
+func (ps *PostServiceMock) GetAllCommentedPostsWithComments(userID int) (*[]entity.PostView, *[][]entity.CommentView, error) {
+	postsEntities, err := ps.pr.GetAllCommentedPosts(userID)
+	if err != nil {
+		return nil, nil, err
+	}
+	posts, _ := service.ConvertEntitiesToViews(postsEntities)
+
+	var allComments [][]entity.CommentView
+
+	for _, p := range *posts {
+		comments, err := ps.commentService.GetAllUserCommentsForPost(userID, p.ID)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		allComments = append(allComments, *comments)
+	}
+
+	return posts, &allComments, nil
 }
 
 func (ps *PostServiceMock) ExistsPost(postID int) (bool, error) {

@@ -32,6 +32,10 @@ func (r *CommentRepoMock) GetAllForPost(postID int) (*[]entity.CommentEntity, er
 	return &[]entity.CommentEntity{mockComment}, nil
 }
 
+func (r *CommentRepoMock) GetAllUserCommentsForPost(userID, postID int) (*[]entity.CommentEntity, error) {
+	return &[]entity.CommentEntity{mockComment}, nil
+}
+
 func (r *CommentRepoMock) Exists(commentID int) (bool, error) {
 	return true, nil
 }

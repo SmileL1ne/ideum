@@ -21,7 +21,7 @@ type Services struct {
 
 func New(r *repository.Repositories) *Services {
 	return &Services{
-		Post:     post.NewPostsService(r.Post, image.NewImageService(r.Image), tag.NewTagService(r.Tag)),
+		Post:     post.NewPostsService(r.Post, image.NewImageService(r.Image), tag.NewTagService(r.Tag), comment.NewCommentService(r.Comment)),
 		User:     user.NewUserService(r.User),
 		Comment:  comment.NewCommentService(r.Comment),
 		Reaction: reaction.NewReactionService(r.Reaction),

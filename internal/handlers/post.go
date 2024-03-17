@@ -50,7 +50,7 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 	}
 
 	data.Models.Post = post
-	data.Models.Comments = *comments
+	data.Models.Post.Comments = *comments
 	data.Models.Post.ImageName = post.ImageName
 
 	r.render(w, req, http.StatusOK, "view.html", data)
@@ -222,6 +222,35 @@ func (r *Routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 	data.Models.Posts = *reactedPosts
 
 	r.render(w, req, http.StatusOK, "home.html", data)
+}
+
+func (r *Routes) postsCommented(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	userID, data, err := r.getBaseInfo(req)
+	if err != nil {
+		if errors.Is(err, entity.ErrUnauthorized) {
+			r.unauthorized(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	posts, comments, err := r.services.Post.GetAllCommentedPostsWithComments(userID)
+	if err != nil {
+		r.serverError(w, req, err)
+	}
+
+	data.Models.Posts = *posts
+	for i := range data.Models.Posts {
+		data.Models.Posts[i].Comments = (*comments)[i]
+	}
+
+	r.render(w, req, http.StatusOK, "commented.html", data)
 }
 
 func (r *Routes) postDelete(w http.ResponseWriter, req *http.Request) {

@@ -13,6 +13,7 @@ type IPostRepository interface {
 	GetAllByTagId(int) (*[]entity.PostEntity, error)
 	GetAllByUserID(int) (*[]entity.PostEntity, error)
 	GetAllByUserReaction(int) (*[]entity.PostEntity, error)
+	GetAllCommentedPosts(userID int) (*[]entity.PostEntity, error)
 	Exists(int) (bool, error)
 	Delete(postID int) error
 }
@@ -248,6 +249,38 @@ func (r *postRepository) GetAllByUserReaction(userID int) (*[]entity.PostEntity,
 		INNER JOIN users u ON p.user_id = u.id
 		LEFT JOIN post_reactions pr ON p.id = pr.post_id
 		WHERE pr.user_id = $1
+		GROUP BY p.id 
+	`
+
+	return getAllPostsByQuery(r.DB, query, userID)
+}
+
+func (r *postRepository) GetAllCommentedPosts(userID int) (*[]entity.PostEntity, error) {
+	query := `
+		SELECT p.id, p.title, p.content, p.created_at, u.username,
+			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
+			SUM(CASE WHEN pr.is_like = false THEN 1 ELSE 0 END) as dislikes_count,
+			(
+				SELECT COUNT(*)
+				FROM comments c
+				WHERE c.post_id = p.id
+			),
+			(
+				SELECT GROUP_CONCAT(t.name, ', ')
+				FROM tags t
+				LEFT JOIN posts_tags pt ON pt.tag_id = t.id
+				WHERE pt.post_id = p.id 
+			),
+			(
+				SELECT name
+				FROM images
+				WHERE post_id = p.id
+			)
+		FROM posts p
+		INNER JOIN users u ON p.user_id = u.id
+		LEFT JOIN post_reactions pr ON p.id = pr.post_id
+		LEFT JOIN comments cm ON p.id = cm.post_id
+		WHERE cm.user_id = $1
 		GROUP BY p.id 
 	`
 

@@ -16,19 +16,30 @@
                     <li> <a class="interface-link" href="/post/myReacted">
                             <img src="/static/img/svg/like-dislike.svg" alt="liked-icon">Liked/disliked posts
                         </a></li>
-                    <!-- <li> <a class="interface-link" href="#">
+
+                    <li> <a class="interface-link" href="/post/myCommented">
                             <img src="/static/img/svg/commented-post.svg" alt="commented-post"> Commented posts
                         </a></li>
+
                     <li> <a class="interface-link" href="#">
                             <img src="/static/img/svg/notification.svg" alt="notification-icon"> Notifications
                         </a></li>
+
+                    <!-- if role admin -->
                     <li> <a class="interface-link" href="#">
                             <img src="/static/img/svg/requests.svg" alt="requests-icon"> Requests
                         </a></li>
-                    <li> <a class="interface-link" href="#">
+
+                    <!-- if role user -->
+
+                    <li>
+                        <a class="interface-link" href="/user/promote">
                             <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
-                        </a></li> -->
+                        </a>
+                    </li>
+                    
                 </ul>
+
                 <form action="/post/create" method="get">
                     <button id="make-post-button" class="light-button">Create new post</button>
                 </form>
@@ -44,7 +55,8 @@
         <form class="loginQuery">
             <div class="user-bar-sign-up" id="SignUp">
                 <h1>Welcome back!</h1>
-                <input class="dark-input" type="text" placeholder="Email or username" name="identifier" required autocomplete="off">
+                <input class="dark-input" type="text" placeholder="Email or username" name="identifier" required
+                    autocomplete="off">
                 <input class="dark-input" type="password" placeholder="Password" name="password" required>
                 <button class="light-button" type="submit">Sign in</button>
                 <p class="error-msg"></p>
@@ -59,34 +71,35 @@
         <form action="/login/github">
             <button class="dark-button"><img src="/static/img/svg/github_logo.svg" alt="github_logo">GitHub</button>
         </form>
-        
+
         <a class="user-bar-link" id="SignUpBtn" href="#">Don`t have an account?<span> Sign up
                 now</span> </a>
-        </div>
+    </div>
 
-        <form class="singupQuery"> 
-            <div class="user-bar-register" id="SignIn">
-                <h1>Sign up</h1>
-                <input class="dark-input" type="text" placeholder="Username" name="username" required minlength="3" autocomplete="off">
-                <input class="dark-input" type="text" placeholder="Email" name="email" required autocomplete="off">
-                <input class="dark-input" type="password" placeholder="Password" name="password" required minlength="8">
-                <button class="light-button" type="submit">Sign up</button>
-                <p class="error-msg"></p>
-                <div class="user-bar-line"></div>
-                <!-- <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
+    <form class="singupQuery">
+        <div class="user-bar-register" id="SignIn">
+            <h1>Sign up</h1>
+            <input class="dark-input" type="text" placeholder="Username" name="username" required minlength="3"
+                autocomplete="off">
+            <input class="dark-input" type="text" placeholder="Email" name="email" required autocomplete="off">
+            <input class="dark-input" type="password" placeholder="Password" name="password" required minlength="8">
+            <button class="light-button" type="submit">Sign up</button>
+            <p class="error-msg"></p>
+            <div class="user-bar-line"></div>
+            <!-- <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
                         alt="Google_logo">Google</button>
                 <button class="dark-button" disabled><img src="/static/img/svg/github_logo.svg"
                         alt="github_logo">GitHub</button> -->
-                <a class="user-bar-link" id="SignInBtn" href="#">Already have an account? <span>Sign
-                        in</span>
-                </a>
-            </div>
-        </form>
+            <a class="user-bar-link" id="SignInBtn" href="#">Already have an account? <span>Sign
+                    in</span>
+            </a>
+        </div>
+    </form>
 
 
-        <script src="/static/js/register.js"></script>
-    </div>
-    {{end}}
+    <script src="/static/js/register.js"></script>
+</div>
+{{end}}
 
 </div>
 

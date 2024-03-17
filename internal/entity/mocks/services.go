@@ -13,10 +13,10 @@ import (
 
 func NewServicesMock(r *repository.Repositories) *service.Services {
 	return &service.Services{
-		Post:     post.NewPostServiceMock(r.Post, image.NewImageServiceMock(r.Image), tag.NewTagServiceMock(r.Tag)),
+		Post:     post.NewPostServiceMock(r.Post, image.NewImageServiceMock(r.Image), tag.NewTagServiceMock(r.Tag), comment.NewCommentServiceMock(r.Comment)),
 		User:     user.NewUserServiceMock(r.User),
 		Tag:      tag.NewTagServiceMock(r.Tag),
-		Comment:  comment.NewTagServiceMock(r.Comment),
+		Comment:  comment.NewCommentServiceMock(r.Comment),
 		Reaction: reaction.NewReactionServiceMock(r.Reaction),
 	}
 }

@@ -22,7 +22,7 @@ func NewUserRepoMock() *UserRepoMock {
 
 var _ user.IUserRepository = (*UserRepoMock)(nil)
 
-func (r *UserRepoMock) Insert(u entity.UserSignupForm) (int, error) {
+func (r *UserRepoMock) Insert(u entity.UserSignupForm, hashedPassword []byte) (int, error) {
 	if u.Username == "satoru" {
 		return 0, entity.ErrDuplicateUsername
 	} else if u.Email == "satoru@gmail.com" {

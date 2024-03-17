@@ -16,10 +16,11 @@ import (
 )
 
 func (r *Routes) newTemplateData(req *http.Request) (templateData, error) {
+	userRole := r.sesm.GetUserRole(req.Context())
 	username, err := r.getUsername(req.Context())
 	if err != nil {
 		return templateData{}, err
-	} else if username == "" {
+	} else if username == "" && userRole != entity.GUEST {
 		return templateData{}, entity.ErrUnauthorized
 	}
 
@@ -27,8 +28,6 @@ func (r *Routes) newTemplateData(req *http.Request) (templateData, error) {
 	if err != nil {
 		return templateData{}, err
 	}
-
-	userRole := r.sesm.GetUserRole(req.Context())
 
 	return templateData{
 		IsAuthenticated: r.isAuthenticated(req),
@@ -192,4 +191,20 @@ func getErrorMessage(v *validator.Validator) string {
 	}
 
 	return msg
+}
+
+// getBaseInfo collects and returns base info for the page such as
+// userID and template data
+func (r *Routes) getBaseInfo(req *http.Request) (int, templateData, error) {
+	userID := r.sesm.GetUserID(req.Context())
+	if userID == 0 {
+		return 0, templateData{}, entity.ErrUnauthorized
+	}
+
+	data, err := r.newTemplateData(req)
+	if err != nil {
+		return 0, templateData{}, err
+	}
+
+	return userID, data, nil
 }

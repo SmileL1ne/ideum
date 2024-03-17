@@ -25,7 +25,7 @@ func (us *UserServiceMock) SaveUser(u *entity.UserSignupForm) (int, error) {
 		return 0, entity.ErrInvalidFormData
 	}
 
-	id, err := us.ur.Insert(*u)
+	id, err := us.ur.Insert(*u, nil)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrDuplicateEmail):

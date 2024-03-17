@@ -33,6 +33,7 @@ type PostView struct {
 	PostTags    []string
 	CommentsLen int
 	ImageName   string
+	Comments    []CommentView
 }
 
 // PostCreateForm is accepted by services and repos. Services accept pointer only for

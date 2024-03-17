@@ -8,16 +8,15 @@ import (
 	"strings"
 
 	"github.com/mattn/go-sqlite3"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type IUserRepository interface {
-	Insert(user entity.UserSignupForm) (int, error)
+	Insert(user entity.UserSignupForm, hashedPassword []byte) (int, error)
 	GetByUsername(username string) (entity.UserEntity, error)
 	GetByEmail(email string) (entity.UserEntity, error)
 	GetUsernameByID(userID int) (string, error)
 	GetRole(userID int) (string, error)
-	CreateNotification(notification entity.Notification) error
+	CreateNotification(n entity.Notification) error
 }
 
 type userRepository struct {
@@ -32,26 +31,17 @@ func NewUserRepo(db *sql.DB) *userRepository {
 
 var _ IUserRepository = (*userRepository)(nil)
 
-func (r *userRepository) Insert(u entity.UserSignupForm) (int, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
+func (r *userRepository) Insert(u entity.UserSignupForm, hashedPassword []byte) (int, error) {
+	tx, err := r.DB.Begin()
 	if err != nil {
 		return 0, err
 	}
+	defer tx.Rollback()
 
-	user, err := r.GetByUsername(u.Username)
-	if err != nil && !errors.Is(err, entity.ErrInvalidCredentials) {
-		return 0, err
-	}
-	if user != (entity.UserEntity{}) {
-		if strings.EqualFold(u.Username, user.Username) {
-			return 0, entity.ErrDuplicateUsername
-		}
-	}
-
-	query := `INSERT INTO users (username, email, hashed_password, created_at) 
+	query1 := `INSERT INTO users (username, email, hashed_password, created_at) 
 		VALUES ($1, $2, $3, datetime('now', 'localtime'))`
 
-	result, err := r.DB.Exec(query, u.Username, u.Email, string(hashedPassword))
+	result, err := tx.Exec(query1, u.Username, u.Email, string(hashedPassword))
 	if err != nil {
 		var sqliteError sqlite3.Error
 		if errors.As(err, &sqliteError) {
@@ -71,6 +61,20 @@ func (r *userRepository) Insert(u entity.UserSignupForm) (int, error) {
 
 	id, err := result.LastInsertId()
 	if err != nil {
+		return 0, err
+	}
+
+	query2 := `
+		INSERT INTO roles (role, user_id)
+		VALUES ($1, $2)
+	`
+
+	_, err = tx.Exec(query2, entity.USER, int(id))
+	if err != nil {
+		return 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
 
