@@ -26,18 +26,19 @@
                             <img src="/static/img/svg/commented-post.svg" alt="commented-post"> Commented posts
                         </a>
                     </li>
-                    <!-- if admin -->
                     <li> 
                         <a class="interface-link" href="#">
                             <img src="/static/img/svg/notification.svg" alt="notification-icon"> Notifications
                         </a>
                     </li>
                     <!-- if role admin -->
-                    <li> 
-                        <a class="interface-link" href="#">
-                            <img src="/static/img/svg/requests.svg" alt="requests-icon"> Requests
-                        </a>
-                    </li>
+                    {{if eq .UserRole "admin"}}
+                        <li> 
+                            <a class="interface-link" href="/admin/requests">
+                                <img src="/static/img/svg/requests.svg" alt="requests-icon"> Requests
+                            </a>
+                        </li>
+                    {{end}}
 
                     {{if eq .UserRole "user"}}
                         <a class="interface-link" href="/user/promote">

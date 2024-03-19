@@ -64,15 +64,13 @@
 
                     <div class="post-options">
                         <!-- if owner -->
-                        <form action="">
                             <button type="submit" class="clean-btn">
-                                <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
+                                <img src="/static/img/svg/edit-icon.svg" alt="edit-icon">
                             </button>
-                        </form>
 
                         <!-- if owner or admin or moderator -->
 
-                        {{if eq .Models.Post.Username .Username}}
+                        {{if or (eq .Models.Post.Username .Username) (eq .UserRole "moderator") (eq .UserRole "admin")}}
                             <button type="submit" class="Btn clean-btn" data-modal="delete-modal"
                                 data-url-id="{{.Models.Post.ID}}">
                                 <img src="/static/img/svg/delete-icon.svg" alt="delete-icon">
@@ -97,6 +95,7 @@
 
             </div>
         </div>
+
         <!-- comments -->
         {{range .Models.Post.Comments}}
         <div class="post">
@@ -134,21 +133,21 @@
                     <div class="post-options">
 
                         <!-- if owner -->
+                        <!-- COMMENT SECTION -->
                         <form action="">
                             <button type="submit" class="clean-btn">
                                 <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
                             </button>
                         </form>
 
-                        {{if or (eq .Models.Post.Username .Username) (eq .UserRole "moderator") (eq .UserRole "admin")}}
-                            <button type="submit" class="Btn clean-btn" data-modal="delete-modal" data-url-id="{{.ID}}">
-                                <img src="/static/img/svg/delete-icon.svg" alt="delete-icon">
-                            </button>
-                        {{end}}
+                        <!-- COMMENT SECTION -->
+                        <button type="submit" class="Btn clean-btn" data-modal="delete-modal-comment" data-url-id="{{.ID}}">
+                            <img src="/static/img/svg/delete-icon.svg" alt="delete-icon">
+                        </button>
 
 
                         <!-- if moderator -->
-
+                        <!-- COMMENT SECTION -->
                         <button type="submit" class="Btn clean-btn" data-modal="report-modal" data-url-id="{{.ID}}">
                             <img src="/static/img/svg/report-icon.svg" alt="report-icon">
                         </button>
@@ -210,12 +209,26 @@
 
 </dialog>
 
-<!-- delete modal -->
+<!-- delete modal for post -->
 <dialog id="delete-modal" class="Mymodal">
     <form action="/post/delete/" method="POST">
         <div class="modal-frame">
             <img class="modal-icon" src="/static/img/svg/delete-icon.svg" alt="delete-icon">
             <span>Delete post?</span>
+            <div class="modal-button">
+                <button class="light-button" type="submit">Yes</button>
+                <button class="dark-button BtnC" type="reset">No</button>
+            </div>
+        </div>
+    </form>
+</dialog>
+
+<!-- delete modal for comment -->
+<dialog id="delete-modal-comment" class="Mymodal">
+    <form action="/comment/delete/" method="POST">
+        <div class="modal-frame">
+            <img class="modal-icon" src="/static/img/svg/delete-icon.svg" alt="delete-icon">
+            <span>Delete comment?</span>
             <div class="modal-button">
                 <button class="light-button" type="submit">Yes</button>
                 <button class="dark-button BtnC" type="reset">No</button>

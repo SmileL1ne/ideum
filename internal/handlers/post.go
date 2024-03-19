@@ -258,6 +258,8 @@ func (r *Routes) postDelete(w http.ResponseWriter, req *http.Request) {
 		r.methodNotAllowed(w)
 		return
 	}
+	fmt.Println("gay")
+	fmt.Println(req.URL.Path)
 
 	postID, ok := getIdFromPath(req, 4)
 	if !ok {
