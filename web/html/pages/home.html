@@ -17,10 +17,10 @@
                                 <p class="post-date">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</p>
                             </div>
                             <div class="likes-frame">
-                                <button class="like-button tag" id="like">
+                                <button class="disabled" id="like" disabled>
                                     <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
                                 </button>
-                                <button class="like-button tag" id="dislike"><img src="/static/img/svg/dislike.svg"
+                                <button class="disabled" id="dislike" disabled><img src="/static/img/svg/dislike.svg"
                                         alt="dislike">{{.Dislikes}}
                                 </button>
                             </div>

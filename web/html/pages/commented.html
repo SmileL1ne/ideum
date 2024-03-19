@@ -1,91 +1,97 @@
-{{define "title"}} Rabbit {{end}}
-
-{{define "main"}}
+{{define "title"}} Rabbit {{end}} {{define "main"}}
 
 <div class="base">
-    <!-- post feed-->
-    <div class="post-feed">
-        <!-- post -->
-        {{if .Models.Posts }}
-            {{range .Models.Posts }}
-                <div class="post">
-                    <div class="post-content">
-                        <div class="post-top-info">
-                            <div class="post-top-user"><img src="/static/img/ava/user.png" alt="user-ava">
-                                <p>{{.Username}}</p>
-                                <p class="post-date">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</p>
-                            </div>
-                            <div class="likes-frame">
-                                <button class="like-button tag" id="like">
-                                    <img src="/static/img/svg/like-icon.svg" alt="like">{{.Likes}}
-                                </button>
-                                <button class="like-button tag" id="dislike"><img src="/static/img/svg/dislike.svg"
-                                        alt="dislike">{{.Dislikes}}
-                                </button>
-                            </div>
-                        </div>
-                        <div class="post-header">
-                            <a href="/post/view/{{.ID}}">
-                                <h1>{{ .Title}}</h1>
-                            </a>
-                        </div>
-                        <div class="post-text">
-                            <p>{{.Content}}</p>
-                        </div>
-                        <div class="likes-frame post-tags">
-                            {{range .PostTags}}
-                            <button class="like-button tag" disabled >{{.}} </button>
-                            {{end}}
-                        </div>
+  <!-- post feed-->
+  <div class="post-feed">
+    <!-- post -->
+    {{if .Models.Posts }} {{range .Models.Posts }}
+    <div class="post">
+      <div class="post-content">
+        <div class="post-top-info">
+          <div class="post-top-user">
+            <img src="/static/img/ava/user.png" alt="user-ava" />
+            <p>{{.Username}}</p>
+            <p class="post-date">
+              {{ .CreatedAt.Format "2006-01-02 15:04:05" }}
+            </p>
+          </div>
+          <div class="likes-frame">
+            <button class="like-button tag" id="like">
+              <img src="/static/img/svg/like-icon.svg" alt="like" />{{.Likes}}
+            </button>
+            <button class="like-button tag" id="dislike">
+              <img
+                src="/static/img/svg/dislike.svg"
+                alt="dislike"
+              />{{.Dislikes}}
+            </button>
+          </div>
+        </div>
+        <div class="post-header">
+          <a href="/post/view/{{.ID}}">
+            <h1>{{ .Title}}</h1>
+          </a>
+        </div>
+        <div class="post-text">
+          <p>{{.Content}}</p>
+        </div>
+        <div class="likes-frame post-tags">
+          {{range .PostTags}}
+          <button class="like-button tag" disabled>{{.}}</button>
+          {{end}}
+        </div>
 
-                        {{with .ImageName}}
-                        <div class="post-img"><img src="/static/public/{{.}}" alt="post-img"></div>
-                        {{end}}
-
-                        {{range .Comments}}
-                            <div class="post">
-                                <div class="post-content">
-                                    <div class="post-top-info">
-                    
-                                        <div class="post-top-user">
-                                            <p>{{.Username}}</p>
-                                            <p class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
-                                        </div>
-                    
-                                        <div class="likes-frame">
-                                            <form action="/post/comment/reaction/{{.PostID}}/{{.ID}}?reaction=like" method="POST">
-                                                <button class="like-button" id="like">
-                                                    <img src="/static/img/svg/like-icon.svg" alt="like"><span
-                                                        class="rating-count">{{.Likes}}</span>
-                                                </button>
-                                            </form>
-                    
-                                            <form action="/post/comment/reaction/{{.PostID}}/{{.ID}}?reaction=dislike" method="POST">
-                                                <button class="like-button" id="dislike">
-                                                    <img src="/static/img/svg/dislike.svg" alt="dislike"><span
-                                                        class="rating-count">{{.Dislikes}}</span>
-                                                </button>
-                                            </form>
-                                        </div>
-                    
-                                    </div>
-                    
-                                    <div class="post-text">
-                                        <p>{{.Content}}</p>
-                                    </div>
-                    
-                                </div>
-                            </div>
-                        {{end}}
-                        
-                    </div>
-                </div>
-            {{end}}
-        {{else}}
-        <p>No posts were commented</p>
+        {{with .ImageName}}
+        <div class="post-img">
+          <img src="/static/public/{{.}}" alt="post-img" />
+        </div>
         {{end}}
-
+      </div>
     </div>
+    {{range .Comments}}
+    <div class="post">
+      <div class="post-content">
+        <div class="post-top-info">
+          <div class="post-top-user">
+            <p>{{.Username}}</p>
+            <p class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
+          </div>
 
+          <div class="likes-frame">
+            <form
+              action="/post/comment/reaction/{{.PostID}}/{{.ID}}?reaction=like"
+              method="POST"
+            >
+              <button class="like-button" id="like">
+                <img src="/static/img/svg/like-icon.svg" alt="like" /><span
+                  class="rating-count"
+                  >{{.Likes}}</span
+                >
+              </button>
+            </form>
+
+            <form
+              action="/post/comment/reaction/{{.PostID}}/{{.ID}}?reaction=dislike"
+              method="POST"
+            >
+              <button class="like-button" id="dislike">
+                <img src="/static/img/svg/dislike.svg" alt="dislike" /><span
+                  class="rating-count"
+                  >{{.Dislikes}}</span
+                >
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="post-text">
+          <p>{{.Content}}</p>
+        </div>
+      </div>
+    </div>
+    {{end}} {{end}} {{else}}
+    <p>No posts were commented</p>
+    {{end}}
+  </div>
 </div>
 {{end}}

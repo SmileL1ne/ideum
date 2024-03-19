@@ -1,0 +1,39 @@
+<!-- new -->
+{{define "title"}} Rabbit {{end}}
+
+{{define "main"}}
+
+<div class="base">
+    <!-- post feed-->
+    <div class="post-feed">
+        <!-- topics -->
+        <div class="feed-message-wrapper">
+            <div class="feed-message-frame">
+                <div class="feed-message-left">
+                    <div class="feed-message-from">
+                        <p>Topic name</p>
+                    </div>
+                </div>
+                <div class="ok-frame">
+                    <button class="ok-button" id="like">Delete
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- add topic -->
+        <div class="feed-message-wrapper">
+            <div class="comment-frame">
+                <textarea class="white-text-area" id="usercomment" type="text" minlength="3" maxlength="15"
+                    spellcheck="false"></textarea>
+                <button class="light-button">Add topic</button>
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+{{end}}
