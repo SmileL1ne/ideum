@@ -15,7 +15,9 @@ type IPostRepository interface {
 	GetAllByUserReaction(int) (*[]entity.PostEntity, error)
 	GetAllCommentedPosts(userID int) (*[]entity.PostEntity, error)
 	Exists(int) (bool, error)
-	Delete(postID int) error
+	Delete(postID int, userID int) error
+	DeleteByPrivileged(postID int) error
+	GetAuthorID(postID int) (int, error)
 }
 
 type postRepository struct {
@@ -302,13 +304,56 @@ func (r *postRepository) Exists(postID int) (bool, error) {
 	return exists, err
 }
 
-func (r *postRepository) Delete(postID int) error {
+func (r *postRepository) Delete(postID int, userID int) error {
 	query := `
-		DELETE FROM posts
-		WHERE id = $1
+		DELETE FROM posts p
+		WHERE p.id = $1 AND p.user_id = $2
+	`
+
+	_, err := r.DB.Exec(query, postID, userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entity.ErrForbiddenAccess
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (r *postRepository) DeleteByPrivileged(postID int) error {
+	query := `
+		DELETE FROM posts p
+		WHERE p.id = $1
 	`
 
 	_, err := r.DB.Exec(query, postID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entity.ErrPostNotFound
+		}
+		return err
+	}
 
-	return err
+	return nil
+}
+
+func (r *postRepository) GetAuthorID(postID int) (int, error) {
+	query := `
+		SELECT p.user_id
+		FROM posts p
+		WHERE p.id = $1
+	`
+
+	var userID int
+
+	err := r.DB.QueryRow(query, postID).Scan(&userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, entity.ErrPostNotFound
+		}
+		return 0, err
+	}
+
+	return userID, nil
 }

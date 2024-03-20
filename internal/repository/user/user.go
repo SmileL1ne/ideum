@@ -131,23 +131,12 @@ func (r *userRepository) GetRole(userID int) (string, error) {
 
 func (r *userRepository) CreateNotification(n entity.Notification) error {
 	query := `
-		INSERT INTO notifications (type, content, source_id, user_from, user_to, created_at)
+		INSERT OR REPLACE INTO notifications (type, content, source_id, user_from, user_to, created_at)
 		VALUES ($1, $2, $3, $4, $5, datetime('now', 'localtime'))
 	`
 
 	_, err := r.DB.Exec(query, n.Type, n.Content, n.SourceID, n.UserFrom, n.UserTo)
 	if err != nil {
-		var sqliteError sqlite3.Error
-		if errors.As(err, &sqliteError) {
-			if sqliteError.Code == 19 && strings.Contains(sqliteError.Error(), "UNIQUE constraint failed:") {
-				switch {
-				case strings.Contains(sqliteError.Error(), "notifications.type, notifications.source_id, notifications.user_from, notifications.user_to"):
-					return entity.ErrDuplicateNotification
-				default:
-					return fmt.Errorf("(repo) SaveUser: unknown field - %v", sqliteError)
-				}
-			}
-		}
 		return err
 	}
 
@@ -156,8 +145,9 @@ func (r *userRepository) CreateNotification(n entity.Notification) error {
 
 func (r *userRepository) GetRequests() (*[]entity.Notification, error) {
 	query := `
-		SELECT n.type, n.content, n.user_from, n.created_at
+		SELECT n.type, n.content, u.username, n.created_at
 		FROM notifications n
+		INNER JOIN users u ON n.user_from = u.id
 		WHERE n.type = $1
 	`
 
@@ -171,7 +161,7 @@ func (r *userRepository) GetRequests() (*[]entity.Notification, error) {
 
 	for rows.Next() {
 		var req entity.Notification
-		if err := rows.Scan(&req.Type, &req.Content, &req.UserFrom, &req.CreatedAt); err != nil {
+		if err := rows.Scan(&req.Type, &req.Content, &req.Username, &req.CreatedAt); err != nil {
 			return nil, err
 		}
 		requests = append(requests, req)

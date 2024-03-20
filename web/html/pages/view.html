@@ -164,19 +164,19 @@
 
         <!-- Leave Your comment -->
         {{if .IsAuthenticated}}
-        <script src="/static/js/comment.js"></script>
-        <div class="feed-message-wrapper">
-            <div class="comment-frame">
+            <script src="/static/js/comment.js"></script>
+            <div class="feed-message-wrapper">
+                <div class="comment-frame">
 
-                <form action="/post/comment/{{.Models.Post.ID}}" method="POST" id="commentForm">
-                    <p class="error-msg"></p>
-                    <br>
-                    <textarea class="white-text-area" name="commentContent" id="usercomment" type="text" minlength="3"
-                        maxlength="256" spellcheck="false" required></textarea>
-                    <button class="light-button">Leave Comment</button>
-                </form>
+                    <form action="/post/comment/{{.Models.Post.ID}}" method="POST" id="commentForm">
+                        <p class="error-msg"></p>
+                        <br>
+                        <textarea class="white-text-area" name="commentContent" id="usercomment" type="text" minlength="3"
+                            maxlength="256" spellcheck="false" required></textarea>
+                        <button class="light-button">Leave Comment</button>
+                    </form>
+                </div>
             </div>
-        </div>
         {{end}}
 
     </div>
@@ -225,7 +225,7 @@
 
 <!-- delete modal for comment -->
 <dialog id="delete-modal-comment" class="Mymodal">
-    <form action="/comment/delete/" method="POST">
+    <form action="/post/comment/delete/{{.Models.Post.ID}}/" method="POST">
         <div class="modal-frame">
             <img class="modal-icon" src="/static/img/svg/delete-icon.svg" alt="delete-icon">
             <span>Delete comment?</span>

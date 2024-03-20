@@ -258,8 +258,21 @@ func (r *Routes) postDelete(w http.ResponseWriter, req *http.Request) {
 		r.methodNotAllowed(w)
 		return
 	}
-	fmt.Println("gay")
-	fmt.Println(req.URL.Path)
+
+	userRole := r.sesm.GetUserRole(req.Context())
+	if userRole == entity.MODERATOR || userRole == entity.ADMIN {
+		r.postDeletePrivileged(w, req)
+		return
+	} else if userRole != entity.USER {
+		r.unauthorized(w)
+		return
+	}
+
+	userID := r.sesm.GetUserID(req.Context())
+	if userID == 0 {
+		r.unauthorized(w)
+		return
+	}
 
 	postID, ok := getIdFromPath(req, 4)
 	if !ok {
@@ -268,8 +281,38 @@ func (r *Routes) postDelete(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err := r.services.Post.DeletePost(postID)
+	err := r.services.Post.DeletePost(postID, userID)
 	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrPostNotFound):
+			r.notFound(w)
+		case errors.Is(err, entity.ErrForbiddenAccess):
+			r.forbidden(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
+	http.Redirect(w, req, "/", http.StatusSeeOther)
+}
+
+func (r *Routes) postDeletePrivileged(w http.ResponseWriter, req *http.Request) {
+	userRole := r.sesm.GetUserRole(req.Context())
+
+	postID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("postDeletePrivileged: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	err := r.services.Post.DeletePostPrivileged(postID, userRole)
+	if err != nil {
+		if errors.Is(err, entity.ErrPostNotFound) {
+			r.notFound(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -301,24 +344,16 @@ func (r *Routes) postReport(w http.ResponseWriter, req *http.Request) {
 	userID := r.sesm.GetUserID(req.Context())
 
 	notification := entity.Notification{
-		Type:     entity.REPORT,
-		Content:  message,
-		SourceID: postID,
-		UserFrom: userID,
+		Type:       entity.REPORT,
+		Content:    message,
+		SourceID:   postID,
+		SourceType: entity.POST,
+		UserFrom:   userID,
 	}
 
 	err := r.services.User.SendNotification(notification)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrDuplicateNotification):
-			r.logger.Print("postReport: request is already sent")
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, strings.TrimSpace("Request is already sent"))
-		case errors.Is(err, entity.ErrInvalidNotificaitonType):
-			r.badRequest(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 

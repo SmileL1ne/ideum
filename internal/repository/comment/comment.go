@@ -2,6 +2,7 @@ package comment
 
 import (
 	"database/sql"
+	"errors"
 	"forum/internal/entity"
 )
 
@@ -10,6 +11,9 @@ type ICommentRepository interface {
 	GetAllForPost(int) (*[]entity.CommentEntity, error)
 	GetAllUserCommentsForPost(userID, postID int) (*[]entity.CommentEntity, error)
 	Exists(int) (bool, error)
+	Delete(commentID, userID int) error
+	DeleteByPrivileged(commentID int) error
+	GetAuthorID(commentID int) (int, error)
 }
 
 type commentRepository struct {
@@ -120,4 +124,58 @@ func (r *commentRepository) Exists(commentID int) (bool, error) {
 
 	err := r.DB.QueryRow(query, commentID).Scan(&exists)
 	return exists, err
+}
+
+func (r *commentRepository) Delete(commentID, userID int) error {
+	query := `
+		DELETE FROM comments c
+		WHERE c.id = $1 AND c.user_id = $2
+	`
+
+	_, err := r.DB.Exec(query, commentID, userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entity.ErrForbiddenAccess
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (r *commentRepository) DeleteByPrivileged(commentID int) error {
+	query := `
+		DELETE FROM comments c
+		WHERE c.id = $1
+	`
+
+	_, err := r.DB.Exec(query, commentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entity.ErrCommentNotFound
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (r *commentRepository) GetAuthorID(commentID int) (int, error) {
+	query := `
+		SELECT c.user_id
+		FROM comments c
+		WHERE c.id = $1
+	`
+
+	var userID int
+
+	err := r.DB.QueryRow(query, commentID).Scan(&userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, entity.ErrCommentNotFound
+		}
+		return 0, err
+	}
+
+	return userID, nil
 }

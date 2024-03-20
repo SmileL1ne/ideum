@@ -16,6 +16,8 @@ var (
 	ErrInvalidImageType = errors.New("entity: invalid image type")
 	ErrTooLargeImage    = errors.New("entity: too large image")
 	ErrInvalidTags      = errors.New("entity: tags don't exist")
+	ErrPostNotFound     = errors.New("entity: post not found")
+	ErrCommentNotFound  = errors.New("entity: comment not found")
 )
 
 // User related errors
@@ -30,6 +32,5 @@ var (
 
 // Notification related errors
 var (
-	ErrDuplicateNotification   = errors.New("entity: notification is already sent")
 	ErrInvalidNotificaitonType = errors.New("entity: invalid notification type")
 )

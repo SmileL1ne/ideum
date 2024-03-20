@@ -6,7 +6,6 @@ import (
 	"forum/internal/repository/user"
 	"forum/internal/validator"
 	"strings"
-	"sync"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -120,21 +119,27 @@ func (us *userService) GetUserRole(userID int) (string, error) {
 func (us *userService) SendNotification(n entity.Notification) error {
 	switch n.Type {
 	case entity.PROMOTION:
-		n.Content = "requested promotion to moderator"
+		n.Content = "Requested promotion to moderator"
+	case entity.PROMOTED:
+		n.Content = "Congratulations! You've been promoted to moderator!"
 	case entity.POST_LIKE:
-		n.Content = "liked your post"
+		n.Content = "Liked your post"
 	case entity.POST_DISLIKE:
-		n.Content = "disliked your post"
+		n.Content = "Disliked your post"
 	case entity.COMMENT_LIKE:
-		n.Content = "liked your comment"
+		n.Content = "Liked your comment"
 	case entity.COMMENT_DISLIKE:
-		n.Content = "disliked your comment"
+		n.Content = "Disliked your comment"
 	case entity.COMMENTED:
-		n.Content = "left a comment on your post"
+		n.Content = "Left a comment on your post"
 	case entity.REPORT:
-		n.Content = "reported this content as " + n.Content
+		n.Content = "Reported this content as " + n.Content
 	case entity.REJECT_PROMOTION:
-		n.Content = "rejected your promotion to moderator"
+		n.Content = "Your promotion was rejected"
+	case entity.DELETE_POST:
+		n.Content = "Your post/posts was/were deleted" + n.Content
+	case entity.DELETE_COMMENT:
+		n.Content = "Your comment/comments was/were deleted" + n.Content
 	default:
 		return entity.ErrInvalidNotificaitonType
 	}
@@ -149,30 +154,6 @@ func (us *userService) GetRequests(role string) (*[]entity.Notification, error) 
 
 	requests, err := us.userRepo.GetRequests()
 	if err != nil {
-		return nil, err
-	}
-
-	var wg sync.WaitGroup
-	var errCh = make(chan error, len(*requests))
-
-	for _, req := range *requests {
-		wg.Add(1)
-		go func(request entity.Notification) {
-			username, err := us.userRepo.GetUsernameByID(request.UserFrom)
-			if err != nil {
-				errCh <- err
-				return
-			}
-			request.Username = username
-		}(req)
-	}
-
-	go func() {
-		wg.Wait()
-		close(errCh)
-	}()
-
-	for err := range errCh {
 		return nil, err
 	}
 

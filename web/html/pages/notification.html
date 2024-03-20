@@ -10,47 +10,63 @@
 
         <!-- messages Yes-No -->
         <!-- only admin -->
-        <div class="feed-message-wrapper">
-            <div class="feed-message-frame">
-                <div class="feed-message-left">
-                    <div class="feed-message-from">
-                        <p>User001</p>
-                        <p class="post-date">28-10-2025</p>
+        {{range .Model.Notifications}}
+            {{if eq .Type "report"}}
+                <div class="feed-message-wrapper">
+                    <div class="feed-message-frame">
+                        <div class="feed-message-left">
+                            <div class="feed-message-from">
+                                <p>{{.Username}}</p>
+                                <p class="post-date">{{.CreatedAt}}</p>
+                            </div>
+                            <div class="message-content">{{.Content}}
+                                {{if eq .SourceType "post"}}
+                                    . Source: <a href="/post/view/{{.SourceID}}">click</a>
+                                {{end}}
+                            </div>
+                        </div>
+
+                        <div class="ok-frame">
+                            <div class="action-message">Delete {{.SourceType}}?</div>
+                            {{if eq .SourceType "post"}}
+                                <form action="/post/delete/{{.SourceID}}">
+                                    <button class="ok-button" id="like">YES</button>
+                                </form>
+                            {{else if eq .SourceType "comment"}}
+                                <form action="/post/comment/delete/{{.SourceID}}">
+                                    <button class="ok-button" id="like">YES</button>
+                                </form>
+                            {{end}}
+                            <form action="/admin/rejectReport">
+                                <button class="ok-button" id="dislike">NO</button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="message-content">Reported <a href="">post</a></div>
                 </div>
-
-                <div class="ok-frame">
-                    <div class="action-message">Delete post?</div>
-                    <form action="">
-                        <button class="ok-button" id="like">YES</button>
-                    </form>
-                    <form action="">
-                        <button class="ok-button" id="dislike">NO</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- messages, liked, commented, etc. -->
-        <!-- everyone -->
-        <div class="feed-message-wrapper">
-            <div class="feed-message-frame">
-                <div class="feed-message-left">
-                    <div class="feed-message-from">
-                        <p>User001</p>
-                        <p class="post-date">28-10-2025</p>
+            {{else}}
+                <!-- messages, liked, commented, etc. -->
+                <!-- everyone -->
+                <div class="feed-message-wrapper">
+                    <div class="feed-message-frame">
+                        <div class="feed-message-left">
+                            <div class="feed-message-from">
+                                <p>{{.Username}}</p>
+                                <p class="post-date">{{.CreatedAt}}</p>
+                            </div>
+                            <div class="message-content">{{.Content}}
+                                {{if eq .SourceType "post"}}
+                                    <a href="/post/view/{{.SourceID}}">click</a>
+                                {{end}}
+                            </div>
+                        </div>
+                        
+                        <!-- ADD FORM HERE -->
+                        <button class="ok-button" id="like">OK
+                        </button>
                     </div>
-                    <div class="message-content">Liked your <a href="">post</a></div>
                 </div>
-
-                <button class="ok-button" id="like">OK
-                </button>
-            </div>
-        </div>
-
-
+            {{end}}
+        {{end}}
     </div>
-
 </div>
 {{end}}

@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"forum/internal/entity"
 	"net/http"
-	"strings"
 )
 
 func (r *Routes) requests(w http.ResponseWriter, req *http.Request) {
@@ -63,6 +61,17 @@ func (r *Routes) adminPromote(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	notification := entity.Notification{
+		Type:   entity.PROMOTED,
+		UserTo: userID,
+	}
+
+	err = r.services.User.SendNotification(notification)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
 	http.Redirect(w, req, "/admin/requests", http.StatusSeeOther)
 }
 
@@ -72,8 +81,6 @@ func (r *Routes) adminReject(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	adminID := r.sesm.GetUserID(req.Context())
-
 	userID, ok := getIdFromPath(req, 4)
 	if !ok {
 		r.logger.Print("adminPromote: invalid url path")
@@ -82,23 +89,13 @@ func (r *Routes) adminReject(w http.ResponseWriter, req *http.Request) {
 	}
 
 	notification := entity.Notification{
-		Type:     entity.REJECT_PROMOTION,
-		UserFrom: adminID,
-		UserTo:   userID,
+		Type:   entity.REJECT_PROMOTION,
+		UserTo: userID,
 	}
 
 	err := r.services.User.SendNotification(notification)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrDuplicateNotification):
-			r.logger.Print("postReport: request is already sent")
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, strings.TrimSpace("Request is already sent"))
-		case errors.Is(err, entity.ErrInvalidNotificaitonType):
-			r.badRequest(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 

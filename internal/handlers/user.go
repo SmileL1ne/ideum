@@ -120,16 +120,7 @@ func (r *Routes) userPromote(w http.ResponseWriter, req *http.Request) {
 
 	err := r.services.User.SendNotification(notification)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrDuplicateNotification):
-			r.logger.Print("userPromote: request is already sent")
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, strings.TrimSpace("Request is already sent"))
-		case errors.Is(err, entity.ErrInvalidNotificaitonType):
-			r.badRequest(w)
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 

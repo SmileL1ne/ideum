@@ -7,6 +7,7 @@ import (
 	"forum/internal/service/comment"
 	"forum/internal/service/image"
 	"forum/internal/service/tag"
+	"forum/internal/service/user"
 	"strconv"
 )
 
@@ -20,22 +21,25 @@ type IPostService interface {
 	GetAllCommentedPostsWithComments(userID int) (*[]entity.PostView, *[][]entity.CommentView, error)
 	ExistsPost(postID int) (bool, error)
 	CheckPostAttrs(*entity.PostCreateForm, bool) (bool, error)
-	DeletePost(postID int) error
+	DeletePost(postID int, userID int) error
+	DeletePostPrivileged(postID int, userRole string) error
 }
 
 type postService struct {
 	imgService     image.IImageService
 	tagService     tag.ITagService
 	commentService comment.ICommentService
+	userService    user.IUserService
 	postRepo       post.IPostRepository
 }
 
 // Constructor for post service
-func NewPostsService(r post.IPostRepository, is image.IImageService, ts tag.ITagService, cs comment.ICommentService) *postService {
+func NewPostsService(r post.IPostRepository, is image.IImageService, ts tag.ITagService, cs comment.ICommentService, us user.IUserService) *postService {
 	return &postService{
 		imgService:     is,
 		tagService:     ts,
 		commentService: cs,
+		userService:    us,
 		postRepo:       r,
 	}
 }
@@ -162,6 +166,49 @@ func (ps *postService) CheckPostAttrs(p *entity.PostCreateForm, withImage bool) 
 	return true, nil
 }
 
-func (ps *postService) DeletePost(postID int) error {
-	return ps.postRepo.Delete(postID)
+func (ps *postService) DeletePost(postID int, userID int) error {
+	exists, err := ps.postRepo.Exists(postID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return entity.ErrPostNotFound
+	}
+
+	return ps.postRepo.Delete(postID, userID)
+}
+
+func (ps *postService) DeletePostPrivileged(postID int, userRole string) error {
+	exists, err := ps.postRepo.Exists(postID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return entity.ErrPostNotFound
+	}
+
+	authorID, err := ps.postRepo.GetAuthorID(postID)
+	if err != nil {
+		return err
+	}
+
+	err = ps.postRepo.DeleteByPrivileged(postID)
+	if err != nil {
+		return err
+	}
+
+	notificaiton := entity.Notification{
+		Type:     entity.DELETE_POST,
+		UserFrom: authorID,
+	}
+	if userRole == entity.MODERATOR {
+		notificaiton.Content = ". Reason: obscene"
+	}
+
+	err = ps.userService.SendNotification(notificaiton)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
