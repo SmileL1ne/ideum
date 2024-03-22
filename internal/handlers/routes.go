@@ -63,16 +63,16 @@ func (r *Routes) Register() http.Handler {
 	// Dynamic middleware chain for routes that don't require authentication
 	dynamic := mids.New(r.sesm.LoadAndSave, r.detectUserRole)
 
+	// GUEST MODE
 	router.Handle("/", dynamic.ThenFunc(r.home))
 	router.Handle("/sortByTags/", dynamic.ThenFunc(r.sortedByTag))
 	router.Handle("/user/login", dynamic.ThenFunc(r.userLoginPost))
 	router.Handle("/user/signup", dynamic.ThenFunc(r.userSignupPost))
 	router.Handle("/post/view/", dynamic.ThenFunc(r.postView)) // postID at the end
 
-	// SSO
+	// EXTERNAL AUTH
 	router.Handle("/login/google", dynamic.ThenFunc(r.googlelogin))
 	router.Handle("/callbackGoogle", dynamic.ThenFunc(r.googleCallback))
-	//git hub sso
 	router.Handle("/login/github", dynamic.ThenFunc(r.githublogin))
 	router.Handle("/callbackGithub", dynamic.ThenFunc(r.githubCallback))
 
@@ -80,21 +80,28 @@ func (r *Routes) Register() http.Handler {
 	// that require authentication
 	protected := dynamic.Append(r.requireAuthentication)
 
+	// POST
 	router.Handle("/post/myPosts", protected.ThenFunc(r.postsPersonal))
 	router.Handle("/post/myReacted", protected.ThenFunc(r.postsReacted))
 	router.Handle("/post/myCommented", protected.ThenFunc(r.postsCommented))
 	router.Handle("/post/create", protected.ThenFunc(r.postCreate))
-	router.Handle("/post/delete/", protected.ThenFunc(r.postDelete))                // postID at the end
-	router.Handle("/post/report/", protected.ThenFunc(r.postReport))                // postID at the end
-	router.Handle("/post/reaction/", protected.ThenFunc(r.postReaction))            // postID at the end
+	router.Handle("/post/delete/", protected.ThenFunc(r.postDelete))     // postID at the end
+	router.Handle("/post/report/", protected.ThenFunc(r.postReport))     // postID at the end
+	router.Handle("/post/reaction/", protected.ThenFunc(r.postReaction)) // postID at the end
+
+	// COMMENT
 	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))            // postID at the end
 	router.Handle("/post/comment/reaction/", protected.ThenFunc(r.commentReaction)) // postID at the end
 	router.Handle("/post/comment/delete/", protected.ThenFunc(r.commentDelete))     // commentID at the end
 	router.Handle("/post/comment/report/", protected.ThenFunc(r.commentReport))     // commentID at the end
+
+	// ADMIN
 	router.Handle("/admin/requests", protected.ThenFunc(r.requests))
 	router.Handle("/admin/promote/", protected.ThenFunc(r.promoteUser))             // userID at the end
 	router.Handle("/admin/rejectPromotion/", protected.ThenFunc(r.rejectPromotion)) // userID at the end
 	router.Handle("/admin/rejectReport/", protected.ThenFunc(r.rejectReport))       // userID at the end
+
+	// USER
 	router.Handle("/user/promote", protected.ThenFunc(r.userPromote))
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
 

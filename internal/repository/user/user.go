@@ -17,6 +17,7 @@ type IUserRepository interface {
 	GetUsernameByID(userID int) (string, error)
 	GetRole(userID int) (string, error)
 	CreateNotification(n entity.Notification) error
+	DeleteNotification(notificationID int) error
 	GetRequests() (*[]entity.Notification, error)
 	Promote(userID int) error
 }
@@ -131,7 +132,7 @@ func (r *userRepository) GetRole(userID int) (string, error) {
 
 func (r *userRepository) CreateNotification(n entity.Notification) error {
 	query := `
-		INSERT OR REPLACE INTO notifications (type, content, source_id, user_from, user_to, created_at)
+		INSERT INTO notifications (type, content, source_id, user_from, user_to, created_at)
 		VALUES ($1, $2, $3, $4, $5, datetime('now', 'localtime'))
 	`
 
@@ -143,9 +144,32 @@ func (r *userRepository) CreateNotification(n entity.Notification) error {
 	return nil
 }
 
+func (r *userRepository) DeleteNotification(notificationID int) error {
+	query := `
+		DELETE FROM notifications
+		WHERE id = $1
+	`
+
+	res, err := r.DB.Exec(query, notificationID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return entity.ErrNotificationNotFound
+	}
+
+	return nil
+}
+
 func (r *userRepository) GetRequests() (*[]entity.Notification, error) {
 	query := `
-		SELECT n.type, n.content, u.username, n.created_at
+		SELECT n.id, n.type, n.content, u.username, n.created_at
 		FROM notifications n
 		INNER JOIN users u ON n.user_from = u.id
 		WHERE n.type = $1
@@ -161,7 +185,7 @@ func (r *userRepository) GetRequests() (*[]entity.Notification, error) {
 
 	for rows.Next() {
 		var req entity.Notification
-		if err := rows.Scan(&req.Type, &req.Content, &req.Username, &req.CreatedAt); err != nil {
+		if err := rows.Scan(&req.ID, &req.Type, &req.Content, &req.Username, &req.CreatedAt); err != nil {
 			return nil, err
 		}
 		requests = append(requests, req)

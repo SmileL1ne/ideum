@@ -22,12 +22,13 @@ var (
 
 // User related errors
 var (
-	ErrDuplicateEmail     = errors.New("entity: duplicate email")
-	ErrDuplicateUsername  = errors.New("entity: dupliate username")
-	ErrInvalidCredentials = errors.New("entity: invalid credentials")
-	ErrInvalidUserID      = errors.New("entity: non-existent user id")
-	ErrUnauthorized       = errors.New("entity: unauthorized")
-	ErrForbiddenAccess    = errors.New("entity: further access is forbidden")
+	ErrDuplicateEmail       = errors.New("entity: duplicate email")
+	ErrDuplicateUsername    = errors.New("entity: dupliate username")
+	ErrInvalidCredentials   = errors.New("entity: invalid credentials")
+	ErrInvalidUserID        = errors.New("entity: non-existent user id")
+	ErrUnauthorized         = errors.New("entity: unauthorized")
+	ErrForbiddenAccess      = errors.New("entity: further access is forbidden")
+	ErrNotificationNotFound = errors.New("entity: notification not found")
 )
 
 // Notification related errors

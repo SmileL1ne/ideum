@@ -26,9 +26,11 @@
                     <div class="ok-frame">
                         <div class="action-message">Promote?</div>
                         <form action="/admin/promote/{{.UserFrom}}" method="POST">
+                            <input type="hidden" name="notificationID" value="{{.ID}}">
                             <button class="ok-button" id="like">YES</button>
                         </form>
                         <form action="/admin/rejectPromotion/{{.UserFrom}}" method="POST">
+                            <input type="hidden" name="notificationID" value="{{.ID}}">
                             <button class="ok-button" id="dislike">NO</button>
                         </form>
                     </div>

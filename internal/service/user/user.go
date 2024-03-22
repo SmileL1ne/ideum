@@ -19,6 +19,7 @@ type IUserService interface {
 	SendNotification(notification entity.Notification) error
 	GetRequests(role string) (*[]entity.Notification, error)
 	PromoteUser(userID int) error
+	DeleteNotification(notificationID int) error
 }
 
 type userService struct {
@@ -164,4 +165,8 @@ func (us *userService) GetRequests(role string) (*[]entity.Notification, error) 
 
 func (us *userService) PromoteUser(userID int) error {
 	return us.userRepo.Promote(userID)
+}
+
+func (us *userService) DeleteNotification(notificationID int) error {
+	return us.userRepo.DeleteNotification(notificationID)
 }

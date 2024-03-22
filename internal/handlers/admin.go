@@ -48,11 +48,22 @@ func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
 		r.methodNotAllowed(w)
 		return
 	}
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
+		return
+	}
 
 	userID, ok := getIdFromPath(req, 4)
 	if !ok {
 		r.logger.Print("promoteUser: invalid url path")
 		r.notFound(w)
+		return
+	}
+
+	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	if !ok {
+		r.logger.Print("promoteUser: invalid notificationID")
+		r.badRequest(w)
 		return
 	}
 
@@ -68,6 +79,12 @@ func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
 	}
 
 	err = r.services.User.SendNotification(notification)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	err = r.services.User.DeleteNotification(notificationID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -89,12 +106,25 @@ func (r *Routes) rejectPromotion(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	if !ok {
+		r.logger.Print("promoteUser: invalid notificationID")
+		r.badRequest(w)
+		return
+	}
+
 	notification := entity.Notification{
 		Type:   entity.REJECT_PROMOTION,
 		UserTo: userID,
 	}
 
 	err := r.services.User.SendNotification(notification)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	err = r.services.User.DeleteNotification(notificationID)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
@@ -117,6 +147,13 @@ func (r *Routes) rejectReport(w http.ResponseWriter, req *http.Request) {
 	if !ok {
 		r.logger.Print("rejectReport: invalid url path")
 		r.notFound(w)
+		return
+	}
+
+	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	if !ok {
+		r.logger.Print("promoteUser: invalid notificationID")
+		r.badRequest(w)
 		return
 	}
 
@@ -143,6 +180,16 @@ func (r *Routes) rejectReport(w http.ResponseWriter, req *http.Request) {
 
 	err = r.services.User.SendNotification(notification)
 	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	err = r.services.User.DeleteNotification(notificationID)
+	if err != nil {
+		if errors.Is(err, entity.ErrNotificationNotFound) {
+			r.notFound(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
