@@ -4,6 +4,7 @@ import (
 	"errors"
 	"forum/internal/entity"
 	"net/http"
+	"strconv"
 )
 
 func (r *Routes) requests(w http.ResponseWriter, req *http.Request) {
@@ -42,15 +43,15 @@ func (r *Routes) requests(w http.ResponseWriter, req *http.Request) {
 	r.render(w, req, http.StatusOK, "notification.html", data)
 }
 
-func (r *Routes) adminPromote(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
+func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
 		r.methodNotAllowed(w)
 		return
 	}
 
 	userID, ok := getIdFromPath(req, 4)
 	if !ok {
-		r.logger.Print("adminPromote: invalid url path")
+		r.logger.Print("promoteUser: invalid url path")
 		r.notFound(w)
 		return
 	}
@@ -75,15 +76,15 @@ func (r *Routes) adminPromote(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/admin/requests", http.StatusSeeOther)
 }
 
-func (r *Routes) adminReject(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
+func (r *Routes) rejectPromotion(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
 		r.methodNotAllowed(w)
 		return
 	}
 
 	userID, ok := getIdFromPath(req, 4)
 	if !ok {
-		r.logger.Print("adminPromote: invalid url path")
+		r.logger.Print("rejectPromotion: invalid url path")
 		r.notFound(w)
 		return
 	}
@@ -100,4 +101,51 @@ func (r *Routes) adminReject(w http.ResponseWriter, req *http.Request) {
 	}
 
 	http.Redirect(w, req, "/admin/requests", http.StatusSeeOther)
+}
+
+func (r *Routes) rejectReport(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
+		return
+	}
+
+	userID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("rejectReport: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	sourceID, err := strconv.Atoi(req.PostForm.Get("sourceID"))
+	if err != nil {
+		r.logger.Print("rejectReport:", err)
+		r.badRequest(w)
+		return
+	}
+
+	sourceType := req.PostForm.Get("sourceType")
+	if sourceType == "" || (sourceType != entity.POST && sourceType != entity.COMMENT) {
+		r.logger.Print("rejectReport: invalid sourceType provided")
+		r.badRequest(w)
+		return
+	}
+
+	notification := entity.Notification{
+		Type:       entity.REJECT_REPORT,
+		SourceType: sourceType,
+		SourceID:   sourceID,
+		UserTo:     userID,
+	}
+
+	err = r.services.User.SendNotification(notification)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	http.Redirect(w, req, "/user/notifications", http.StatusSeeOther)
 }

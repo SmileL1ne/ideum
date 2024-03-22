@@ -136,6 +136,8 @@ func (us *userService) SendNotification(n entity.Notification) error {
 		n.Content = "Reported this content as " + n.Content
 	case entity.REJECT_PROMOTION:
 		n.Content = "Your promotion was rejected"
+	case entity.REJECT_REPORT:
+		n.Content = "Your report was rejected"
 	case entity.DELETE_POST:
 		n.Content = "Your post/posts was/were deleted" + n.Content
 	case entity.DELETE_COMMENT:

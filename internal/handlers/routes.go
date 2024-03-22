@@ -92,8 +92,9 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/post/comment/delete/", protected.ThenFunc(r.commentDelete))     // commentID at the end
 	router.Handle("/post/comment/report/", protected.ThenFunc(r.commentReport))     // commentID at the end
 	router.Handle("/admin/requests", protected.ThenFunc(r.requests))
-	router.Handle("/admin/promote/", protected.ThenFunc(r.adminPromote)) // userID at the end
-	router.Handle("/admin/reject/", protected.ThenFunc(r.adminReject))   // userID at the end
+	router.Handle("/admin/promote/", protected.ThenFunc(r.promoteUser))             // userID at the end
+	router.Handle("/admin/rejectPromotion/", protected.ThenFunc(r.rejectPromotion)) // userID at the end
+	router.Handle("/admin/rejectReport/", protected.ThenFunc(r.rejectReport))       // userID at the end
 	router.Handle("/user/promote", protected.ThenFunc(r.userPromote))
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
 

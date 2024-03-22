@@ -29,15 +29,17 @@
                         <div class="ok-frame">
                             <div class="action-message">Delete {{.SourceType}}?</div>
                             {{if eq .SourceType "post"}}
-                                <form action="/post/delete/{{.SourceID}}">
+                                <form action="/post/delete/{{.SourceID}}" method="POST">
                                     <button class="ok-button" id="like">YES</button>
                                 </form>
                             {{else if eq .SourceType "comment"}}
-                                <form action="/post/comment/delete/{{.SourceID}}">
+                                <form action="/post/comment/delete/{{.SourceID}}" method="POST">
                                     <button class="ok-button" id="like">YES</button>
                                 </form>
                             {{end}}
-                            <form action="/admin/rejectReport">
+                            <form action="/admin/rejectReport/{{.UserFrom}}" method="POST">
+                                <input type="hidden" name="sourceID" value="{{.SourceID}}">
+                                <input type="hidden" name="sourceType" value="{{.SourceType}}">
                                 <button class="ok-button" id="dislike">NO</button>
                             </form>
                         </div>

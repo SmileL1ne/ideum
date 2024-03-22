@@ -16,6 +16,7 @@ const (
 	COMMENTED        = "commented"
 	REPORT           = "report"
 	REJECT_PROMOTION = "reject_promotion"
+	REJECT_REPORT    = "reject_report"
 	DELETE_POST      = "delete_post"
 	DELETE_COMMENT   = "delete_comment"
 	PROMOTED         = "promoted"

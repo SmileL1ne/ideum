@@ -25,10 +25,10 @@
 
                     <div class="ok-frame">
                         <div class="action-message">Promote?</div>
-                        <form action="/admin/promote/{{.UserFrom}}">
+                        <form action="/admin/promote/{{.UserFrom}}" method="POST">
                             <button class="ok-button" id="like">YES</button>
                         </form>
-                        <form action="/admin/reject/{{.UserFrom}}">
+                        <form action="/admin/rejectPromotion/{{.UserFrom}}" method="POST">
                             <button class="ok-button" id="dislike">NO</button>
                         </form>
                     </div>
