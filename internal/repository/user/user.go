@@ -319,6 +319,7 @@ func (r *userRepository) GetReports() (*[]entity.Report, error) {
 		SELECT r.id, r.reason, r.user_from, r.source_id, r.source_type, r.created_at, u.username
 		FROM reports r
 		INNER JOIN users u ON u.id = r.user_from
+		ORDER BY r.created_at DESC
 	`
 
 	var reports []entity.Report
@@ -393,6 +394,7 @@ func (r *userRepository) GetUsers() (*[]entity.UserEntity, error) {
 		SELECT u.id, u.username, u.email, u.hashed_password, u.created_at, r.role
 		FROM users u
 		LEFT JOIN roles r ON u.id = r.user_id
+		ORDER BY u.created_at DESC
 	`
 
 	var users []entity.UserEntity
