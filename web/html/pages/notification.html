@@ -10,64 +10,65 @@
 
         <!-- messages Yes-No -->
         <!-- only admin -->
-        {{range .Model.Notifications}}
-            {{if eq .Type "report"}}
-                <div class="feed-message-wrapper">
-                    <div class="feed-message-frame">
-                        <div class="feed-message-left">
-                            <div class="feed-message-from">
-                                <p>{{.Username}}</p>
-                                <p class="post-date">{{.CreatedAt}}</p>
+        {{if .Models.Notifications}}
+            {{range .Models.Notifications}}
+                {{if eq .Type "report"}}
+                    <div class="feed-message-wrapper">
+                        <div class="feed-message-frame">
+                            <div class="feed-message-left">
+                                <div class="feed-message-from">
+                                    <p>{{.Username}}</p>
+                                    <p class="post-date">{{.CreatedAt}}</p>
+                                </div>
+                                <div class="message-content">{{.Content}}. Source: <a href="/post/view/{{.SourceID}}">click</a>
+                                </div>
                             </div>
-                            <div class="message-content">{{.Content}}
+
+                            <div class="ok-frame">
+                                <div class="action-message">Delete {{.SourceType}}?</div>
                                 {{if eq .SourceType "post"}}
-                                    . Source: <a href="/post/view/{{.SourceID}}">click</a>
+                                    <form action="/post/delete/{{.SourceID}}" method="POST">
+                                        <input type="hidden" name="notificationID" value="{{.ID}}">
+                                        <button class="ok-button" id="like">YES</button>
+                                    </form>
+                                {{else if eq .SourceType "comment"}}
+                                    <form action="/post/comment/delete/{{.SourceID}}" method="POST">
+                                        <input type="hidden" name="notificationID" value="{{.ID}}">
+                                        <button class="ok-button" id="like">YES</button>
+                                    </form>
                                 {{end}}
+                                <form action="/admin/rejectReport/{{.UserFrom}}" method="POST">
+                                    <input type="hidden" name="sourceID" value="{{.SourceID}}">
+                                    <input type="hidden" name="sourceType" value="{{.SourceType}}">
+                                    <button class="ok-button" id="dislike">NO</button>
+                                </form>
                             </div>
                         </div>
-
-                        <div class="ok-frame">
-                            <div class="action-message">Delete {{.SourceType}}?</div>
-                            {{if eq .SourceType "post"}}
-                                <form action="/post/delete/{{.SourceID}}" method="POST">
-                                    <button class="ok-button" id="like">YES</button>
-                                </form>
-                            {{else if eq .SourceType "comment"}}
-                                <form action="/post/comment/delete/{{.SourceID}}" method="POST">
-                                    <button class="ok-button" id="like">YES</button>
-                                </form>
-                            {{end}}
-                            <form action="/admin/rejectReport/{{.UserFrom}}" method="POST">
-                                <input type="hidden" name="sourceID" value="{{.SourceID}}">
-                                <input type="hidden" name="sourceType" value="{{.SourceType}}">
-                                <button class="ok-button" id="dislike">NO</button>
+                    </div>
+                {{else}}
+                    <!-- messages, liked, commented, etc. -->
+                    <!-- everyone -->
+                    <div class="feed-message-wrapper">
+                        <div class="feed-message-frame">
+                            <div class="feed-message-left">
+                                <div class="feed-message-from">
+                                    <p>{{.Username}}</p>
+                                    <p class="post-date">{{.CreatedAt}}</p>
+                                </div>
+                                <div class="message-content">{{.Content}}. Source: <a href="/post/view/{{.SourceID}}">click</a>
+                                </div>
+                            </div>
+                            
+                            <form action="/user/deleteNotification/{{.ID}}" method="POST">
+                                <button class="ok-button" id="like">OK</button>
                             </form>
                         </div>
                     </div>
-                </div>
-            {{else}}
-                <!-- messages, liked, commented, etc. -->
-                <!-- everyone -->
-                <div class="feed-message-wrapper">
-                    <div class="feed-message-frame">
-                        <div class="feed-message-left">
-                            <div class="feed-message-from">
-                                <p>{{.Username}}</p>
-                                <p class="post-date">{{.CreatedAt}}</p>
-                            </div>
-                            <div class="message-content">{{.Content}}
-                                {{if eq .SourceType "post"}}
-                                    <a href="/post/view/{{.SourceID}}">click</a>
-                                {{end}}
-                            </div>
-                        </div>
-                        
-                        <form action="/user/deleteNotification" method="POST">
-                            <button class="ok-button" id="like">OK</button>
-                        </form>
-                    </div>
-                </div>
+                {{end}}
             {{end}}
+
+        {{else}}
+            <p>No notifications yet!</p>
         {{end}}
     </div>
 </div>

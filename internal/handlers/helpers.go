@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"forum/internal/entity"
 	"forum/internal/validator"
 	"forum/web"
 	"html/template"
@@ -17,12 +16,7 @@ import (
 
 func (r *Routes) newTemplateData(req *http.Request) (templateData, error) {
 	userRole := r.sesm.GetUserRole(req.Context())
-	username, err := r.getUsername(req.Context())
-	if err != nil {
-		return templateData{}, err
-	} else if username == "" && userRole != entity.GUEST {
-		return templateData{}, entity.ErrUnauthorized
-	}
+	username, _ := r.getUsername(req.Context())
 
 	tags, err := r.services.Tag.GetAllTags()
 	if err != nil {
@@ -144,9 +138,6 @@ func (r *Routes) renderErrorPage(w http.ResponseWriter, errInfo errData) {
 // getUsername retrieves username by user id from request context
 func (r *Routes) getUsername(ctx context.Context) (string, error) {
 	userID := r.sesm.GetUserID(ctx)
-	if userID == 0 {
-		return "", nil
-	}
 
 	return r.services.User.GetUsernameById(userID)
 }
@@ -197,9 +188,6 @@ func getErrorMessage(v *validator.Validator) string {
 // userID and template data
 func (r *Routes) getBaseInfo(req *http.Request) (int, templateData, error) {
 	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		return 0, templateData{}, entity.ErrUnauthorized
-	}
 
 	data, err := r.newTemplateData(req)
 	if err != nil {

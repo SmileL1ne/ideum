@@ -19,10 +19,6 @@ func (r *Routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		r.unauthorized(w)
-		return
-	}
 
 	postID, ok := getIdFromPath(req, 4)
 	if !ok {
@@ -61,6 +57,37 @@ func (r *Routes) commentCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	authorID, err := r.services.Post.GetAuthorID(postID)
+	if err != nil {
+		if errors.Is(err, entity.ErrPostNotFound) {
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	notification := entity.Notification{
+		Type:       entity.COMMENTED,
+		SourceID:   postID,
+		SourceType: entity.COMMENT,
+		UserFrom:   userID,
+		UserTo:     authorID,
+	}
+
+	err = r.services.User.SendNotification(notification)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrDuplicateNotification):
+			r.logger.Print("rejectPromotion: duplicate notification")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Reject promotion notification is already sent")
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
 	redirectURL := fmt.Sprintf("/post/view/%d", postID)
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprint(w, redirectURL)
@@ -82,10 +109,6 @@ func (r *Routes) commentDelete(w http.ResponseWriter, req *http.Request) {
 	}
 
 	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		r.unauthorized(w)
-		return
-	}
 
 	commentID, ok := getIdFromPath(req, 5)
 	if !ok {
@@ -111,7 +134,29 @@ func (r *Routes) commentDelete(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Routes) commentDeletePrivileged(w http.ResponseWriter, req *http.Request) {
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
+		return
+	}
+
 	userRole := r.sesm.GetUserRole(req.Context())
+
+	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	if !ok {
+		r.logger.Print("promoteUser: invalid notificationID")
+		r.badRequest(w)
+		return
+	}
+
+	err := r.services.User.DeleteNotification(notificationID)
+	if err != nil {
+		if errors.Is(err, entity.ErrNotificationNotFound) {
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
 
 	commentID, ok := getIdFromPath(req, 5)
 	if !ok {
@@ -120,7 +165,9 @@ func (r *Routes) commentDeletePrivileged(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	err := r.services.Comment.DeleteCommentPrivileged(commentID, userRole)
+	userID := r.sesm.GetUserID(req.Context())
+
+	err = r.services.Comment.DeleteCommentPrivileged(commentID, userID, userRole)
 	if err != nil {
 		if errors.Is(err, entity.ErrCommentNotFound) {
 			r.notFound(w)
@@ -174,19 +221,22 @@ func (r *Routes) commentReport(w http.ResponseWriter, req *http.Request) {
 	message := req.PostFormValue("message")
 	userID := r.sesm.GetUserID(req.Context())
 
-	notification := entity.Notification{
-		Type:       entity.REPORT,
-		Content:    message,
+	report := entity.Report{
+		Reason:     message,
+		UserFrom:   userID,
 		SourceID:   postID,
 		SourceType: entity.COMMENT,
-		UserFrom:   userID,
 	}
 
-	err = r.services.User.SendNotification(notification)
+	err = r.services.User.SendReport(report)
 	if err != nil {
+		if errors.Is(err, entity.ErrDuplicateReport) {
+			r.badRequest(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
 
-	http.Redirect(w, req, req.URL.Path, http.StatusOK)
+	http.Redirect(w, req, "/user/notifications", http.StatusOK)
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"forum/internal/entity"
 	"net/http"
 	"strconv"
@@ -14,10 +15,6 @@ func (r *Routes) requests(w http.ResponseWriter, req *http.Request) {
 	}
 	data, err := r.newTemplateData(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrUnauthorized) {
-			r.unauthorized(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -28,19 +25,15 @@ func (r *Routes) requests(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	requests, err := r.services.User.GetRequests(userRole)
+	requests, err := r.services.User.GetRequests()
 	if err != nil {
-		if errors.Is(err, entity.ErrForbiddenAccess) {
-			r.forbidden(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}
 
-	data.Models.Notifications = *requests
+	data.Models.Requests = *requests
 
-	r.render(w, req, http.StatusOK, "notification.html", data)
+	r.render(w, req, http.StatusOK, "request.html", data)
 }
 
 func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
@@ -53,40 +46,60 @@ func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userID, ok := getIdFromPath(req, 4)
+	userRole := r.sesm.GetUserRole(req.Context())
+	if userRole != entity.ADMIN {
+		r.forbidden(w)
+		return
+	}
+
+	userTo, ok := getIdFromPath(req, 4)
 	if !ok {
 		r.logger.Print("promoteUser: invalid url path")
 		r.notFound(w)
 		return
 	}
 
-	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	promotionID, ok := getValidID(req.PostForm.Get("promotionID"))
 	if !ok {
-		r.logger.Print("promoteUser: invalid notificationID")
+		r.logger.Print("promoteUser: invalid promotionID")
 		r.badRequest(w)
 		return
 	}
 
-	err := r.services.User.PromoteUser(userID)
+	err := r.services.User.DeletePromotion(promotionID)
+	if err != nil {
+		if errors.Is(err, entity.ErrPromotionNotFound) {
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	err = r.services.User.PromoteUser(userTo)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
 
+	adminID := r.sesm.GetUserID(req.Context())
+
 	notification := entity.Notification{
-		Type:   entity.PROMOTED,
-		UserTo: userID,
+		Type:     entity.PROMOTED,
+		UserFrom: adminID,
+		UserTo:   userTo,
 	}
 
 	err = r.services.User.SendNotification(notification)
 	if err != nil {
-		r.serverError(w, req, err)
-		return
-	}
-
-	err = r.services.User.DeleteNotification(notificationID)
-	if err != nil {
-		r.serverError(w, req, err)
+		switch {
+		case errors.Is(err, entity.ErrDuplicateNotification):
+			r.logger.Print("promoteUser: duplicate notification")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Promotion of user notification is already sent")
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -106,27 +119,41 @@ func (r *Routes) rejectPromotion(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	promotionID, ok := getValidID(req.PostForm.Get("promotionID"))
 	if !ok {
-		r.logger.Print("promoteUser: invalid notificationID")
+		r.logger.Print("rejectPromotion: invalid promotionID")
 		r.badRequest(w)
 		return
 	}
 
-	notification := entity.Notification{
-		Type:   entity.REJECT_PROMOTION,
-		UserTo: userID,
-	}
-
-	err := r.services.User.SendNotification(notification)
+	err := r.services.User.DeletePromotion(promotionID)
 	if err != nil {
+		if errors.Is(err, entity.ErrPromotionNotFound) {
+			r.notFound(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
 
-	err = r.services.User.DeleteNotification(notificationID)
+	adminID := r.sesm.GetUserID(req.Context())
+
+	notification := entity.Notification{
+		Type:     entity.REJECT_PROMOTION,
+		UserFrom: adminID,
+		UserTo:   userID,
+	}
+
+	err = r.services.User.SendNotification(notification)
 	if err != nil {
-		r.serverError(w, req, err)
+		switch {
+		case errors.Is(err, entity.ErrDuplicateNotification):
+			r.logger.Print("rejectPromotion: duplicate notification")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Reject promotion notification is already sent")
+		default:
+			r.serverError(w, req, err)
+		}
 		return
 	}
 
@@ -150,10 +177,20 @@ func (r *Routes) rejectReport(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	reportID, ok := getValidID(req.PostForm.Get("reportID"))
 	if !ok {
-		r.logger.Print("promoteUser: invalid notificationID")
+		r.logger.Print("rejectReport: invalid reportID")
 		r.badRequest(w)
+		return
+	}
+
+	err := r.services.User.DeleteReport(reportID)
+	if err != nil {
+		if errors.Is(err, entity.ErrReportNotFound) {
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -164,33 +201,25 @@ func (r *Routes) rejectReport(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	sourceType := req.PostForm.Get("sourceType")
-	if sourceType == "" || (sourceType != entity.POST && sourceType != entity.COMMENT) {
-		r.logger.Print("rejectReport: invalid sourceType provided")
-		r.badRequest(w)
-		return
-	}
+	adminID := r.sesm.GetUserID(req.Context())
 
 	notification := entity.Notification{
-		Type:       entity.REJECT_REPORT,
-		SourceType: sourceType,
-		SourceID:   sourceID,
-		UserTo:     userID,
+		Type:     entity.REJECT_REPORT,
+		SourceID: sourceID,
+		UserFrom: adminID,
+		UserTo:   userID,
 	}
 
 	err = r.services.User.SendNotification(notification)
 	if err != nil {
-		r.serverError(w, req, err)
-		return
-	}
-
-	err = r.services.User.DeleteNotification(notificationID)
-	if err != nil {
-		if errors.Is(err, entity.ErrNotificationNotFound) {
-			r.notFound(w)
-			return
+		switch {
+		case errors.Is(err, entity.ErrDuplicateNotification):
+			r.logger.Print("rejectReport: duplicate notification")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Reject report notification is already sent")
+		default:
+			r.serverError(w, req, err)
 		}
-		r.serverError(w, req, err)
 		return
 	}
 

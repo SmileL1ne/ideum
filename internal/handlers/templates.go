@@ -14,6 +14,7 @@ type Models struct {
 	Post          entity.PostView
 	Tags          []entity.TagEntity
 	Notifications []entity.Notification
+	Requests      []entity.Request
 }
 
 type templateData struct {

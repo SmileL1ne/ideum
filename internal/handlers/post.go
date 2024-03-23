@@ -16,10 +16,6 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 
 	data, err := r.newTemplateData(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrUnauthorized) {
-			r.unauthorized(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -68,10 +64,6 @@ func (r *Routes) postCreate(w http.ResponseWriter, req *http.Request) {
 
 	data, err := r.newTemplateData(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrUnauthorized) {
-			r.unauthorized(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -105,10 +97,6 @@ func (r *Routes) postCreatePost(w http.ResponseWriter, req *http.Request) {
 
 	// Get userID from request's context
 	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		r.unauthorized(w)
-		return
-	}
 
 	p := entity.PostCreateForm{
 		Title:      title,
@@ -164,18 +152,8 @@ func (r *Routes) postsPersonal(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		r.unauthorized(w)
-		return
-	}
-
-	data, err := r.newTemplateData(req)
+	userID, data, err := r.getBaseInfo(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrUnauthorized) {
-			r.unauthorized(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -197,18 +175,8 @@ func (r *Routes) postsReacted(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		r.unauthorized(w)
-		return
-	}
-
-	data, err := r.newTemplateData(req)
+	userID, data, err := r.getBaseInfo(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrUnauthorized) {
-			r.unauthorized(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -232,10 +200,6 @@ func (r *Routes) postsCommented(w http.ResponseWriter, req *http.Request) {
 
 	userID, data, err := r.getBaseInfo(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrUnauthorized) {
-			r.unauthorized(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -269,10 +233,6 @@ func (r *Routes) postDelete(w http.ResponseWriter, req *http.Request) {
 	}
 
 	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		r.unauthorized(w)
-		return
-	}
 
 	postID, ok := getIdFromPath(req, 4)
 	if !ok {
@@ -298,6 +258,28 @@ func (r *Routes) postDelete(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Routes) postDeletePrivileged(w http.ResponseWriter, req *http.Request) {
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
+		return
+	}
+
+	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	if !ok {
+		r.logger.Print("postDeletePrivileged: invalid notificationID")
+		r.badRequest(w)
+		return
+	}
+
+	err := r.services.User.DeleteNotification(notificationID)
+	if err != nil {
+		if errors.Is(err, entity.ErrNotificationNotFound) {
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
 	userRole := r.sesm.GetUserRole(req.Context())
 
 	postID, ok := getIdFromPath(req, 4)
@@ -307,7 +289,9 @@ func (r *Routes) postDeletePrivileged(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	err := r.services.Post.DeletePostPrivileged(postID, userRole)
+	userID := r.sesm.GetUserID(req.Context())
+
+	err = r.services.Post.DeletePostPrivileged(postID, userID, userRole)
 	if err != nil {
 		if errors.Is(err, entity.ErrPostNotFound) {
 			r.notFound(w)
@@ -340,22 +324,26 @@ func (r *Routes) postReport(w http.ResponseWriter, req *http.Request) {
 		r.notFound(w)
 		return
 	}
+
 	message := req.PostFormValue("message")
 	userID := r.sesm.GetUserID(req.Context())
 
-	notification := entity.Notification{
-		Type:       entity.REPORT,
-		Content:    message,
+	report := entity.Report{
+		Reason:     message,
 		SourceID:   postID,
 		SourceType: entity.POST,
 		UserFrom:   userID,
 	}
 
-	err := r.services.User.SendNotification(notification)
+	err := r.services.User.SendReport(report)
 	if err != nil {
+		if errors.Is(err, entity.ErrDuplicateReport) {
+			r.badRequest(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
 
-	http.Redirect(w, req, req.URL.Path, http.StatusOK)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusOK)
 }

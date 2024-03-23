@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"errors"
-	"forum/internal/entity"
 	"net/http"
 	"strings"
 )
@@ -34,10 +32,6 @@ func (r *Routes) home(w http.ResponseWriter, req *http.Request) {
 
 	data, err := r.newTemplateData(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrUnauthorized) {
-			r.unauthorized(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}
@@ -60,10 +54,6 @@ func (r *Routes) sortedByTag(w http.ResponseWriter, req *http.Request) {
 
 	data, err := r.newTemplateData(req)
 	if err != nil {
-		if errors.Is(err, entity.ErrUnauthorized) {
-			r.unauthorized(w)
-			return
-		}
 		r.serverError(w, req, err)
 		return
 	}

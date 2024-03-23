@@ -22,7 +22,8 @@ type IPostService interface {
 	ExistsPost(postID int) (bool, error)
 	CheckPostAttrs(*entity.PostCreateForm, bool) (bool, error)
 	DeletePost(postID int, userID int) error
-	DeletePostPrivileged(postID int, userRole string) error
+	DeletePostPrivileged(postID int, userID int, userRole string) error
+	GetAuthorID(postID int) (int, error)
 }
 
 type postService struct {
@@ -166,6 +167,10 @@ func (ps *postService) CheckPostAttrs(p *entity.PostCreateForm, withImage bool) 
 	return true, nil
 }
 
+func (ps *postService) GetAuthorID(postID int) (int, error) {
+	return ps.postRepo.GetAuthorID(postID)
+}
+
 func (ps *postService) DeletePost(postID int, userID int) error {
 	exists, err := ps.postRepo.Exists(postID)
 	if err != nil {
@@ -178,7 +183,7 @@ func (ps *postService) DeletePost(postID int, userID int) error {
 	return ps.postRepo.Delete(postID, userID)
 }
 
-func (ps *postService) DeletePostPrivileged(postID int, userRole string) error {
+func (ps *postService) DeletePostPrivileged(postID int, userID int, userRole string) error {
 	exists, err := ps.postRepo.Exists(postID)
 	if err != nil {
 		return err
@@ -199,7 +204,8 @@ func (ps *postService) DeletePostPrivileged(postID int, userRole string) error {
 
 	notificaiton := entity.Notification{
 		Type:     entity.DELETE_POST,
-		UserFrom: authorID,
+		UserFrom: userID,
+		UserTo:   authorID,
 	}
 	if userRole == entity.MODERATOR {
 		notificaiton.Content = ". Reason: obscene"

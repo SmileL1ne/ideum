@@ -128,8 +128,8 @@ func (r *commentRepository) Exists(commentID int) (bool, error) {
 
 func (r *commentRepository) Delete(commentID, userID int) error {
 	query := `
-		DELETE FROM comments c
-		WHERE c.id = $1 AND c.user_id = $2
+		DELETE FROM comments
+		WHERE id = $1 AND user_id = $2
 	`
 
 	_, err := r.DB.Exec(query, commentID, userID)

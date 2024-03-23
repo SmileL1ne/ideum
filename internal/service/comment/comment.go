@@ -12,7 +12,8 @@ type ICommentService interface {
 	GetAllUserCommentsForPost(userID, postID int) (*[]entity.CommentView, error)
 	ExistsComment(int) (bool, error)
 	DeleteComment(commentID, userID int) error
-	DeleteCommentPrivileged(commentID int, userRole string) error
+	DeleteCommentPrivileged(commentID int, userID int, userRole string) error
+	GetAuthorID(commentID int) (int, error)
 }
 
 type commentService struct {
@@ -65,6 +66,10 @@ func (cs *commentService) ExistsComment(commentID int) (bool, error) {
 	return cs.commentRepo.Exists(commentID)
 }
 
+func (cs *commentService) GetAuthorID(commentID int) (int, error) {
+	return cs.commentRepo.GetAuthorID(commentID)
+}
+
 func (cs *commentService) DeleteComment(commentID, userID int) error {
 	exists, err := cs.commentRepo.Exists(commentID)
 	if err != nil {
@@ -77,7 +82,7 @@ func (cs *commentService) DeleteComment(commentID, userID int) error {
 	return cs.commentRepo.Delete(commentID, userID)
 }
 
-func (cs *commentService) DeleteCommentPrivileged(commentID int, userRole string) error {
+func (cs *commentService) DeleteCommentPrivileged(commentID int, userID int, userRole string) error {
 	exists, err := cs.commentRepo.Exists(commentID)
 	if err != nil {
 		return err
@@ -98,7 +103,8 @@ func (cs *commentService) DeleteCommentPrivileged(commentID int, userRole string
 
 	notificaiton := entity.Notification{
 		Type:     entity.DELETE_COMMENT,
-		UserFrom: authorID,
+		UserFrom: userID,
+		UserTo:   authorID,
 	}
 	if userRole == entity.MODERATOR {
 		notificaiton.Content = ". Reason: obscene"

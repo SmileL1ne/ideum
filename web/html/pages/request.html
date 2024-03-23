@@ -10,7 +10,7 @@
 
          <!-- messages Yes-No -->
          <!-- only admin -->
-         {{range .Models.Notifications}}
+         {{range .Models.Requests}}
             <div class="feed-message-wrapper" >
 
                 <div class="feed-message-frame">
@@ -19,18 +19,18 @@
                             <p>{{.Username}}</p>
                             <p class="post-date">{{.CreatedAt}}</p>
                         </div>
-                        <div class="message-content">{{.UserFrom}} {{.Content}}
+                        <div class="message-content">{{.Username}} wants to promote to moderator
                         </div>
                     </div>
 
                     <div class="ok-frame">
                         <div class="action-message">Promote?</div>
-                        <form action="/admin/promote/{{.UserFrom}}" method="POST">
-                            <input type="hidden" name="notificationID" value="{{.ID}}">
+                        <form action="/admin/promote/{{.UserID}}" method="POST">
+                            <input type="hidden" name="promotionID" value="{{.ID}}">
                             <button class="ok-button" id="like">YES</button>
                         </form>
-                        <form action="/admin/rejectPromotion/{{.UserFrom}}" method="POST">
-                            <input type="hidden" name="notificationID" value="{{.ID}}">
+                        <form action="/admin/rejectPromotion/{{.UserID}}" method="POST">
+                            <input type="hidden" name="promotionID" value="{{.ID}}">
                             <button class="ok-button" id="dislike">NO</button>
                         </form>
                     </div>

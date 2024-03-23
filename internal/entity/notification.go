@@ -10,6 +10,6 @@ type Notification struct {
 	SourceType string // source type can be either 'post' or 'comment'
 	UserFrom   int
 	UserTo     int
-	Username   string // Not in db
+	Username   string // not in db
 	CreatedAt  time.Time
 }

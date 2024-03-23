@@ -17,8 +17,13 @@ type IUserService interface {
 	GetUserByEmail(string) (entity.UserEntity, error)
 	GetUserRole(int) (string, error)
 	SendNotification(notification entity.Notification) error
-	GetRequests(role string) (*[]entity.Notification, error)
+	SendPromotion(userID int) error
+	SendReport(report entity.Report) error
+	DeleteReport(reportID int) error
+	DeletePromotion(promotionID int) error
+	GetRequests() (*[]entity.Request, error)
 	PromoteUser(userID int) error
+	GetNotifications(userID int) (*[]entity.Notification, error)
 	DeleteNotification(notificationID int) error
 }
 
@@ -119,8 +124,6 @@ func (us *userService) GetUserRole(userID int) (string, error) {
 
 func (us *userService) SendNotification(n entity.Notification) error {
 	switch n.Type {
-	case entity.PROMOTION:
-		n.Content = "Requested promotion to moderator"
 	case entity.PROMOTED:
 		n.Content = "Congratulations! You've been promoted to moderator!"
 	case entity.POST_LIKE:
@@ -133,8 +136,6 @@ func (us *userService) SendNotification(n entity.Notification) error {
 		n.Content = "Disliked your comment"
 	case entity.COMMENTED:
 		n.Content = "Left a comment on your post"
-	case entity.REPORT:
-		n.Content = "Reported this content as " + n.Content
 	case entity.REJECT_PROMOTION:
 		n.Content = "Your promotion was rejected"
 	case entity.REJECT_REPORT:
@@ -150,17 +151,33 @@ func (us *userService) SendNotification(n entity.Notification) error {
 	return us.userRepo.CreateNotification(n)
 }
 
-func (us *userService) GetRequests(role string) (*[]entity.Notification, error) {
-	if role != entity.ADMIN {
-		return nil, entity.ErrForbiddenAccess
-	}
+func (us *userService) SendPromotion(userID int) error {
+	return us.userRepo.CreatePromotion(userID)
+}
 
+func (us *userService) SendReport(report entity.Report) error {
+	return us.userRepo.CreateReport(report)
+}
+
+func (us *userService) DeleteReport(reportID int) error {
+	return us.userRepo.DeleteReport(reportID)
+}
+
+func (us *userService) DeletePromotion(promotionID int) error {
+	return us.userRepo.DeletePromotion(promotionID)
+}
+
+func (us *userService) GetRequests() (*[]entity.Request, error) {
 	requests, err := us.userRepo.GetRequests()
 	if err != nil {
 		return nil, err
 	}
 
 	return requests, nil
+}
+
+func (us *userService) GetNotifications(userID int) (*[]entity.Notification, error) {
+	return us.userRepo.GetNotifications(userID)
 }
 
 func (us *userService) PromoteUser(userID int) error {

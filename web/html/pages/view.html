@@ -134,11 +134,9 @@
 
                         <!-- if owner -->
                         <!-- COMMENT SECTION -->
-                        <form action="">
-                            <button type="submit" class="clean-btn">
-                                <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
-                            </button>
-                        </form>
+                        <button type="submit" class="clean-btn">
+                            <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
+                        </button>
 
                         <!-- COMMENT SECTION -->
                         <button type="submit" class="Btn clean-btn" data-modal="delete-modal-comment" data-url-id="{{.ID}}">
@@ -225,7 +223,7 @@
 
 <!-- delete modal for comment -->
 <dialog id="delete-modal-comment" class="Mymodal">
-    <form action="/post/comment/delete/{{.Models.Post.ID}}/" method="POST">
+    <form action="/post/comment/delete/" method="POST">
         <div class="modal-frame">
             <img class="modal-icon" src="/static/img/svg/delete-icon.svg" alt="delete-icon">
             <span>Delete comment?</span>

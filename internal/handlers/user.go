@@ -101,6 +101,59 @@ func (r *Routes) userLogout(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
 
+func (r *Routes) notifications(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	userID, data, err := r.getBaseInfo(req)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	notifications, err := r.services.User.GetNotifications(userID)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	data.Models.Notifications = *notifications
+
+	r.render(w, req, http.StatusOK, "notification.html", data)
+}
+
+func (r *Routes) deleteNotification(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
+		return
+	}
+
+	notificationID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("deleteNotification: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	err := r.services.User.DeleteNotification(notificationID)
+	if err != nil {
+		if errors.Is(err, entity.ErrNotificationNotFound) {
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	http.Redirect(w, req, "/user/notifications", http.StatusSeeOther)
+}
+
 func (r *Routes) userPromote(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
 		r.methodNotAllowed(w)
@@ -113,16 +166,15 @@ func (r *Routes) userPromote(w http.ResponseWriter, req *http.Request) {
 
 	userID := r.sesm.GetUserID(req.Context())
 
-	notification := entity.Notification{
-		Type:     entity.PROMOTION,
-		UserFrom: userID,
-	}
-
-	err := r.services.User.SendNotification(notification)
+	err := r.services.User.SendPromotion(userID)
 	if err != nil {
+		if errors.Is(err, entity.ErrDuplicatePromotion) {
+			r.badRequest(w)
+			return
+		}
 		r.serverError(w, req, err)
 		return
 	}
 
-	http.Redirect(w, req, req.URL.Path, http.StatusOK)
+	http.Redirect(w, req, "/", http.StatusSeeOther)
 }

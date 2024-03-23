@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS posts_tags (
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
-    session_id TEXT PRIMARY KEY,
+    session_id TEXT PRIMARY KEY AUTOINCREMENT,
     expiry DATETIME NOT NULL,
     user_role VARCHAR(30) NOT NULL,
     user_id INTEGER NOT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 CREATE TABLE IF NOT EXISTS images (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     post_id INTEGER NOT NULL,
     
@@ -91,3 +91,18 @@ CREATE TABLE IF NOT EXISTS roles (
 
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type VARCHAR(100) NOT NULL,
+    user_from INTEGER NOT NULL,
+    user_to INTEGER NOT NULL,
+    content VARCHAR(500) NOT NULL,
+    source_id INTEGER NOT NULL DEFAULT -1,
+    source_type VARCHAR(30) NOT NULL DEFAULT "default_source_type",
+    created_at DATETIME NOT NULL,
+
+    UNIQUE(type, user_from, user_to)
+    FOREIGN KEY(user_from) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY(user_to) REFERENCES users(id) ON DELETE CASCADE
+) 

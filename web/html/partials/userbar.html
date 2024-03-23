@@ -1,71 +1,70 @@
 {{define "userbar"}}
 <div class="wrapper_user-bar">
     {{if .IsAuthenticated}}
-    <div class="user-bar">
-        <div class="user-bar-interface">
+        <div class="user-bar">
+            <div class="user-bar-interface">
 
-            <div class="user-bar-role-info">
-                <img src="/static/img/ava/user.png" alt="ava">
-                <p>{{.Username}}<br> <span>User</span></p>
-            </div>
-            <div class="interface-options">
-                <ul>
+                <div class="user-bar-role-info">
+                    <img src="/static/img/ava/user.png" alt="ava">
+                    <p>{{.Username}}<br> <span>User</span></p>
+                </div>
+                <div class="interface-options">
+                    <ul>
 
-                    <li> 
-                        <a class="interface-link" href="/post/myPosts">
-                            <img src="/static/img/svg/my-posts.svg" alt="my-posts-icon">My posts
-                        </a>
-                    </li>
-                    <li> 
-                        <a class="interface-link" href="/post/myReacted">
-                            <img src="/static/img/svg/like-dislike.svg" alt="liked-icon">Liked/disliked posts
-                        </a>
-                    </li>
-                    <li> 
-                        <a class="interface-link" href="/post/myCommented">
-                            <img src="/static/img/svg/commented-post.svg" alt="commented-post"> Commented posts
-                        </a>
-                    </li>
-                    <li> 
-                        <a class="interface-link" href="#">
-                            <img src="/static/img/svg/notification.svg" alt="notification-icon"> Notifications
-                        </a>
-                    </li>
-                    <!-- if role admin -->
-                    {{if eq .UserRole "admin"}}
                         <li> 
-                            <a class="interface-link" href="/admin/requests">
-                                <img src="/static/img/svg/requests.svg" alt="requests-icon"> Requests
+                            <a class="interface-link" href="/post/myPosts">
+                                <img src="/static/img/svg/my-posts.svg" alt="my-posts-icon">My posts
                             </a>
                         </li>
-                    {{end}}
+                        <li> 
+                            <a class="interface-link" href="/post/myReacted">
+                                <img src="/static/img/svg/like-dislike.svg" alt="liked-icon">Liked/disliked posts
+                            </a>
+                        </li>
+                        <li> 
+                            <a class="interface-link" href="/post/myCommented">
+                                <img src="/static/img/svg/commented-post.svg" alt="commented-post"> Commented posts
+                            </a>
+                        </li>
+                        <li> 
+                            <a class="interface-link" href="/user/notifications">
+                                <img src="/static/img/svg/notification.svg" alt="notification-icon"> Notifications
+                            </a>
+                        </li>
+                        
+                        {{if eq .UserRole "admin"}}
+                            <li> 
+                                <a class="interface-link" href="/admin/requests">
+                                    <img src="/static/img/svg/requests.svg" alt="requests-icon"> Requests
+                                </a>
+                            </li>
+                        {{end}}
 
-                    {{if eq .UserRole "user"}}
-                        <a class="interface-link" href="/user/promote">
-                            <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
-                        </a>
-                    {{end}}
+                        {{if eq .UserRole "user"}}
+                            <a class="interface-link" href="/user/promote">
+                                <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
+                            </a>
+                        {{end}}
 
-                    <!-- if admin -->
-                    <li> <a class="interface-link" href="#">
-                        <img src="/static/img/svg/notification.svg" alt="notification-icon"> Edit topics
-                    </a></li>
+                        <!-- if admin -->
+                        <li> <a class="interface-link" href="#">
+                            <img src="/static/img/svg/notification.svg" alt="notification-icon"> Edit topics
+                        </a></li>
 
-                    <!-- if admin -->
-                    <li> <a class="interface-link" href="#">
-                        <img src="/static/img/svg/notification.svg" alt="notification-icon"> Users
-                    </a></li>
+                        <!-- if admin -->
+                        <li> <a class="interface-link" href="#">
+                            <img src="/static/img/svg/notification.svg" alt="notification-icon"> Users
+                        </a></li>
 
 
-                </ul>
-                <form action="/post/create" method="get">
-                    <button id="make-post-button" class="light-button">Create new post</button>
-                </form>
+                    </ul>
+                    <form action="/post/create" method="get">
+                        <button id="make-post-button" class="light-button">Create new post</button>
+                    </form>
+                </div>
+
             </div>
-
         </div>
-    </div>
-
     {{else}}
 
     <div class="user-bar">

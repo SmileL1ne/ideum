@@ -97,12 +97,15 @@ func (r *Routes) Register() http.Handler {
 
 	// ADMIN
 	router.Handle("/admin/requests", protected.ThenFunc(r.requests))
+	// router.Handle("/admin/reports", protected.ThenFunc(r.reports)) // TODO
 	router.Handle("/admin/promote/", protected.ThenFunc(r.promoteUser))             // userID at the end
 	router.Handle("/admin/rejectPromotion/", protected.ThenFunc(r.rejectPromotion)) // userID at the end
 	router.Handle("/admin/rejectReport/", protected.ThenFunc(r.rejectReport))       // userID at the end
 
 	// USER
 	router.Handle("/user/promote", protected.ThenFunc(r.userPromote))
+	router.Handle("/user/notifications", protected.ThenFunc(r.notifications))
+	router.Handle("/user/deleteNotification/", protected.ThenFunc(r.deleteNotification)) // notificationID at the end
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
 
 	// Standard middleware chain applied to router itself -> used in all routes

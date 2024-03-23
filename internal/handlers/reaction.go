@@ -15,10 +15,6 @@ func (r *Routes) postReaction(w http.ResponseWriter, req *http.Request) {
 	}
 
 	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		r.unauthorized(w)
-		return
-	}
 
 	reaction := req.URL.Query().Get("reaction")
 	if reaction == "" {
@@ -100,10 +96,6 @@ func (r *Routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 	}
 
 	userID := r.sesm.GetUserID(req.Context())
-	if userID == 0 {
-		r.unauthorized(w)
-		return
-	}
 
 	err = r.services.Reaction.SetCommentReaction(reaction, commentID, userID)
 	if err != nil {
