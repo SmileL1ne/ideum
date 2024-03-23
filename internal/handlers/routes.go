@@ -61,7 +61,7 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/static/", r.preventDirListing(http.StripPrefix("/static", fileServer)))
 
 	// Dynamic middleware chain for routes that don't require authentication
-	dynamic := mids.New(r.sesm.LoadAndSave, r.detectUserRole)
+	dynamic := mids.New(r.sesm.LoadAndSave, r.detectGuest)
 
 	// GUEST MODE
 	router.Handle("/", dynamic.ThenFunc(r.home))
@@ -95,18 +95,20 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/post/comment/delete/", protected.ThenFunc(r.commentDelete))     // commentID at the end
 	router.Handle("/post/comment/report/", protected.ThenFunc(r.commentReport))     // commentID at the end
 
-	// ADMIN
-	router.Handle("/admin/requests", protected.ThenFunc(r.requests))
-	// router.Handle("/admin/reports", protected.ThenFunc(r.reports)) // TODO
-	router.Handle("/admin/promote/", protected.ThenFunc(r.promoteUser))             // userID at the end
-	router.Handle("/admin/rejectPromotion/", protected.ThenFunc(r.rejectPromotion)) // userID at the end
-	router.Handle("/admin/rejectReport/", protected.ThenFunc(r.rejectReport))       // userID at the end
-
 	// USER
 	router.Handle("/user/promote", protected.ThenFunc(r.userPromote))
 	router.Handle("/user/notifications", protected.ThenFunc(r.notifications))
 	router.Handle("/user/deleteNotification/", protected.ThenFunc(r.deleteNotification)) // notificationID at the end
 	router.Handle("/user/logout", protected.ThenFunc(r.userLogout))
+
+	// ADMIN
+	requireAdmin := protected.Append(r.requireAdminRights)
+
+	router.Handle("/admin/requests", requireAdmin.ThenFunc(r.requests))
+	router.Handle("/admin/reports", requireAdmin.ThenFunc(r.reports))                  // TODO
+	router.Handle("/admin/promote/", requireAdmin.ThenFunc(r.promoteUser))             // userID at the end
+	router.Handle("/admin/rejectPromotion/", requireAdmin.ThenFunc(r.rejectPromotion)) // userID at the end
+	router.Handle("/admin/rejectReport/", requireAdmin.ThenFunc(r.rejectReport))       // userID at the end
 
 	// Standard middleware chain applied to router itself -> used in all routes
 	standard := mids.New(r.recoverPanic, r.limitRate, r.secureHeaders)

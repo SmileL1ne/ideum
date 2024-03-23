@@ -32,33 +32,39 @@
                             </a>
                         </li>
                         
-                        {{if eq .UserRole "admin"}}
-                            <li> 
-                                <a class="interface-link" href="/admin/requests">
-                                    <img src="/static/img/svg/requests.svg" alt="requests-icon"> Requests
-                                </a>
-                            </li>
-                        {{end}}
-
                         {{if eq .UserRole "user"}}
                             <a class="interface-link" href="/user/promote">
                                 <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
                             </a>
                         {{end}}
 
-                        <!-- if admin -->
-                        <li> <a class="interface-link" href="#">
-                            <img src="/static/img/svg/notification.svg" alt="notification-icon"> Edit topics
-                        </a></li>
+                        {{if eq .UserRole "admin"}}
+                            <li> 
+                                <a class="interface-link" href="/admin/requests">
+                                    <img src="/static/img/svg/requests.svg" alt="requests-icon"> Requests
+                                </a>
+                            </li>
 
-                        <!-- if admin -->
-                        <li> <a class="interface-link" href="#">
-                            <img src="/static/img/svg/notification.svg" alt="notification-icon"> Users
-                        </a></li>
+                            <li> 
+                                <a class="interface-link" href="/admin/reports">
+                                    <img src="/static/img/svg/notification.svg" alt="requests-icon"> Reports
+                                </a>
+                            </li>
 
+                            <li> 
+                                <a class="interface-link" href="#">
+                                    <img src="/static/img/svg/notification.svg" alt="notification-icon"> Edit topics
+                                </a>
+                            </li>
 
+                            <li> 
+                                <a class="interface-link" href="#">
+                                    <img src="/static/img/svg/notification.svg" alt="notification-icon"> Users
+                                </a>
+                            </li>
+                        {{end}}
                     </ul>
-                    <form action="/post/create" method="get">
+                    <form action="/post/create" method="GET">
                         <button id="make-post-button" class="light-button">Create new post</button>
                     </form>
                 </div>

@@ -24,6 +24,7 @@ type IUserRepository interface {
 	GetNotifications(userID int) (*[]entity.Notification, error)
 	DeleteNotification(notificationID int) error
 	GetRequests() (*[]entity.Request, error)
+	GetReports() (*[]entity.Report, error)
 	Promote(userID int) error
 }
 
@@ -142,22 +143,8 @@ func (r *userRepository) CreateNotification(n entity.Notification) error {
 	`
 
 	_, err := r.DB.Exec(query, n.Type, n.UserFrom, n.UserTo, n.Content, n.SourceID, n.SourceType)
-	if err != nil {
-		var sqliteError sqlite3.Error
-		if errors.As(err, &sqliteError) {
-			if sqliteError.Code == 19 && strings.Contains(sqliteError.Error(), "UNIQUE constraint failed:") {
-				switch {
-				case strings.Contains(sqliteError.Error(), "notifications.type, notifications.source_id, notifications.user_from, notifications.user_to"):
-					return entity.ErrDuplicateNotification
-				default:
-					return fmt.Errorf("(repo) SaveUser: unknown field - %v", sqliteError)
-				}
-			}
-		}
-		return err
-	}
 
-	return nil
+	return err
 }
 
 func (r *userRepository) CreatePromotion(userID int) error {
@@ -190,7 +177,7 @@ func (r *userRepository) CreateReport(report entity.Report) error {
 	if err != nil {
 		var sqliteError sqlite3.Error
 		if errors.As(err, &sqliteError) {
-			if sqliteError.Code == 19 && strings.Contains(sqliteError.Error(), "UNIQUE constaint failed:") {
+			if sqliteError.Code == 19 && strings.Contains(sqliteError.Error(), "UNIQUE constraint failed:") {
 				return entity.ErrDuplicateReport
 			}
 		}
@@ -320,6 +307,32 @@ func (r *userRepository) GetRequests() (*[]entity.Request, error) {
 	}
 
 	return &requests, nil
+}
+
+func (r *userRepository) GetReports() (*[]entity.Report, error) {
+	query := `
+		SELECT r.id, r.reason, r.user_from, r.source_id, r.source_type, r.created_at, u.username
+		FROM reports r
+		INNER JOIN users u ON u.id = r.user_from
+	`
+
+	var reports []entity.Report
+
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r entity.Report
+		if err := rows.Scan(&r.ID, &r.Reason, &r.UserFrom, &r.SourceID, &r.SourceType, &r.CreatedAt, &r.Username); err != nil {
+			return nil, err
+		}
+		reports = append(reports, r)
+	}
+
+	return &reports, nil
 }
 
 func (r *userRepository) Promote(userID int) error {

@@ -20,25 +20,26 @@ func New(db *sql.DB) *SQLite3Store {
 	return s
 }
 
-func (s *SQLite3Store) StoreFind(ctx context.Context, sessionID string) (int, time.Time, error) {
+func (s *SQLite3Store) StoreFind(ctx context.Context, sessionID string) (int, string, time.Time, error) {
 	query := `
-		SELECT user_id, expiry 
+		SELECT user_id, user_role, expiry 
 		FROM sessions 
 		WHERE session_id = $1 AND datetime('now', 'localtime') < expiry
 	`
 	var userID int
+	var userRole string
 	var expiry time.Time
 	row := s.db.QueryRow(query, sessionID)
 
-	err := row.Scan(&userID, &expiry)
+	err := row.Scan(&userID, &userRole, &expiry)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return 0, time.Time{}, ErrNotFound
+			return 0, "", time.Time{}, ErrNotFound
 		}
-		return 0, time.Time{}, err
+		return 0, "", time.Time{}, err
 	}
 
-	return userID, expiry, nil
+	return userID, userRole, expiry, nil
 }
 
 func (s *SQLite3Store) StoreCommit(ctx context.Context, sessionID string, userID int, userRole string, expiry time.Time) error {

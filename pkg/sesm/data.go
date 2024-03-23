@@ -24,9 +24,10 @@ func (sm *SessionManager) Load(ctx context.Context, sessionID string) (context.C
 		return context.WithValue(ctx, sm.ContextKey, newSessionData(sm.Lifetime)), nil
 	}
 
-	userID, expiry, err := sm.Store.StoreFind(ctx, sessionID)
+	userID, userRole, expiry, err := sm.Store.StoreFind(ctx, sessionID)
 	if err != nil {
 		if errors.Is(err, sqlite3store.ErrNotFound) {
+			// This is the case when session is deleted but still is in cookie (can be done only by manual deletion)
 			sd := newSessionData(time.Second)
 			sd.status = Destroyed
 			return context.WithValue(ctx, sm.ContextKey, sd), nil
@@ -36,9 +37,10 @@ func (sm *SessionManager) Load(ctx context.Context, sessionID string) (context.C
 
 	sd := &sessionData{
 		sessionID:  sessionID,
-		status:     Unmodified,
-		userID:     userID,
 		expiryTime: expiry,
+		userID:     userID,
+		userRole:   userRole,
+		status:     Unmodified,
 	}
 
 	return context.WithValue(ctx, sm.ContextKey, sd), nil
@@ -66,8 +68,8 @@ const (
 type sessionData struct {
 	sessionID  string
 	status     Status
-	userRole   string
 	userID     int
+	userRole   string
 	expiryTime time.Time
 	mu         sync.Mutex
 }

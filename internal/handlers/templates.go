@@ -15,6 +15,7 @@ type Models struct {
 	Tags          []entity.TagEntity
 	Notifications []entity.Notification
 	Requests      []entity.Request
+	Reports       []entity.Report
 }
 
 type templateData struct {

@@ -323,8 +323,8 @@ func (r *postRepository) Delete(postID int, userID int) error {
 
 func (r *postRepository) DeleteByPrivileged(postID int) error {
 	query := `
-		DELETE FROM posts p
-		WHERE p.id = $1
+		DELETE FROM posts
+		WHERE id = $1
 	`
 
 	_, err := r.DB.Exec(query, postID)
@@ -340,9 +340,9 @@ func (r *postRepository) DeleteByPrivileged(postID int) error {
 
 func (r *postRepository) GetAuthorID(postID int) (int, error) {
 	query := `
-		SELECT p.user_id
-		FROM posts p
-		WHERE p.id = $1
+		SELECT user_id
+		FROM posts
+		WHERE id = $1
 	`
 
 	var userID int

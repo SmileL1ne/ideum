@@ -76,12 +76,19 @@ func (r *Routes) userLoginPost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	role, err := r.services.User.GetUserRole(id)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
 	err = r.sesm.RenewToken(req.Context(), id)
 	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
 	r.sesm.PutUserID(req.Context(), id)
+	r.sesm.PutUserRole(req.Context(), role)
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }
@@ -169,6 +176,7 @@ func (r *Routes) userPromote(w http.ResponseWriter, req *http.Request) {
 	err := r.services.User.SendPromotion(userID)
 	if err != nil {
 		if errors.Is(err, entity.ErrDuplicatePromotion) {
+			r.logger.Print("userPromote:", err)
 			r.badRequest(w)
 			return
 		}

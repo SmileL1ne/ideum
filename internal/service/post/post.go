@@ -2,6 +2,7 @@ package post
 
 import (
 	"errors"
+	"fmt"
 	"forum/internal/entity"
 	"forum/internal/repository/post"
 	"forum/internal/service/comment"
@@ -204,9 +205,12 @@ func (ps *postService) DeletePostPrivileged(postID int, userID int, userRole str
 
 	notificaiton := entity.Notification{
 		Type:     entity.DELETE_POST,
+		SourceID: postID,
 		UserFrom: userID,
 		UserTo:   authorID,
 	}
+	fmt.Println("userFrom", userID)
+	fmt.Println("userTo", authorID)
 	if userRole == entity.MODERATOR {
 		notificaiton.Content = ". Reason: obscene"
 	}

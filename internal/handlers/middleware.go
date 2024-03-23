@@ -104,20 +104,24 @@ func (r *Routes) updateRateLimit(ip string, lastReq time.Time, penalty time.Dura
 	}
 }
 
-func (r *Routes) detectUserRole(next http.Handler) http.Handler {
+func (r *Routes) detectGuest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if r.sesm.ExistsUserID(req.Context()) {
-			userID := r.sesm.GetUserID(req.Context())
-
-			role, err := r.services.User.GetUserRole(userID)
-			if err != nil {
-				r.serverError(w, req, err)
-				return
-			}
-
-			r.sesm.PutUserRole(req.Context(), role)
-		} else {
+		role := r.sesm.GetUserRole(req.Context())
+		if role == "" {
 			r.sesm.PutUserRoleWithoutStatusChange(req.Context(), entity.GUEST)
+		}
+
+		next.ServeHTTP(w, req)
+	})
+}
+
+func (r *Routes) requireAdminRights(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		userRole := r.sesm.GetUserRole(req.Context())
+
+		if userRole != entity.ADMIN {
+			r.forbidden(w)
+			return
 		}
 
 		next.ServeHTTP(w, req)

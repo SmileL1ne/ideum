@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	userIDMock = 1
-	expiryMock = time.Now().Add(1_000_000 * time.Hour)
+	userIDMock   = 1
+	userRoleMock = "guest"
+	expiryMock   = time.Now().Add(1_000_000 * time.Hour)
 )
 
 type SQLite3StoreMock struct {
@@ -17,8 +18,8 @@ func New() *SQLite3StoreMock {
 	return &SQLite3StoreMock{}
 }
 
-func (s *SQLite3StoreMock) StoreFind(ctx context.Context, sessionID string) (int, time.Time, error) {
-	return userIDMock, expiryMock, nil
+func (s *SQLite3StoreMock) StoreFind(ctx context.Context, sessionID string) (int, string, time.Time, error) {
+	return userIDMock, userRoleMock, expiryMock, nil
 }
 
 func (s *SQLite3StoreMock) StoreCommit(ctx context.Context, sessionID string, userID int, userRole string, expiry time.Time) error {

@@ -47,7 +47,6 @@ func (r *Routes) postView(w http.ResponseWriter, req *http.Request) {
 
 	data.Models.Post = post
 	data.Models.Post.Comments = *comments
-	data.Models.Post.ImageName = post.ImageName
 
 	r.render(w, req, http.StatusOK, "view.html", data)
 }
@@ -263,24 +262,22 @@ func (r *Routes) postDeletePrivileged(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
+	reportID, ok := getValidID(req.PostForm.Get("reportID"))
 	if !ok {
-		r.logger.Print("postDeletePrivileged: invalid notificationID")
+		r.logger.Print("postDeletePrivileged: invalid reportID")
 		r.badRequest(w)
 		return
 	}
 
-	err := r.services.User.DeleteNotification(notificationID)
+	err := r.services.User.DeleteReport(reportID)
 	if err != nil {
-		if errors.Is(err, entity.ErrNotificationNotFound) {
+		if errors.Is(err, entity.ErrReportNotFound) {
 			r.notFound(w)
 			return
 		}
 		r.serverError(w, req, err)
 		return
 	}
-
-	userRole := r.sesm.GetUserRole(req.Context())
 
 	postID, ok := getIdFromPath(req, 4)
 	if !ok {
@@ -289,6 +286,7 @@ func (r *Routes) postDeletePrivileged(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
+	userRole := r.sesm.GetUserRole(req.Context())
 	userID := r.sesm.GetUserID(req.Context())
 
 	err = r.services.Post.DeletePostPrivileged(postID, userID, userRole)
@@ -338,12 +336,14 @@ func (r *Routes) postReport(w http.ResponseWriter, req *http.Request) {
 	err := r.services.User.SendReport(report)
 	if err != nil {
 		if errors.Is(err, entity.ErrDuplicateReport) {
-			r.badRequest(w)
+			r.logger.Print("postReport: report is already sent")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Report is already sent")
 			return
 		}
 		r.serverError(w, req, err)
 		return
 	}
 
-	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusOK)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }

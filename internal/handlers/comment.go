@@ -110,8 +110,17 @@ func (r *Routes) commentDelete(w http.ResponseWriter, req *http.Request) {
 
 	userID := r.sesm.GetUserID(req.Context())
 
-	commentID, ok := getIdFromPath(req, 5)
+	urls := strings.Split(req.URL.Path, "/")
+	postID, isValid := getValidID(urls[len(urls)-2])
+	if !isValid {
+		r.logger.Print("commentDelete: invalid postID")
+		r.notFound(w)
+		return
+	}
+
+	commentID, ok := getIdFromPath(req, 6)
 	if !ok {
+		fmt.Println("nah")
 		r.logger.Print("commentDelete: invalid url path")
 		r.notFound(w)
 		return
@@ -130,7 +139,7 @@ func (r *Routes) commentDelete(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Redirect(w, req, "/", http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }
 
 func (r *Routes) commentDeletePrivileged(w http.ResponseWriter, req *http.Request) {
@@ -158,7 +167,15 @@ func (r *Routes) commentDeletePrivileged(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	commentID, ok := getIdFromPath(req, 5)
+	urls := strings.Split(req.URL.Path, "/")
+	postID, isValid := getValidID(urls[len(urls)-2])
+	if !isValid {
+		r.logger.Print("commentDelete: invalid postID")
+		r.notFound(w)
+		return
+	}
+
+	commentID, ok := getIdFromPath(req, 6)
 	if !ok {
 		r.logger.Print("commentDeletePrivileged: invalid url path")
 		r.notFound(w)
@@ -177,7 +194,7 @@ func (r *Routes) commentDeletePrivileged(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	http.Redirect(w, req, "/", http.StatusSeeOther)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }
 
 func (r *Routes) commentReport(w http.ResponseWriter, req *http.Request) {

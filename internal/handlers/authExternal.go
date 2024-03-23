@@ -39,6 +39,12 @@ func (r *Routes) SSO(w http.ResponseWriter, req *http.Request, form *entity.User
 		}
 	}
 
+	role, err := r.services.User.GetUserRole(id)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
 	err = r.sesm.RenewToken(req.Context(), id)
 	if err != nil {
 		r.serverError(w, req, err)
@@ -46,6 +52,7 @@ func (r *Routes) SSO(w http.ResponseWriter, req *http.Request, form *entity.User
 	}
 
 	r.sesm.PutUserID(req.Context(), id)
+	r.sesm.PutUserRole(req.Context(), role)
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
 }

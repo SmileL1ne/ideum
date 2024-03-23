@@ -19,12 +19,6 @@ func (r *Routes) requests(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	userRole := r.sesm.GetUserRole(req.Context())
-	if userRole != entity.ADMIN {
-		r.forbidden(w)
-		return
-	}
-
 	requests, err := r.services.User.GetRequests()
 	if err != nil {
 		r.serverError(w, req, err)
@@ -36,6 +30,28 @@ func (r *Routes) requests(w http.ResponseWriter, req *http.Request) {
 	r.render(w, req, http.StatusOK, "request.html", data)
 }
 
+func (r *Routes) reports(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+	data, err := r.newTemplateData(req)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	reports, err := r.services.User.GetReports()
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	data.Models.Reports = *reports
+
+	r.render(w, req, http.StatusOK, "report.html", data)
+}
+
 func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		r.methodNotAllowed(w)
@@ -43,12 +59,6 @@ func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
 	}
 	if err := req.ParseForm(); err != nil {
 		r.badRequest(w)
-		return
-	}
-
-	userRole := r.sesm.GetUserRole(req.Context())
-	if userRole != entity.ADMIN {
-		r.forbidden(w)
 		return
 	}
 

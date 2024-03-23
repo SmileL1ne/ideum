@@ -22,6 +22,7 @@ type IUserService interface {
 	DeleteReport(reportID int) error
 	DeletePromotion(promotionID int) error
 	GetRequests() (*[]entity.Request, error)
+	GetReports() (*[]entity.Report, error)
 	PromoteUser(userID int) error
 	GetNotifications(userID int) (*[]entity.Notification, error)
 	DeleteNotification(notificationID int) error
@@ -168,12 +169,11 @@ func (us *userService) DeletePromotion(promotionID int) error {
 }
 
 func (us *userService) GetRequests() (*[]entity.Request, error) {
-	requests, err := us.userRepo.GetRequests()
-	if err != nil {
-		return nil, err
-	}
+	return us.userRepo.GetRequests()
+}
 
-	return requests, nil
+func (us *userService) GetReports() (*[]entity.Report, error) {
+	return us.userRepo.GetReports()
 }
 
 func (us *userService) GetNotifications(userID int) (*[]entity.Notification, error) {

@@ -98,11 +98,31 @@ CREATE TABLE IF NOT EXISTS notifications (
     user_from INTEGER NOT NULL,
     user_to INTEGER NOT NULL,
     content VARCHAR(500) NOT NULL,
-    source_id INTEGER NOT NULL DEFAULT -1,
-    source_type VARCHAR(30) NOT NULL DEFAULT "default_source_type",
+    source_id INTEGER NULL,
+    source_type VARCHAR(30) NULL,
     created_at DATETIME NOT NULL,
 
-    UNIQUE(type, user_from, user_to)
-    FOREIGN KEY(user_from) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY(user_from) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(user_to) REFERENCES users(id) ON DELETE CASCADE
 ) 
+
+CREATE TABLE IF NOT EXISTS reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reason VARCHAR(30) NOT NULL, 
+    user_from INT NOT NULL,
+    source_id INT NOT NULL,
+    source_type VARCHAR(30) NOT NULL,
+    created_at DATETIME NOT NULL,
+
+    UNIQUE(user_from, source_id, source_type)
+    FOREIGN KEY(user_from) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY(source_id) REFERENCES posts(id) ON DELETE CASCADE
+)
+
+CREATE TABLE IF NOT EXISTS requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    created_at DATETIME NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
