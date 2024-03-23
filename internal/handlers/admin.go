@@ -110,14 +110,7 @@ func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
 
 	err = r.services.User.SendNotification(notification)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrDuplicateNotification):
-			r.logger.Print("promoteUser: duplicate notification")
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "Promotion of user notification is already sent")
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -220,14 +213,7 @@ func (r *Routes) rejectPromotion(w http.ResponseWriter, req *http.Request) {
 
 	err = r.services.User.SendNotification(notification)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrDuplicateNotification):
-			r.logger.Print("rejectPromotion: duplicate notification")
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "Reject promotion notification is already sent")
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 
@@ -286,14 +272,7 @@ func (r *Routes) rejectReport(w http.ResponseWriter, req *http.Request) {
 
 	err = r.services.User.SendNotification(notification)
 	if err != nil {
-		switch {
-		case errors.Is(err, entity.ErrDuplicateNotification):
-			r.logger.Print("rejectReport: duplicate notification")
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "Reject report notification is already sent")
-		default:
-			r.serverError(w, req, err)
-		}
+		r.serverError(w, req, err)
 		return
 	}
 

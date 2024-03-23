@@ -20,11 +20,14 @@ type Services struct {
 }
 
 func New(r *repository.Repositories) *Services {
+	postService := post.NewPostsService(r.Post, image.NewImageService(r.Image), tag.NewTagService(r.Tag), comment.NewCommentService(r.Comment, user.NewUserService(r.User)), user.NewUserService(r.User))
+	commentService := comment.NewCommentService(r.Comment, user.NewUserService(r.User))
+	userService := user.NewUserService(r.User)
 	return &Services{
-		Post:     post.NewPostsService(r.Post, image.NewImageService(r.Image), tag.NewTagService(r.Tag), comment.NewCommentService(r.Comment, user.NewUserService(r.User)), user.NewUserService(r.User)),
-		User:     user.NewUserService(r.User),
-		Comment:  comment.NewCommentService(r.Comment, user.NewUserService(r.User)),
-		Reaction: reaction.NewReactionService(r.Reaction),
+		Post:     postService,
+		User:     userService,
+		Comment:  commentService,
+		Reaction: reaction.NewReactionService(r.Reaction, postService, commentService, userService),
 		Tag:      tag.NewTagService(r.Tag),
 		Image:    image.NewImageService(r.Image),
 	}

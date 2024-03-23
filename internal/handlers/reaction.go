@@ -47,6 +47,11 @@ func (r *Routes) postReaction(w http.ResponseWriter, req *http.Request) {
 		case errors.Is(err, entity.ErrInvalidURLPath):
 			r.logger.Printf("postReaction: invalid query parameter - '%s'", reaction)
 			r.badRequest(w)
+		case errors.Is(err, entity.ErrPostNotFound):
+			r.logger.Print("postReaction: post not found")
+			r.notFound(w)
+		case errors.Is(err, entity.ErrNotificationNotFound):
+			r.logger.Print("postReaction: notification not found")
 		default:
 			r.serverError(w, req, err)
 		}
@@ -97,12 +102,17 @@ func (r *Routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 
 	userID := r.sesm.GetUserID(req.Context())
 
-	err = r.services.Reaction.SetCommentReaction(reaction, commentID, userID)
+	err = r.services.Reaction.SetCommentReaction(reaction, commentID, postID, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, entity.ErrInvalidURLPath):
 			r.logger.Printf("commentReaction: invalid query parameter - '%s'", reaction)
 			r.badRequest(w)
+		case errors.Is(err, entity.ErrCommentNotFound):
+			r.logger.Print("commentReaction: comment not found")
+			r.notFound(w)
+		case errors.Is(err, entity.ErrNotificationNotFound):
+			r.logger.Print("postReaction: notification not found")
 		default:
 			r.serverError(w, req, err)
 		}

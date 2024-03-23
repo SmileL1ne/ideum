@@ -168,10 +168,6 @@ func (ps *postService) CheckPostAttrs(p *entity.PostCreateForm, withImage bool) 
 	return true, nil
 }
 
-func (ps *postService) GetAuthorID(postID int) (int, error) {
-	return ps.postRepo.GetAuthorID(postID)
-}
-
 func (ps *postService) DeletePost(postID int, userID int) error {
 	exists, err := ps.postRepo.Exists(postID)
 	if err != nil {
@@ -221,4 +217,8 @@ func (ps *postService) DeletePostPrivileged(postID int, userID int, userRole str
 	}
 
 	return nil
+}
+
+func (ps *postService) GetAuthorID(postID int) (int, error) {
+	return ps.postRepo.GetAuthorID(postID)
 }

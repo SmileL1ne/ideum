@@ -28,6 +28,7 @@ type IUserRepository interface {
 	Promote(userID int) error
 	Demote(userID int) error
 	GetUsers() (*[]entity.UserEntity, error)
+	FindNotification(nType string, userFrom, userTo int) (int, error)
 }
 
 type userRepository struct {
@@ -411,4 +412,24 @@ func (r *userRepository) GetUsers() (*[]entity.UserEntity, error) {
 	}
 
 	return &users, nil
+}
+
+func (r *userRepository) FindNotification(nType string, userFrom, userTo int) (int, error) {
+	query := `
+		SELECT id
+		FROM notifications
+		WHERE type = $1 AND user_from = $2 AND user_to = $3
+	`
+
+	var notificationID int
+
+	err := r.DB.QueryRow(query, nType, userFrom, userTo).Scan(&notificationID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, entity.ErrNotificationNotFound
+		}
+		return 0, err
+	}
+
+	return notificationID, nil
 }

@@ -28,6 +28,7 @@ type IUserService interface {
 	GetNotifications(userID int) (*[]entity.Notification, error)
 	DeleteNotification(notificationID int) error
 	GetUsers() (*[]entity.UserEntity, error)
+	FindNotification(nType string, userFrom, userTo int) (int, error)
 }
 
 type userService struct {
@@ -198,4 +199,8 @@ func (us *userService) DeleteNotification(notificationID int) error {
 
 func (us *userService) GetUsers() (*[]entity.UserEntity, error) {
 	return us.userRepo.GetUsers()
+}
+
+func (us *userService) FindNotification(nType string, userFrom, userTo int) (int, error) {
+	return us.userRepo.FindNotification(nType, userFrom, userTo)
 }
