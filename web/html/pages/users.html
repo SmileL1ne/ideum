@@ -1,35 +1,43 @@
-<!-- new -->
 {{define "title"}} Rabbit {{end}}
 
 {{define "main"}}
 
 <div class="base">
-    <!-- post feed-->
-    <div class="post-feed">
-        <!-- users -->
-        <!-- add range loop -->
-        <div class="feed-message-wrapper">
-            <div class="feed-message-frame">
-                <div class="feed-message-left">
-                    <div class="feed-message-from">
-                        <p>User001</p>
+    {{if .Models.Users}}
+        <div class="post-feed">
+            {{range .Models.Users}}
+                <div class="feed-message-wrapper">
+                    <div class="feed-message-frame">
+                        <div class="feed-message-left">
+                            <div class="feed-message-from">
+                                <p>{{.Username}}</p>
+                                <p class="post-date">{{.CreatedAt}}</p>
+                            </div>
+                            <div class="feed-message-from">
+                                <p>{{.Role}}</p>
+                            </div>
+                        </div>
+                        <div class="ok-frame">
+                            {{if eq .Role "user"}}
+                                <form action="/admin/promote/{{.ID}}" method="POST">
+                                    <input type="hidden" name="promotionType" value="direct">
+                                    <button class="ok-button" id="like">Promote</button>
+                                </form>
+                            {{else if eq .Role "moderator"}}
+                                <form action="/admin/demote/{{.ID}}" method="POST">
+                                    <button class="ok-button" id="like">Demote</button>
+                                </form>
+                            {{end}}
+                        </div>
                     </div>
                 </div>
-                <div class="ok-frame">
-
-                    <!-- if user -->
-                    <button class="ok-button" id="like">Promote
-                    </button>
-                    <!-- else  -->
-                    <button class="ok-button" id="like">Demote
-                    </button>
-                </div>
-            </div>
-
+            {{end}}
         </div>
-
-
-    </div>
+    {{else}}
+        <!-- Practically impossible, because I count admin as user too so at least he would be displayed -->
+        <p>No users yet!</p>
+    {{end}}
 
 </div>
+
 {{end}}

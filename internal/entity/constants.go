@@ -19,7 +19,10 @@ const (
 	DELETE_POST      = "delete_post"
 	DELETE_COMMENT   = "delete_comment"
 	PROMOTED         = "promoted"
+	DEMOTED          = "demoted"
 
 	POST    = "post"
 	COMMENT = "comment"
+
+	DIRECT = "direct"
 )

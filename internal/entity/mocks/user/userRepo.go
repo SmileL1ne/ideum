@@ -7,7 +7,7 @@ import (
 )
 
 var mockUser = entity.UserEntity{
-	Id:        1,
+	ID:        1,
 	Username:  "yuta",
 	Email:     "yuta@gmail.com",
 	Password:  "yuta12345",
@@ -28,7 +28,7 @@ func (r *UserRepoMock) Insert(u entity.UserSignupForm, hashedPassword []byte) (i
 	} else if u.Email == "satoru@gmail.com" {
 		return 0, entity.ErrDuplicateEmail
 	}
-	return mockUser.Id, nil
+	return mockUser.ID, nil
 }
 
 func (r *UserRepoMock) GetByEmail(email string) (entity.UserEntity, error) {

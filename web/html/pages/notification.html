@@ -55,7 +55,10 @@
                                     <p>{{.Username}}</p>
                                     <p class="post-date">{{.CreatedAt}}</p>
                                 </div>
-                                <div class="message-content">{{.Content}}. Source: <a href="/post/view/{{.SourceID}}">click</a>
+                                <div class="message-content">{{.Content}} 
+                                    {{if .SourceID}}
+                                    . Source: <a href="/post/view/{{.SourceID}}">click</a>
+                                    {{end}}
                                 </div>
                             </div>
                             

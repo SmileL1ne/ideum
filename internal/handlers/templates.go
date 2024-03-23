@@ -16,6 +16,7 @@ type Models struct {
 	Notifications []entity.Notification
 	Requests      []entity.Request
 	Reports       []entity.Report
+	Users         []entity.UserEntity
 }
 
 type templateData struct {
@@ -32,6 +33,7 @@ type errData struct {
 
 var fm = template.FuncMap{
 	"low": strings.ToLower,
+	"cap": strings.Title,
 }
 
 // newTemplateCache initializes all templates and stores them in map

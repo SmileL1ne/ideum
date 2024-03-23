@@ -35,6 +35,7 @@ var (
 	ErrAdminNotFound         = errors.New("entity: admin not found")
 	ErrDuplicateReport       = errors.New("entity: duplicate report")
 	ErrReportNotFound        = errors.New("entity: report not found")
+	ErrUserNotFound          = errors.New("entity: user not found")
 )
 
 // Notification related errors

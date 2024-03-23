@@ -6,7 +6,7 @@
 
                 <div class="user-bar-role-info">
                     <img src="/static/img/ava/user.png" alt="ava">
-                    <p>{{.Username}}<br> <span>User</span></p>
+                    <p>{{.Username}}<br> <span>{{cap .UserRole}}</span></p>
                 </div>
                 <div class="interface-options">
                     <ul>
@@ -58,7 +58,7 @@
                             </li>
 
                             <li> 
-                                <a class="interface-link" href="#">
+                                <a class="interface-link" href="/admin/users">
                                     <img src="/static/img/svg/notification.svg" alt="notification-icon"> Users
                                 </a>
                             </li>

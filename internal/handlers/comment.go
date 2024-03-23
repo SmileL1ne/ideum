@@ -248,7 +248,9 @@ func (r *Routes) commentReport(w http.ResponseWriter, req *http.Request) {
 	err = r.services.User.SendReport(report)
 	if err != nil {
 		if errors.Is(err, entity.ErrDuplicateReport) {
-			r.badRequest(w)
+			r.logger.Print("commentReport: report is already sent")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Report is already sent")
 			return
 		}
 		r.serverError(w, req, err)

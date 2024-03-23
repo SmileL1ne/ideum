@@ -32,7 +32,7 @@ func (r *Routes) SSO(w http.ResponseWriter, req *http.Request, form *entity.User
 				return
 			}
 
-			id = user.Id
+			id = user.ID
 		} else {
 			r.serverError(w, req, err)
 			return

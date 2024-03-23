@@ -176,8 +176,9 @@ func (r *Routes) userPromote(w http.ResponseWriter, req *http.Request) {
 	err := r.services.User.SendPromotion(userID)
 	if err != nil {
 		if errors.Is(err, entity.ErrDuplicatePromotion) {
-			r.logger.Print("userPromote:", err)
-			r.badRequest(w)
+			r.logger.Print("userPromote: promotion is already sent")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Promotion is already sent")
 			return
 		}
 		r.serverError(w, req, err)

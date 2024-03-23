@@ -7,7 +7,7 @@ import (
 
 // UserEntity is returned by repos (not pointer, because data is read only)
 type UserEntity struct {
-	Id        int
+	ID        int
 	Username  string
 	Email     string
 	Password  string

@@ -60,7 +60,7 @@ func (us *UserServiceMock) Authenticate(u *entity.UserLoginForm) (int, error) {
 		return 0, entity.ErrInvalidCredentials
 	}
 
-	return userFromDB.Id, nil
+	return userFromDB.ID, nil
 }
 
 func (us *UserServiceMock) GetUsernameById(userID int) (string, error) {

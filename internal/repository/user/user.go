@@ -26,6 +26,8 @@ type IUserRepository interface {
 	GetRequests() (*[]entity.Request, error)
 	GetReports() (*[]entity.Report, error)
 	Promote(userID int) error
+	Demote(userID int) error
+	GetUsers() (*[]entity.UserEntity, error)
 }
 
 type userRepository struct {
@@ -108,7 +110,7 @@ func (r *userRepository) getUserByField(field string, value interface{}) (entity
 
 	query := fmt.Sprintf(`SELECT * FROM users WHERE %s = $1 COLLATE NOCASE`, field)
 
-	err := r.DB.QueryRow(query, value).Scan(&u.Id, &u.Username, &u.Email, &u.Password, &u.CreatedAt)
+	err := r.DB.QueryRow(query, value).Scan(&u.ID, &u.Username, &u.Email, &u.Password, &u.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.UserEntity{}, entity.ErrInvalidCredentials
@@ -157,7 +159,7 @@ func (r *userRepository) CreatePromotion(userID int) error {
 	if err != nil {
 		var sqliteError sqlite3.Error
 		if errors.As(err, &sqliteError) {
-			if sqliteError.Code == 19 && strings.Contains(sqliteError.Error(), "UNIQUE constaint failed:") {
+			if sqliteError.Code == 19 && strings.Contains(sqliteError.Error(), "UNIQUE constraint failed:") {
 				return entity.ErrDuplicatePromotion
 			}
 		}
@@ -239,6 +241,7 @@ func (r *userRepository) GetNotifications(userID int) (*[]entity.Notification, e
 		FROM notifications n
 		JOIN users u ON u.id = n.user_from
 		WHERE user_to = $1
+		ORDER BY n.created_at DESC
 	`
 
 	var notifications []entity.Notification
@@ -285,9 +288,10 @@ func (r *userRepository) DeleteNotification(notificationID int) error {
 
 func (r *userRepository) GetRequests() (*[]entity.Request, error) {
 	query := `
-		SELECT r.id, r.user_id, u.username
+		SELECT r.id, r.user_id, r.created_at, u.username
 		FROM requests r
 		INNER JOIN users u ON r.user_id = u.id
+		ORDER BY r.created_at DESC
 	`
 
 	var requests []entity.Request
@@ -300,7 +304,7 @@ func (r *userRepository) GetRequests() (*[]entity.Request, error) {
 
 	for rows.Next() {
 		var req entity.Request
-		if err := rows.Scan(&req.ID, &req.UserID, &req.Username, &req.CreatedAt); err != nil {
+		if err := rows.Scan(&req.ID, &req.UserID, &req.CreatedAt, &req.Username); err != nil {
 			return nil, err
 		}
 		requests = append(requests, req)
@@ -342,7 +346,69 @@ func (r *userRepository) Promote(userID int) error {
 		WHERE user_id = $2
 	`
 
-	_, err := r.DB.Exec(query, entity.MODERATOR, userID)
+	res, err := r.DB.Exec(query, entity.MODERATOR, userID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return entity.ErrUserNotFound
+	}
 
 	return err
+}
+
+func (r *userRepository) Demote(userID int) error {
+	query := `
+		UPDATE roles
+		SET role = $1
+		WHERE user_id = $2
+	`
+
+	res, err := r.DB.Exec(query, entity.USER, userID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return entity.ErrUserNotFound
+	}
+
+	return err
+}
+
+func (r *userRepository) GetUsers() (*[]entity.UserEntity, error) {
+	query := `
+		SELECT u.id, u.username, u.email, u.hashed_password, u.created_at, r.role
+		FROM users u
+		LEFT JOIN roles r ON u.id = r.user_id
+	`
+
+	var users []entity.UserEntity
+
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var u entity.UserEntity
+		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.Password, &u.CreatedAt, &u.Role); err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	return &users, nil
 }

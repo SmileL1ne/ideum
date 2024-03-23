@@ -69,25 +69,33 @@ func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	promotionID, ok := getValidID(req.PostForm.Get("promotionID"))
-	if !ok {
-		r.logger.Print("promoteUser: invalid promotionID")
-		r.badRequest(w)
-		return
+	promotionType := req.PostForm.Get("promotionType")
+	if promotionType != entity.DIRECT {
+		promotionID, ok := getValidID(req.PostForm.Get("promotionID"))
+		if !ok {
+			r.logger.Print("promoteUser: invalid promotionID")
+			r.badRequest(w)
+			return
+		}
+
+		err := r.services.User.DeletePromotion(promotionID)
+		if err != nil {
+			if errors.Is(err, entity.ErrPromotionNotFound) {
+				r.notFound(w)
+				return
+			}
+			r.serverError(w, req, err)
+			return
+		}
 	}
 
-	err := r.services.User.DeletePromotion(promotionID)
+	err := r.services.User.PromoteUser(userTo)
 	if err != nil {
-		if errors.Is(err, entity.ErrPromotionNotFound) {
+		if errors.Is(err, entity.ErrUserNotFound) {
+			r.logger.Print("promoteUser: user not found")
 			r.notFound(w)
 			return
 		}
-		r.serverError(w, req, err)
-		return
-	}
-
-	err = r.services.User.PromoteUser(userTo)
-	if err != nil {
 		r.serverError(w, req, err)
 		return
 	}
@@ -113,12 +121,68 @@ func (r *Routes) promoteUser(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Redirect(w, req, "/admin/requests", http.StatusSeeOther)
+	if promotionType == entity.DIRECT {
+		http.Redirect(w, req, "/admin/users", http.StatusSeeOther)
+	} else {
+		http.Redirect(w, req, "/admin/requests", http.StatusSeeOther)
+	}
+}
+
+func (r *Routes) demoteUser(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	userTo, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("demoteUser: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	err := r.services.User.DemoteUser(userTo)
+	if err != nil {
+		if errors.Is(err, entity.ErrUserNotFound) {
+			r.logger.Print("promoteUser: user not found")
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	adminID := r.sesm.GetUserID(req.Context())
+
+	notification := entity.Notification{
+		Type:     entity.DEMOTED,
+		UserFrom: adminID,
+		UserTo:   userTo,
+	}
+
+	err = r.services.User.SendNotification(notification)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrDuplicateNotification):
+			r.logger.Print("demoteUser: duplicate notification")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Demotion of user notification is already sent")
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
+	http.Redirect(w, req, "/admin/users", http.StatusSeeOther)
 }
 
 func (r *Routes) rejectPromotion(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		r.methodNotAllowed(w)
+		return
+	}
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
 		return
 	}
 
@@ -234,4 +298,27 @@ func (r *Routes) rejectReport(w http.ResponseWriter, req *http.Request) {
 	}
 
 	http.Redirect(w, req, "/user/notifications", http.StatusSeeOther)
+}
+
+func (r *Routes) users(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	data, err := r.newTemplateData(req)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	users, err := r.services.User.GetUsers()
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	data.Models.Users = *users
+
+	r.render(w, req, http.StatusOK, "users.html", data)
 }

@@ -24,8 +24,10 @@ type IUserService interface {
 	GetRequests() (*[]entity.Request, error)
 	GetReports() (*[]entity.Report, error)
 	PromoteUser(userID int) error
+	DemoteUser(userID int) error
 	GetNotifications(userID int) (*[]entity.Notification, error)
 	DeleteNotification(notificationID int) error
+	GetUsers() (*[]entity.UserEntity, error)
 }
 
 type userService struct {
@@ -108,7 +110,7 @@ func (us *userService) Authenticate(u *entity.UserLoginForm) (int, error) {
 		}
 	}
 
-	return userFromDB.Id, nil
+	return userFromDB.ID, nil
 }
 
 func (us *userService) GetUsernameById(userID int) (string, error) {
@@ -126,7 +128,9 @@ func (us *userService) GetUserRole(userID int) (string, error) {
 func (us *userService) SendNotification(n entity.Notification) error {
 	switch n.Type {
 	case entity.PROMOTED:
-		n.Content = "Congratulations! You've been promoted to moderator!"
+		n.Content = "Congratulations! You've been promoted to a moderator!"
+	case entity.DEMOTED:
+		n.Content = "Oh, looks like you've been demoted from a moderator role :("
 	case entity.POST_LIKE:
 		n.Content = "Liked your post"
 	case entity.POST_DISLIKE:
@@ -184,6 +188,14 @@ func (us *userService) PromoteUser(userID int) error {
 	return us.userRepo.Promote(userID)
 }
 
+func (us *userService) DemoteUser(userID int) error {
+	return us.userRepo.Demote(userID)
+}
+
 func (us *userService) DeleteNotification(notificationID int) error {
 	return us.userRepo.DeleteNotification(notificationID)
+}
+
+func (us *userService) GetUsers() (*[]entity.UserEntity, error) {
+	return us.userRepo.GetUsers()
 }
