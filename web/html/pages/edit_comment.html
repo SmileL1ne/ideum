@@ -1,0 +1,32 @@
+{{define "title"}} Edit Comment{{end}}
+
+{{define "main"}}
+
+<div class="base">
+    <!-- post feed-->
+    <div class="post-feed">
+
+
+        <!-- Leave Your comment -->
+
+        <script src="/static/js/comment.js"></script>
+        <div class="feed-message-wrapper">
+            <div class="comment-frame">
+
+                <form action="/post/comment/{{.Models.Post.ID}}" method="POST" id="commentForm">
+                    <p class="error-msg"></p>
+                    <br>
+                    <textarea class="white-text-area" name="commentContent" id="usercomment" type="text" minlength="3"
+                        maxlength="256" spellcheck="false" required></textarea>
+                    <button class="light-button">Edit Comment</button>
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+
+
+{{end}}

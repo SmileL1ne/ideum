@@ -347,3 +347,117 @@ func (r *Routes) postReport(w http.ResponseWriter, req *http.Request) {
 
 	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }
+
+func (r *Routes) postEdit(w http.ResponseWriter, req *http.Request) {
+	switch {
+	case req.Method == http.MethodPost:
+		r.postEditPost(w, req)
+		return
+	case req.Method != http.MethodGet:
+		r.methodNotAllowed(w)
+		return
+	}
+
+	postID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("postEdit: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	data, err := r.newTemplateData(req)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	post, err := r.services.Post.GetPost(postID)
+	if err != nil {
+		if errors.Is(err, entity.ErrInvalidPostID) {
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	data.Models.Post = post
+
+	r.render(w, req, http.StatusOK, "edit_post.html", data)
+}
+
+func (r *Routes) postEditPost(w http.ResponseWriter, req *http.Request) {
+	if err := req.ParseMultipartForm(10); err != nil {
+		r.logger.Print("postEditPost: invalid form fill (parse error)")
+		r.badRequest(w)
+		return
+	}
+
+	postID, ok := getIdFromPath(req, 4)
+	if !ok {
+		r.logger.Print("postEditPost: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	form := req.PostForm
+	title := strings.TrimSpace(form.Get("title"))
+	content := strings.TrimSpace(form.Get("content"))
+	tags := form["tags"]
+	deleteImage := form.Get("deleteImage")
+
+	// Take image file from file form
+	var withImage bool = true
+	file, fileHeader, imgErr := req.FormFile("image")
+	if imgErr != nil {
+		withImage = false
+		r.logger.Print("postEditPost: no file")
+	}
+
+	p := entity.PostCreateForm{
+		ID:         postID,
+		Title:      title,
+		Content:    content,
+		Tags:       tags,
+		File:       file,
+		FileHeader: fileHeader,
+	}
+
+	isPostValid, err := r.services.Post.CheckPostAttrs(&p, withImage)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidTags):
+			r.logger.Print("postEditPost: post tags don't exist")
+			r.badRequest(w)
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+	if !isPostValid {
+		r.logger.Print("postEditPost: invalid form fill")
+		w.WriteHeader(http.StatusBadRequest)
+		msg := getErrorMessage(&p.Validator)
+		fmt.Fprint(w, strings.TrimSpace(msg))
+		return
+	}
+
+	if withImage {
+		imgName, err := r.services.Image.ProcessImage(file, fileHeader)
+		if err != nil {
+			r.serverError(w, req, err)
+			return
+		}
+		p.ImageName = imgName
+	}
+
+	err = r.services.Post.UpdatePost(p, deleteImage)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	redirectURL := fmt.Sprintf("/post/view/%d", p.ID)
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, redirectURL)
+}

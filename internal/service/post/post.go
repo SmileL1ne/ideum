@@ -25,6 +25,7 @@ type IPostService interface {
 	DeletePost(postID int, userID int) error
 	DeletePostPrivileged(postID int, userID int, userRole string) error
 	GetAuthorID(postID int) (int, error)
+	UpdatePost(p entity.PostCreateForm, deleteImageStr string) error
 }
 
 type postService struct {
@@ -221,4 +222,24 @@ func (ps *postService) DeletePostPrivileged(postID int, userID int, userRole str
 
 func (ps *postService) GetAuthorID(postID int) (int, error) {
 	return ps.postRepo.GetAuthorID(postID)
+}
+
+func (ps *postService) UpdatePost(p entity.PostCreateForm, deleteImageStr string) error {
+	var tagIDs []int
+	for _, tagIDStr := range p.Tags {
+		tagID, _ := strconv.Atoi(tagIDStr) // Don't handle error because we know Ids are valid (checked before)
+		tagIDs = append(tagIDs, tagID)
+	}
+
+	var deleteImage bool
+	if deleteImageStr == "yes" {
+		deleteImage = true
+	}
+
+	err := ps.postRepo.Update(p, tagIDs, deleteImage)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

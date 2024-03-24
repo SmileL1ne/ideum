@@ -58,8 +58,9 @@ func (is *imageService) ProcessImage(file multipart.File, fileHeader *multipart.
 }
 
 func (is *imageService) Get(postID int) (string, error) {
-	name, err := is.imageRepo.ReadName(postID)
+	name, err := is.imageRepo.GetName(postID)
 	if errors.Is(err, sql.ErrNoRows) {
+		// If there is image path, return nil as error because post can be display without image
 		return name, nil
 	}
 	return name, err

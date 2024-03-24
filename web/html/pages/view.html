@@ -65,9 +65,11 @@
 
                     <div class="post-options">
                         {{if eq .Models.Post.Username .Username}}
-                            <button type="submit" class="clean-btn">
-                                <img src="/static/img/svg/edit-icon.svg" alt="edit-icon">
-                            </button>
+                            <form action="/post/edit/{{.Models.Post.ID}}" method="GET">
+                                <button type="submit" class="clean-btn">
+                                    <img src="/static/img/svg/edit-icon.svg" alt="edit-icon">
+                                </button>
+                            </form>
                         {{end}}
 
                         {{if or (eq .Models.Post.Username .Username) (eq .UserRole "moderator") (eq .UserRole "admin")}}

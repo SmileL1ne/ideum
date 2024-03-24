@@ -18,6 +18,7 @@ type IPostRepository interface {
 	Delete(postID int, userID int) error
 	DeleteByPrivileged(postID int) error
 	GetAuthorID(postID int) (int, error)
+	Update(p entity.PostCreateForm, tagIDs []int, deleteImage bool) error
 }
 
 type postRepository struct {
@@ -306,8 +307,8 @@ func (r *postRepository) Exists(postID int) (bool, error) {
 
 func (r *postRepository) Delete(postID int, userID int) error {
 	query := `
-		DELETE FROM posts p
-		WHERE p.id = $1 AND p.user_id = $2
+		DELETE FROM posts
+		WHERE id = $1 AND user_id = $2
 	`
 
 	_, err := r.DB.Exec(query, postID, userID)
@@ -356,4 +357,71 @@ func (r *postRepository) GetAuthorID(postID int) (int, error) {
 	}
 
 	return userID, nil
+}
+
+func (r *postRepository) Update(p entity.PostCreateForm, tagIDs []int, deleteImage bool) error {
+	tx, err := r.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	posts := `
+		UPDATE posts
+		SET title = $1, content = $2
+		WHERE id = $3
+	`
+
+	_, err = tx.Exec(posts, p.Title, p.Content, p.ID)
+	if err != nil {
+		return err
+	}
+
+	post_tags_delete := `
+		DELETE FROM posts_tags
+		WHERE post_id = $1
+	`
+	_, err = tx.Exec(post_tags_delete, p.ID)
+	if err != nil {
+		return err
+	}
+
+	posts_tags := `
+		INSERT INTO posts_tags (post_id, tag_id, created_at)
+		VALUES ($1, $2, datetime('now', 'localtime'))
+	`
+	for _, tagID := range tagIDs {
+		_, err := tx.Exec(posts_tags, p.ID, tagID)
+		if err != nil {
+			return err
+		}
+	}
+
+	if deleteImage {
+		images_delete := `
+			DELETE FROM images
+			WHERE post_id = $1 
+		`
+		_, err := tx.Exec(images_delete, p.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	if p.ImageName != "" {
+		images := `
+			INSERT OR REPLACE INTO images (name, post_id)
+			VALUES ($1, $2)
+		`
+		_, err = tx.Exec(images, p.ImageName, p.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }

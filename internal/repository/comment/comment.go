@@ -145,8 +145,8 @@ func (r *commentRepository) Delete(commentID, userID int) error {
 
 func (r *commentRepository) DeleteByPrivileged(commentID int) error {
 	query := `
-		DELETE FROM comments c
-		WHERE c.id = $1
+		DELETE FROM comments
+		WHERE id = $1
 	`
 
 	_, err := r.DB.Exec(query, commentID)

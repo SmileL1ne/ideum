@@ -7,7 +7,7 @@ import (
 
 type IImageRepository interface {
 	Create(entity.ImageEntity) error
-	ReadName(int) (string, error)
+	GetName(int) (string, error)
 }
 
 type imageRepository struct {
@@ -33,7 +33,7 @@ func (r *imageRepository) Create(i entity.ImageEntity) error {
 	return err
 }
 
-func (r *imageRepository) ReadName(postID int) (string, error) {
+func (r *imageRepository) GetName(postID int) (string, error) {
 	query := `
 		SELECT (name)
 		FROM images

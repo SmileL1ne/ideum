@@ -14,14 +14,14 @@
 
                     <p class="error-msg"></p>
 
-                    <label for="">Title</label>
+                    <label>Title</label>
                     <input class="white-input" type="text" name="title">
-                    <label for="">Content</label>
+                    <label>Content</label>
                     <textarea class="white-text-area" type="text" spellcheck="false" name="content"></textarea>
                     <div class="check-box-topics">
                         {{range .Models.Tags}}
-                        <input type="checkbox" name="tags" value="{{.ID}}">
-                        <label for="tags">{{.Name}}</label>
+                            <input type="checkbox" name="tags" value="{{.ID}}">
+                            <label for="tags">{{.Name}}</label>
                         {{end}}
 
                     </div>

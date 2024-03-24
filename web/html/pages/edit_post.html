@@ -1,0 +1,56 @@
+{{define "title"}}Edit Post{{end}}
+
+{{define "main"}}
+<script src="/static/js/create.js"></script>
+
+<form action="/post/edit/{{.Models.Post.ID}}" method="POST" enctype="multipart/form-data" id="postForm"> 
+    <div class="base">
+
+        <div class="post-feed">
+            <!-- post -->
+
+            <div class="post">
+                <div class="make-post-content">
+
+                    <p class="error-msg"></p>
+
+                    <label>Title</label>
+                    <input class="white-input" type="text" name="title" value="{{.Models.Post.Title}}">
+                    <label>Content</label>
+                    <textarea class="white-text-area" type="text" spellcheck="false" name="content">{{.Models.Post.Content}}</textarea>
+                    <div class="check-box-topics">
+                        {{$root := .}}
+                        {{range $root.Models.Tags}}
+                            {{$tag := .Name}}
+                            <input type="checkbox" name="tags" value="{{.ID}}"
+                            {{range $root.Models.Post.PostTags}}
+                                {{if eq $tag .}}
+                                    checked
+                                {{end}}
+                            {{end}}
+                            >
+                            <label for="tags">{{.Name}}</label>
+                        {{end}}
+
+                    </div>
+                    
+                    {{if .Models.Post.ImageName}}
+                        <img src="/static/public/{{.Models.Post.ImageName}}" alt="existing image">
+                    {{end}}
+                    <label for="deleteImage">Delete image?</label>
+                    <input type="checkbox" name="deleteImage" value="yes">
+                    <input class="upload" type="file" name="image" lang="en" accept="image/png,image/gif,image/jpeg,image/jpg">
+
+                    <div class="user-bar-line"></div>
+                    <div class="confirm-section">
+                        <button class="light-button">Save changes</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</form>
+{{end}}

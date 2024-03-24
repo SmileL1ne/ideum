@@ -40,6 +40,7 @@ type PostView struct {
 // form error messages handling, so they are written in Validator's FieldErrors
 // or NonFieldErrors fields
 type PostCreateForm struct {
+	ID         int
 	Title      string
 	Content    string
 	UserID     int
