@@ -301,3 +301,76 @@ func (r *Routes) users(w http.ResponseWriter, req *http.Request) {
 
 	r.render(w, req, http.StatusOK, "users.html", data)
 }
+
+func (r *Routes) tags(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	data, err := r.newTemplateData(req)
+	if err != nil {
+		r.serverError(w, req, err)
+	}
+
+	r.render(w, req, http.StatusOK, "tags.html", data)
+}
+
+func (r *Routes) tagDelete(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+
+	tagID, ok := getIdFromPath(req, 5)
+	if !ok {
+		r.logger.Print("tagDelete: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	err := r.services.Tag.DeleteTag(tagID)
+	if err != nil {
+		if errors.Is(err, entity.ErrTagNotFound) {
+			r.logger.Print("tagDelete: tag not found")
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	http.Redirect(w, req, "/admin/tags", http.StatusSeeOther)
+}
+
+func (r *Routes) tagCreate(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		r.methodNotAllowed(w)
+		return
+	}
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
+		return
+	}
+
+	newTag := req.PostForm.Get("newTag")
+
+	err := r.services.Tag.CreateTag(newTag)
+	if err != nil {
+		switch {
+		case errors.Is(err, entity.ErrInvalidTag):
+			r.logger.Print("tagCreate: invalid tag name")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Invalid tag name. Should be from 3 to 30 characters long.")
+		case errors.Is(err, entity.ErrDuplicateTag):
+			r.logger.Print("tagCreate: duplicate tag name")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "Tag with such name already exists.")
+		default:
+			r.serverError(w, req, err)
+		}
+		return
+	}
+
+	http.Redirect(w, req, "/admin/tags", http.StatusSeeOther)
+}

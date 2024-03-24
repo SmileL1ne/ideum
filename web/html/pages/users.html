@@ -3,41 +3,40 @@
 {{define "main"}}
 
 <div class="base">
+    <div class="post-feed">
     {{if .Models.Users}}
-        <div class="post-feed">
-            {{range .Models.Users}}
-                <div class="feed-message-wrapper">
-                    <div class="feed-message-frame">
-                        <div class="feed-message-left">
-                            <div class="feed-message-from">
-                                <p>{{.Username}}</p>
-                                <p class="post-date">{{.CreatedAt}}</p>
-                            </div>
-                            <div class="feed-message-from">
-                                <p>{{.Role}}</p>
-                            </div>
+        {{range .Models.Users}}
+            <div class="feed-message-wrapper">
+                <div class="feed-message-frame">
+                    <div class="feed-message-left">
+                        <div class="feed-message-from">
+                            <p>{{.Username}}</p>
+                            <p class="post-date">{{.CreatedAt}}</p>
                         </div>
-                        <div class="ok-frame">
-                            {{if eq .Role "user"}}
-                                <form action="/admin/promote/{{.ID}}" method="POST">
-                                    <input type="hidden" name="promotionType" value="direct">
-                                    <button class="ok-button" id="like">Promote</button>
-                                </form>
-                            {{else if eq .Role "moderator"}}
-                                <form action="/admin/demote/{{.ID}}" method="POST">
-                                    <button class="ok-button" id="like">Demote</button>
-                                </form>
-                            {{end}}
+                        <div class="feed-message-from">
+                            <p>{{.Role}}</p>
                         </div>
                     </div>
+                    <div class="ok-frame">
+                        {{if eq .Role "user"}}
+                            <form action="/admin/promote/{{.ID}}" method="POST">
+                                <input type="hidden" name="promotionType" value="direct">
+                                <button class="ok-button" id="like">Promote</button>
+                            </form>
+                        {{else if eq .Role "moderator"}}
+                            <form action="/admin/demote/{{.ID}}" method="POST">
+                                <button class="ok-button" id="like">Demote</button>
+                            </form>
+                        {{end}}
+                    </div>
                 </div>
-            {{end}}
-        </div>
+            </div>
+        {{end}}
     {{else}}
         <!-- Practically impossible, because I count admin as user too so at least he would be displayed -->
         <p>No users yet!</p>
     {{end}}
-
+    </div>
 </div>
 
 {{end}}

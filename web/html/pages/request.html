@@ -3,39 +3,37 @@
 {{define "main"}}
 
 <div class="base">
+    <div class="post-feed">
     {{if .Models.Requests}}
-        <div class="post-feed">
-            {{range .Models.Requests}}
-                <div class="feed-message-wrapper" >
-
-                    <div class="feed-message-frame">
-                        <div class="feed-message-left">
-                            <div class="feed-message-from">
-                                <p>{{.Username}}</p>
-                                <p class="post-date">{{.CreatedAt}}</p>
-                            </div>
-                            <div class="message-content">{{.Username}} wants to promote to moderator
-                            </div>
+        {{range .Models.Requests}}
+            <div class="feed-message-wrapper" >
+                <div class="feed-message-frame">
+                    <div class="feed-message-left">
+                        <div class="feed-message-from">
+                            <p>{{.Username}}</p>
+                            <p class="post-date">{{.CreatedAt}}</p>
                         </div>
-
-                        <div class="ok-frame">
-                            <div class="action-message">Promote?</div>
-                            <form action="/admin/promote/{{.UserID}}" method="POST">
-                                <input type="hidden" name="promotionID" value="{{.ID}}">
-                                <button class="ok-button" id="like">YES</button>
-                            </form>
-                            <form action="/admin/rejectPromotion/{{.UserID}}" method="POST">
-                                <input type="hidden" name="promotionID" value="{{.ID}}">
-                                <button class="ok-button" id="dislike">NO</button>
-                            </form>
+                        <div class="message-content">{{.Username}} wants to promote to moderator
                         </div>
                     </div>
 
+                    <div class="ok-frame">
+                        <div class="action-message">Promote?</div>
+                        <form action="/admin/promote/{{.UserID}}" method="POST">
+                            <input type="hidden" name="promotionID" value="{{.ID}}">
+                            <button class="ok-button" id="like">YES</button>
+                        </form>
+                        <form action="/admin/rejectPromotion/{{.UserID}}" method="POST">
+                            <input type="hidden" name="promotionID" value="{{.ID}}">
+                            <button class="ok-button" id="dislike">NO</button>
+                        </form>
+                    </div>
                 </div>
-            {{end}}
-        </div>
+            </div>
+        {{end}}
     {{else}}
         <p>No requests yet!</p>
     {{end}}
+    </div>
 </div>
 {{end}}

@@ -18,6 +18,9 @@ var (
 	ErrInvalidTags      = errors.New("entity: tags don't exist")
 	ErrPostNotFound     = errors.New("entity: post not found")
 	ErrCommentNotFound  = errors.New("entity: comment not found")
+	ErrTagNotFound      = errors.New("entity: tag not found")
+	ErrInvalidTag       = errors.New("entity: tag name is invalid")
+	ErrDuplicateTag     = errors.New("entity: duplicate tag")
 )
 
 // User related errors

@@ -3,8 +3,8 @@
 {{define "main"}}
 
 <div class="base">
+    <div class="post-feed">
     {{if .Models.Reports}}
-        <div class="post-feed">
             {{range .Models.Reports}}
                 <div class="feed-message-wrapper" >
 
@@ -41,9 +41,9 @@
                     </div>
                 </div>
             {{end}}
-        </div>
     {{else}}
         <p>No reports yet!</p>
     {{end}}
+    </div>
 </div>
 {{end}}

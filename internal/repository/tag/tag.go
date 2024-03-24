@@ -2,14 +2,20 @@ package tag
 
 import (
 	"database/sql"
+	"errors"
 	"forum/internal/entity"
+	"strings"
 	"sync"
+
+	"github.com/mattn/go-sqlite3"
 )
 
 type ITagRepository interface {
 	GetAll() (*[]entity.TagEntity, error)
 	AreTagsExist([]int) (bool, error)
 	IsExist(int) (bool, error)
+	Delete(tagID int) error
+	Create(tag string) error
 }
 
 type tagRepo struct {
@@ -104,4 +110,47 @@ func (r *tagRepo) IsExist(id int) (bool, error) {
 	err := r.DB.QueryRow(query, id).Scan(&exists)
 
 	return exists, err
+}
+
+func (r *tagRepo) Delete(tagID int) error {
+	query := `
+		DELETE FROM tags
+		WHERE id = $1
+	`
+
+	res, err := r.DB.Exec(query, tagID)
+	if err != nil {
+		return err
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if affected == 0 {
+		return entity.ErrTagNotFound
+	}
+
+	return nil
+}
+
+func (r *tagRepo) Create(tag string) error {
+	query := `
+		INSERT INTO tags (name, created_at)
+		VALUES ($1, datetime('now', 'localtime'))
+	`
+
+	_, err := r.DB.Exec(query, tag)
+	if err != nil {
+		var sqlite3Err sqlite3.Error
+		if errors.As(err, &sqlite3Err) {
+			if sqlite3Err.Code == 19 && strings.Contains(sqlite3Err.Error(), "UNIQUE constraint failed:") {
+				return entity.ErrDuplicateTag
+			}
+		}
+		return err
+	}
+
+	return nil
 }

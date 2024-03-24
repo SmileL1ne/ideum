@@ -10,6 +10,8 @@ type ITagService interface {
 	GetAllTags() (*[]entity.TagEntity, error)
 	AreTagsExist([]string) (bool, error)
 	IsExist(int) (bool, error)
+	DeleteTag(tagID int) error
+	CreateTag(tag string) error
 }
 
 type tagService struct {
@@ -43,4 +45,16 @@ func (ts *tagService) AreTagsExist(tags []string) (bool, error) {
 
 func (ts *tagService) IsExist(id int) (bool, error) {
 	return ts.tagRepo.IsExist(id)
+}
+
+func (ts *tagService) DeleteTag(tagID int) error {
+	return ts.tagRepo.Delete(tagID)
+}
+
+func (ts *tagService) CreateTag(tag string) error {
+	if !IsValidTag(tag) {
+		return entity.ErrInvalidTag
+	}
+
+	return ts.tagRepo.Create(tag)
 }

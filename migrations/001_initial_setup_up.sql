@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS comment_reactions (
 
 CREATE TABLE IF NOT EXISTS tags (
     id INTEGER PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
     created_at DATETIME NOT NULL
 );
 

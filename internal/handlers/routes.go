@@ -110,7 +110,10 @@ func (r *Routes) Register() http.Handler {
 	router.Handle("/admin/demote/", requireAdmin.ThenFunc(r.demoteUser))               // userID at the end
 	router.Handle("/admin/rejectPromotion/", requireAdmin.ThenFunc(r.rejectPromotion)) // userID at the end
 	router.Handle("/admin/rejectReport/", requireAdmin.ThenFunc(r.rejectReport))       // userID at the end
-	router.Handle("/admin/users/", requireAdmin.ThenFunc(r.users))                     // userID at the end
+	router.Handle("/admin/users", requireAdmin.ThenFunc(r.users))
+	router.Handle("/admin/tags", requireAdmin.ThenFunc(r.tags))
+	router.Handle("/admin/tags/delete/", requireAdmin.ThenFunc(r.tagDelete)) // tagID at the end
+	router.Handle("/admin/tags/create", requireAdmin.ThenFunc(r.tagCreate))
 
 	// Standard middleware chain applied to router itself -> used in all routes
 	standard := mids.New(r.recoverPanic, r.limitRate, r.secureHeaders)

@@ -1,40 +1,37 @@
-<!-- new -->
 {{define "title"}} Rabbit {{end}}
 
 {{define "main"}}
     <div class="base">
-        <!-- post feed-->
         <div class="post-feed">
-            <!-- topics -->
-            <!-- ITERATE THROUGH TOPICS -->
-            <div class="feed-message-wrapper">
-                <div class="feed-message-frame">
-                    <div class="feed-message-left">
-                        <div class="feed-message-from">
-                            <p>Topic name</p>
+            {{if .Models.Tags}}
+                    {{range .Models.Tags}}
+                        <div class="feed-message-wrapper">
+                            <div class="feed-message-frame">
+                                <div class="feed-message-left">
+                                    <div class="feed-message-from">
+                                        <p>{{.Name}}</p>
+                                    </div>
+                                </div>
+                                <div class="ok-frame">
+                                    <form action="/admin/tags/delete/{{.ID}}" method="POST">
+                                        <button class="ok-button" id="like">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="ok-frame">
-                        <button class="ok-button" id="like">Delete
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- add topic -->
-            <!-- MAKE FORM HERE -->
+                    {{end}}
+            {{else}}
+                <p>No tags yet!</p>
+            {{end}}
+        </div>
+        <form action="/admin/tags/create" method="POST">
             <div class="feed-message-wrapper">
                 <div class="comment-frame">
-                    <textarea class="white-text-area" id="usercomment" type="text" minlength="3" maxlength="15"
+                    <textarea class="white-text-area" id="usercomment" name="newTag" type="text" minlength="3" maxlength="30"
                         spellcheck="false"></textarea>
-                    <button class="light-button">Add topic</button>
+                    <button class="light-button">Add tag</button>
                 </div>
-
             </div>
-
-
-        </div>
-
+        </form>
     </div>
 {{end}}
