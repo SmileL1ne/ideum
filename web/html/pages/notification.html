@@ -18,7 +18,7 @@
                             <div class="feed-message-left">
                                 <div class="feed-message-from">
                                     <p>{{.Username}}</p>
-                                    <p class="post-date">{{.CreatedAt}}</p>
+                                    <p class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
                                 </div>
                                 <div class="message-content">{{.Content}}. Source: <a href="/post/view/{{.SourceID}}">click</a>
                                 </div>
@@ -53,7 +53,7 @@
                             <div class="feed-message-left">
                                 <div class="feed-message-from">
                                     <p>{{.Username}}</p>
-                                    <p class="post-date">{{.CreatedAt}}</p>
+                                    <p class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
                                 </div>
                                 <div class="message-content">{{.Content}} 
                                     {{if .SourceID}}

@@ -11,10 +11,10 @@
                     <div class="feed-message-left">
                         <div class="feed-message-from">
                             <p>{{.Username}}</p>
-                            <p class="post-date">{{.CreatedAt}}</p>
+                            <p class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
                         </div>
-                        <div class="feed-message-from">
-                            <p>{{.Role}}</p>
+                        <div class="message-content">
+                            <p>Role : {{.Role}}</p>
                         </div>
                     </div>
                     <div class="ok-frame">

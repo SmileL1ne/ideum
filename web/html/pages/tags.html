@@ -23,15 +23,15 @@
             {{else}}
                 <p>No tags yet!</p>
             {{end}}
-        </div>
-        <form action="/admin/tags/create" method="POST">
+            <form action="/admin/tags/create" method="POST">
             <div class="feed-message-wrapper">
-                <div class="comment-frame">
-                    <textarea class="white-text-area" id="usercomment" name="newTag" type="text" minlength="3" maxlength="30"
-                        spellcheck="false"></textarea>
-                    <button class="light-button">Add tag</button>
+                    <div class="comment-frame">
+                        <textarea class="white-text-area" id="usercomment" name="newTag" type="text" minlength="3" maxlength="30"
+                            spellcheck="false"></textarea>
+                        <button class="light-button">Add tag</button>
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 {{end}}

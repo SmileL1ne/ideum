@@ -33,9 +33,11 @@
                         </li>
                         
                         {{if eq .UserRole "user"}}
+                        <div>
                             <a class="interface-link" href="/user/promote">
                                 <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
                             </a>
+                        </div>
                         {{end}}
 
                         {{if eq .UserRole "admin"}}
