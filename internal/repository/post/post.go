@@ -230,8 +230,8 @@ func (r *postRepository) GetAllByUserID(userID int) (*[]entity.PostEntity, error
 func (r *postRepository) GetAllByUserReaction(userID int) (*[]entity.PostEntity, error) {
 	query := `
 		SELECT p.id, p.title, p.content, p.created_at, u.username,
-			SUM(CASE WHEN pr.is_like = true THEN 1 ELSE 0 END) as likes_count,
-			SUM(CASE WHEN pr.is_like = false THEN 1 ELSE 0 END) as dislikes_count,
+			COALESCE(l.likes_count, 0) as likes_count,
+			COALESCE(d.dislikes_count, 0) as dislikes_count,
 			(
 				SELECT COUNT(*)
 				FROM comments c
@@ -250,8 +250,23 @@ func (r *postRepository) GetAllByUserReaction(userID int) (*[]entity.PostEntity,
 			)
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
-		LEFT JOIN post_reactions pr ON p.id = pr.post_id
-		WHERE pr.user_id = $1
+		LEFT JOIN (
+			SELECT post_id, COUNT(*) as likes_count
+			FROM post_reactions
+			WHERE is_like = true
+			GROUP BY post_id
+		) l ON p.id = l.post_id
+		LEFT JOIN (
+			SELECT post_id, COUNT(*) as dislikes_count
+			FROM post_reactions
+			WHERE is_like = false
+			GROUP BY post_id
+		) d ON p.id = d.post_id
+		WHERE p.id IN (
+			SELECT post_id
+			FROM post_reactions 
+			WHERE user_id = $1
+		)
 		GROUP BY p.id 
 	`
 

@@ -10,9 +10,6 @@
     <link rel="stylesheet" href="/static/css/font.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="/static/js/msgerr.js" defer></script>
-    <!-- <script src="/static/js/here.js"></script> -->
-    <!-- <script src="/static/js/like.js" defer></script> -->
-    
     <script src="/static/js/modal.js" defer></script>
     <title>{{template "title" .}}</title>
 </head>
@@ -22,13 +19,11 @@
 
         <div class="wrapper">
             <div class="header_wrapper">
-                <!-- logo-->
                 <div class="header_logo">
                     <a href="/" class="header_logo-link">
                         <img src="/static/img/svg/logo.svg" alt="Rabbit" class="header_logo-pic">
                     </a>
                 </div>
-                <!-- log-in button-->
                 {{if .IsAuthenticated}}
                 <form action="/user/logout" method="POST">
 
@@ -46,23 +41,15 @@
 
     </header>
 
-    <!-- <hr>
-    {{template "nav" .}}
-    <hr> -->
     <div class="wrapper_main">
         {{template "topics" .}}
-
         <main>
             {{template "main" .}}
-
         </main>
-
         {{template "userbar" .}}
         <dialog id="signin" class="Mymodal">
-
             <div class="wrapper_user-bar">
                 <div class="user-bar">
-
                     <form class="loginQuery">
                         <div class="user-bar-sign-up" id="SignUpP">
                             <h1>Welcome back!</h1>
@@ -98,25 +85,15 @@
                         <button class="light-button" type="submit">Sign up</button>
                         <p class="error-msg"></p>
                         <div class="user-bar-line"></div>
-                        <!-- <button class="dark-button" disabled><img src="/static/img/svg/Google_logo.svg"
-                                    alt="Google_logo">Google</button>
-                            <button class="dark-button" disabled><img src="/static/img/svg/github_logo.svg"
-                                    alt="github_logo">GitHub</button> -->
                         <a class="user-bar-link" id="SignInBtnP" href="#">Already have an account? <span>Sign
                                 in</span>
                         </a>
                     </div>
                 </form>
-
             </div>
-
             <script src="/static/js/register_modal.js"></script>
-            </dialog>
+        </dialog>
     </div>
-
-     
-    <!-- </div> -->
-
 </body>
 
 </html>

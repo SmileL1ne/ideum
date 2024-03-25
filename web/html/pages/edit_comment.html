@@ -3,12 +3,7 @@
 {{define "main"}}
 
 <div class="base">
-    <!-- post feed-->
     <div class="post-feed">
-
-
-        <!-- Leave Your comment -->
-
         <div class="feed-message-wrapper">
             <div class="comment-frame">
                 <form action="/post/comment/edit/{{with index .Models.Post.Comments 0}}{{.ID}}{{end}}" method="POST" id="commentForm">
@@ -20,10 +15,7 @@
                 </form>
             </div>
         </div>
-
-
     </div>
-
 </div>
 
 

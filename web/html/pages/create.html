@@ -7,8 +7,6 @@
     <div class="base">
 
         <div class="post-feed">
-            <!-- post -->
-
             <div class="post">
                 <div class="make-post-content">
 
@@ -20,21 +18,15 @@
                     <textarea class="white-text-area" type="text" spellcheck="false" name="content"></textarea>
                     <div class="check-box-topics">
                         {{range .Models.Tags}}
-            
                             <input type="checkbox" name="tags" value="{{.ID}}">
                             <label for="tags">{{.Name}}</label>
-                        
                         {{end}}
-
                     </div>
-                    
                     <input class="upload" type="file" name="image" lang="en" accept="image/png,image/gif,image/jpeg,image/jpg">
-
                     <div class="user-bar-line"></div>
                     <div class="confirm-section">
                         <button class="light-button">Submit</button>
                     </div>
-
                 </div>
             </div>
 

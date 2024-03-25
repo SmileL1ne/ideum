@@ -82,7 +82,7 @@ func Load() *Config {
 	}
 }
 
-// Parse ".env" file and sets key-value pairs in it into system environment
+// This init function parses ".env" file and sets key-value pairs in it into system environment
 func init() {
 	file, err := os.Open(".env")
 	if err != nil {

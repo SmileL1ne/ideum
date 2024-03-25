@@ -7,9 +7,7 @@
 {{ end }}
 
 <div class="base">
-    <!-- post feed-->
     <div class="post-feed">
-        <!-- post -->
         <div class="post">
             <div class="post-content">
                 <div class="post-top-info">
@@ -155,7 +153,6 @@
             </div>
         {{end}}
 
-        <!-- Leave Your comment -->
         {{if .IsAuthenticated}}
             <script src="/static/js/comment.js"></script>
             <div class="feed-message-wrapper">
@@ -251,7 +248,5 @@
         </div>
     </form>
 </dialog>
-
-
 
 {{end}}

@@ -262,21 +262,18 @@ func (r *Routes) postDeletePrivileged(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	reportID, ok := getValidID(req.PostForm.Get("reportID"))
-	if !ok {
-		r.logger.Print("postDeletePrivileged: invalid reportID")
-		r.badRequest(w)
-		return
-	}
+	reportID, _ := getValidID(req.PostForm.Get("reportID"))
 
-	err := r.services.User.DeleteReport(reportID)
-	if err != nil {
-		if errors.Is(err, entity.ErrReportNotFound) {
-			r.notFound(w)
+	if reportID != 0 {
+		err := r.services.User.DeleteReport(reportID)
+		if err != nil {
+			if errors.Is(err, entity.ErrReportNotFound) {
+				r.notFound(w)
+				return
+			}
+			r.serverError(w, req, err)
 			return
 		}
-		r.serverError(w, req, err)
-		return
 	}
 
 	postID, ok := getIdFromPath(req, 4)
@@ -289,7 +286,7 @@ func (r *Routes) postDeletePrivileged(w http.ResponseWriter, req *http.Request) 
 	userRole := r.sesm.GetUserRole(req.Context())
 	userID := r.sesm.GetUserID(req.Context())
 
-	err = r.services.Post.DeletePostPrivileged(postID, userID, userRole)
+	err := r.services.Post.DeletePostPrivileged(postID, userID, userRole)
 	if err != nil {
 		if errors.Is(err, entity.ErrPostNotFound) {
 			r.notFound(w)
