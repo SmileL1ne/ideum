@@ -744,6 +744,19 @@ dialog::backdrop {
     background-color: #171717;
 
 }
+/* del comment modal style */
+#delete-modal-comment {
+    border: 0;
+    background: none;
+    margin-top: 200px;
+
+}
+
+#delete-modal-comment::backdrop {
+    background-color: #171717;
+
+}
+
 
 .modal-frame {
     border-radius: 20px;
