@@ -29,6 +29,7 @@ type IUserService interface {
 	DeleteNotification(notificationID int) error
 	GetUsers() (*[]entity.UserEntity, error)
 	FindNotification(nType string, userFrom, userTo int) (int, error)
+	GetNotificationsCount(userID int) (int, error)
 }
 
 type userService struct {
@@ -183,6 +184,10 @@ func (us *userService) GetReports() (*[]entity.Report, error) {
 
 func (us *userService) GetNotifications(userID int) (*[]entity.Notification, error) {
 	return us.userRepo.GetNotifications(userID)
+}
+
+func (us *userService) GetNotificationsCount(userID int) (int, error) {
+	return us.userRepo.GetNotificationsCount(userID)
 }
 
 func (us *userService) PromoteUser(userID int) error {

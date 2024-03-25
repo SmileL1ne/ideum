@@ -31,20 +31,25 @@
                             <a class="interface-link" href="/user/notifications">
                                 <img src="/static/img/svg/notification.svg" alt="notification-icon"> Notifications
                             </a>
-                             <!-- with notification -->
-                            <button class="notifications" disabled="">+99</button>
+                            {{if ne .NotificationsCount 0}}
+                                {{if gt .NotificationsCount 99}}
+                                    <button class="notifications" disabled="">+99</button>
+                                {{else}}
+                                    <button class="notifications" disabled="">+{{.NotificationsCount}}</button>
+                                {{end}}
+                            {{end}}
                             
                         </div>
                         </li>
                         
                         {{if eq .UserRole "user"}}
-                        <div class="moderator-link">
-                            <script src="/static/js/promote_err.js"></script>
-                            <!-- <p class="error-msg" id="small-err"></p> -->
-                            <a class="interface-link" href="/user/promote" id="promote">
-                                <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
-                            </a>
-                        </div>
+                            <div class="moderator-link">
+                                <script src="/static/js/promote_err.js"></script>
+                                <!-- <p class="error-msg" id="small-err"></p> -->
+                                <a class="interface-link" href="/user/promote" id="promote">
+                                    <img src="/static/img/svg/moderator.svg" alt="moderator-icon"> Become Moderator
+                                </a>
+                            </div>
                         {{end}}
 
                         {{if eq .UserRole "admin"}}

@@ -20,10 +20,11 @@ type Models struct {
 }
 
 type templateData struct {
-	Models          Models
-	Username        string
-	UserRole        string
-	IsAuthenticated bool
+	Models             Models
+	Username           string
+	UserRole           string
+	IsAuthenticated    bool
+	NotificationsCount int
 }
 
 type errData struct {

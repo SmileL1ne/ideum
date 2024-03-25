@@ -15,6 +15,7 @@ import (
 )
 
 func (r *Routes) newTemplateData(req *http.Request) (templateData, error) {
+	userID := r.sesm.GetUserID(req.Context())
 	userRole := r.sesm.GetUserRole(req.Context())
 	username, _ := r.getUsername(req.Context())
 
@@ -23,11 +24,21 @@ func (r *Routes) newTemplateData(req *http.Request) (templateData, error) {
 		return templateData{}, err
 	}
 
+	var notificationsCount int
+
+	if userID != 0 {
+		notificationsCount, err = r.services.User.GetNotificationsCount(userID)
+		if err != nil {
+			return templateData{}, err
+		}
+	}
+
 	return templateData{
-		IsAuthenticated: r.isAuthenticated(req),
-		Models:          Models{Tags: *tags},
-		Username:        username,
-		UserRole:        userRole,
+		IsAuthenticated:    r.isAuthenticated(req),
+		Models:             Models{Tags: *tags},
+		Username:           username,
+		UserRole:           userRole,
+		NotificationsCount: notificationsCount,
 	}, nil
 }
 

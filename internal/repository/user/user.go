@@ -29,6 +29,7 @@ type IUserRepository interface {
 	Demote(userID int) error
 	GetUsers() (*[]entity.UserEntity, error)
 	FindNotification(nType string, userFrom, userTo int) (int, error)
+	GetNotificationsCount(userID int) (int, error)
 }
 
 type userRepository struct {
@@ -262,6 +263,20 @@ func (r *userRepository) GetNotifications(userID int) (*[]entity.Notification, e
 	}
 
 	return &notifications, nil
+}
+
+func (r *userRepository) GetNotificationsCount(userID int) (int, error) {
+	query := `
+		SELECT COUNT(*)
+		FROM notifications 
+		WHERE user_to = $1
+	`
+
+	var count int
+
+	err := r.DB.QueryRow(query, userID).Scan(&count)
+
+	return count, err
 }
 
 func (r *userRepository) DeleteNotification(notificationID int) error {
