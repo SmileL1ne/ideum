@@ -20,8 +20,10 @@
                     <textarea class="white-text-area" type="text" spellcheck="false" name="content"></textarea>
                     <div class="check-box-topics">
                         {{range .Models.Tags}}
+            
                             <input type="checkbox" name="tags" value="{{.ID}}">
                             <label for="tags">{{.Name}}</label>
+                        
                         {{end}}
 
                     </div>

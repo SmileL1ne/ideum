@@ -833,9 +833,21 @@ dialog::backdrop {
 .check-box-topics {
     display: flex;
     gap: 10px;
+    padding-bottom: 15px;
     accent-color: #8B5CF6;
     font-size: 16px;
+    max-width: 544px;
+    overflow-x: auto; 
+    white-space: nowrap; 
 }
+
+.check-box-topics > input[type="checkbox"],
+.check-box-topics > label {
+    max-width: 100%; /* Ограничиваем ширину чекбоксов и меток до ширины контейнера */
+}
+
+
+
 
 .big-error-container {
     margin-top: 50px;
@@ -892,5 +904,38 @@ p {
     word-wrap: break-word;
 }
 
+.moderator-link {
+    display: flex;
+    flex-direction: column;
+    gap:9px;
 
-/* upload button */
+}
+
+.small {
+    font-size: 12px;
+}
+
+.notifications-link{
+    display: flex;
+    align-items: center;
+}
+
+.notifications{
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: #ffffff;
+    background-color: #8B5CF6;
+    padding: 0;
+    border: none;
+    border-radius: 5px;
+    width: 49px;
+    height: 25px;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-family: 'Inter';
+}
+
+

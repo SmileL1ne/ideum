@@ -8,7 +8,7 @@
         <label>TOPICS</label>
         {{range .Models.Tags}}
         <a class="topic-link" href="/sortByTags/{{.ID}}">
-            <li><img src="/static/img/svg/{{ low .Name }}-icon.svg" alt="{{.Name}}-icon" class="here"> {{.Name}}</li>
+            <li><img  class="here" src="/static/img/svg/{{ low .Name }}-icon.svg" alt="+"> {{.Name}}</li>
         </a>
         {{end}}
     </ul>

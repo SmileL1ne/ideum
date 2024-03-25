@@ -128,9 +128,11 @@
                     <div class="post-footer comment-option">
                         <div class="post-options">
                             {{if eq .Username $root.Username}}
-                                <button type="submit" class="clean-btn">
-                                    <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
-                                </button>
+                                <form action="/post/comment/edit/{{.ID}}" method="GET">
+                                    <button type="submit" class="clean-btn">
+                                        <img src="/static/img/svg/edit-icon.svg" alt="comment-icon">
+                                    </button>
+                                </form>
                             {{end}}
 
                             {{if or (eq .Username $root.Username) (eq $root.UserRole "moderator") (eq $root.UserRole "admin")}}
@@ -162,8 +164,8 @@
                     <form action="/post/comment/{{.Models.Post.ID}}" method="POST" id="commentForm">
                         <p class="error-msg"></p>
                         <br>
-                        <textarea class="white-text-area" name="commentContent" id="usercomment" type="text" minlength="3"
-                            maxlength="256" spellcheck="false" required></textarea>
+                        <textarea class="white-text-area" name="commentContent" id="usercomment" type="text" minlength="1"
+                            maxlength="500" spellcheck="false" required></textarea>
                         <button class="light-button">Leave Comment</button>
                     </form>
                 </div>

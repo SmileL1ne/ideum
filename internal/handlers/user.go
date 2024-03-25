@@ -185,5 +185,5 @@ func (r *Routes) userPromote(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Redirect(w, req, "/", http.StatusSeeOther)
+	// http.Redirect(w, req, "/", http.StatusSeeOther)
 }

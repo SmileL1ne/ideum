@@ -14,6 +14,9 @@ type ICommentRepository interface {
 	Delete(commentID, userID int) error
 	DeleteByPrivileged(commentID int) error
 	GetAuthorID(commentID int) (int, error)
+	GetByID(commentID int) (entity.CommentEntity, error)
+	Update(commentID int, content string) error
+	GetPostID(commentID int) (int, error)
 }
 
 type commentRepository struct {
@@ -178,4 +181,59 @@ func (r *commentRepository) GetAuthorID(commentID int) (int, error) {
 	}
 
 	return userID, nil
+}
+
+func (r *commentRepository) GetByID(commentID int) (entity.CommentEntity, error) {
+	query := `
+		SELECT content
+		FROM comments
+		WHERE id = $1
+	`
+
+	var comment entity.CommentEntity
+
+	err := r.DB.QueryRow(query, commentID).Scan(&comment.Content)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entity.CommentEntity{}, entity.ErrCommentNotFound
+		}
+		return entity.CommentEntity{}, err
+	}
+
+	return comment, nil
+}
+
+func (r *commentRepository) Update(commentID int, content string) error {
+	query := `
+		UPDATE comments
+		SET content = $1
+		WHERE id = $2
+	`
+
+	_, err := r.DB.Exec(query, content, commentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *commentRepository) GetPostID(commentID int) (int, error) {
+	query := `
+		SELECT post_id
+		FROM comments
+		WHERE id = $1
+	`
+
+	var postID int
+
+	err := r.DB.QueryRow(query, commentID).Scan(&postID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, entity.ErrPostNotFound
+		}
+		return 0, err
+	}
+
+	return postID, nil
 }

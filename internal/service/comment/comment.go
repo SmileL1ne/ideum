@@ -14,6 +14,9 @@ type ICommentService interface {
 	DeleteComment(commentID, userID int) error
 	DeleteCommentPrivileged(commentID int, userID int, userRole string) error
 	GetAuthorID(commentID int) (int, error)
+	GetComment(commentID int) (entity.CommentView, error)
+	UpdateComment(commentID int, content string) error
+	GetPostID(commentID int) (int, error)
 }
 
 type commentService struct {
@@ -116,4 +119,23 @@ func (cs *commentService) DeleteCommentPrivileged(commentID int, userID int, use
 	}
 
 	return nil
+}
+
+func (cs *commentService) GetComment(commentID int) (entity.CommentView, error) {
+	c, err := cs.commentRepo.GetByID(commentID)
+	if err != nil {
+		return entity.CommentView{}, err
+	}
+
+	view := entity.CommentView(c)
+
+	return view, nil
+}
+
+func (cs *commentService) UpdateComment(commentID int, content string) error {
+	return cs.commentRepo.Update(commentID, content)
+}
+
+func (cs *commentService) GetPostID(commentID int) (int, error) {
+	return cs.commentRepo.GetPostID(commentID)
 }
