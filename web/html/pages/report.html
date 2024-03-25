@@ -1,0 +1,49 @@
+{{define "title"}} Rabbit {{end}}
+
+{{define "main"}}
+
+<div class="base">
+    <div class="post-feed">
+    {{if .Models.Reports}}
+            {{range .Models.Reports}}
+                <div class="feed-message-wrapper" >
+
+                    <div class="feed-message-frame">
+                        <div class="feed-message-left">
+                            <div class="feed-message-from">
+                                <p>{{.Username}}</p>
+                                <p class="post-date">{{.CreatedAt}}</p>
+                            </div>
+                            <div class="message-content">
+                                {{.Username}} reported <a href="/post/view/{{.SourceID}}">this post</a> as {{.Reason}} 
+                            </div>
+                        </div>
+
+                        <div class="ok-frame">
+                            <div class="action-message">Delete {{.SourceType}}?</div>
+                            {{if eq .SourceType "post"}}
+                                <form action="/post/delete/{{.SourceID}}" method="POST">
+                                    <input type="hidden" name="reportID" value="{{.ID}}">
+                                    <button class="ok-button" id="like">YES</button>
+                                </form>
+                            {{else if eq .SourceType "comment"}}
+                                <form action="/post/comment/delete/{{.SourceID}}" method="POST">
+                                    <input type="hidden" name="reportID" value="{{.ID}}">
+                                    <button class="ok-button" id="like">YES</button>
+                                </form>
+                            {{end}}
+                            <form action="/admin/rejectReport/{{.UserFrom}}" method="POST">
+                                <input type="hidden" name="sourceID" value="{{.SourceID}}">
+                                <input type="hidden" name="reportID" value="{{.ID}}">
+                                <button class="ok-button" id="dislike">NO</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {{end}}
+    {{else}}
+        <p>No reports yet!</p>
+    {{end}}
+    </div>
+</div>
+{{end}}
