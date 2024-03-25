@@ -9,10 +9,10 @@ import (
 // for business logic
 type CommentEntity struct {
 	ID        int
+	Username  string
 	Content   string
 	CreatedAt time.Time
 	PostID    int
-	Username  string
 	Likes     int
 	Dislikes  int
 }

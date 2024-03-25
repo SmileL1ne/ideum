@@ -92,6 +92,7 @@ func (r *Routes) Register() http.Handler {
 
 	// COMMENT
 	router.Handle("/post/comment/", protected.ThenFunc(r.commentCreate))            // postID at the end
+	router.Handle("/post/comment/edit/", protected.ThenFunc(r.commentEdit))         // postID at the end
 	router.Handle("/post/comment/reaction/", protected.ThenFunc(r.commentReaction)) // postID at the end
 	router.Handle("/post/comment/delete/", protected.ThenFunc(r.commentDelete))     // commentID at the end
 	router.Handle("/post/comment/report/", protected.ThenFunc(r.commentReport))     // commentID at the end

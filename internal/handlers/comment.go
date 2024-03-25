@@ -111,7 +111,7 @@ func (r *Routes) commentDelete(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	commentID, ok := getIdFromPath(req, 6)
+	commentID, ok := getIdFromPath(req, 5)
 	if !ok {
 		fmt.Println("nah")
 		r.logger.Print("commentDelete: invalid url path")
@@ -168,7 +168,7 @@ func (r *Routes) commentDeletePrivileged(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	commentID, ok := getIdFromPath(req, 6)
+	commentID, ok := getIdFromPath(req, 5)
 	if !ok {
 		r.logger.Print("commentDeletePrivileged: invalid url path")
 		r.notFound(w)
@@ -251,4 +251,84 @@ func (r *Routes) commentReport(w http.ResponseWriter, req *http.Request) {
 	}
 
 	http.Redirect(w, req, "/user/notifications", http.StatusOK)
+}
+
+func (r *Routes) commentEdit(w http.ResponseWriter, req *http.Request) {
+	switch {
+	case req.Method == http.MethodPost:
+		r.commentEditPost(w, req)
+		return
+	case req.Method != http.MethodGet:
+		r.methodNotAllowed(w)
+		return
+	}
+
+	data, err := r.newTemplateData(req)
+	if err != nil {
+		r.serverError(w, req, err)
+		return
+	}
+
+	commentID, ok := getIdFromPath(req, 5)
+	if !ok {
+		r.logger.Print("commentEdit: invalid url path")
+		r.notFound(w)
+		return
+	}
+
+	comment, err := r.services.Comment.GetComment(commentID)
+	if err != nil {
+		if errors.Is(err, entity.ErrCommentNotFound) {
+			r.logger.Print("commentEdit: comment not found")
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+	comment.ID = commentID
+
+	data.Models.Post.Comments = make([]entity.CommentView, 1)
+	data.Models.Post.Comments[0] = comment
+
+	r.render(w, req, http.StatusOK, "edit_comment.html", data)
+}
+
+func (r *Routes) commentEditPost(w http.ResponseWriter, req *http.Request) {
+	if err := req.ParseForm(); err != nil {
+		r.badRequest(w)
+		return
+	}
+
+	commentID, ok := getIdFromPath(req, 5)
+	if !ok {
+		r.logger.Print("commentEditPost: invalid url path")
+		r.notFound(w)
+		return
+	}
+	postID, err := r.services.Comment.GetPostID(commentID)
+	if err != nil {
+		if errors.Is(err, entity.ErrPostNotFound) {
+			r.logger.Print("commentEditPost: post not found")
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	content := req.PostForm.Get("commentContent")
+
+	err = r.services.Comment.UpdateComment(commentID, content)
+	if err != nil {
+		if errors.Is(err, entity.ErrCommentNotFound) {
+			r.logger.Print("commentEditPost: comment not found")
+			r.notFound(w)
+			return
+		}
+		r.serverError(w, req, err)
+		return
+	}
+
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }

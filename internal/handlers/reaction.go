@@ -112,7 +112,7 @@ func (r *Routes) commentReaction(w http.ResponseWriter, req *http.Request) {
 			r.logger.Print("commentReaction: comment not found")
 			r.notFound(w)
 		case errors.Is(err, entity.ErrNotificationNotFound):
-			r.logger.Print("postReaction: notification not found")
+			r.logger.Print("commentReaction: notification not found")
 		default:
 			r.serverError(w, req, err)
 		}
