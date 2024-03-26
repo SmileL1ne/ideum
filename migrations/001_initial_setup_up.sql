@@ -114,7 +114,6 @@ CREATE TABLE IF NOT EXISTS reports (
     source_type VARCHAR(30) NOT NULL,
     created_at DATETIME NOT NULL,
 
-    UNIQUE(user_from, source_id, source_type)
     FOREIGN KEY(user_from) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY(source_id) REFERENCES posts(id) ON DELETE CASCADE
 )

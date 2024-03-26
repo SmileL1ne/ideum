@@ -938,4 +938,12 @@ p {
     font-family: 'Inter';
 }
 
+.Mymodal {
+    border: 0;
+    background: none;
+    margin-top: 200px;
+}
 
+.Mymodal::backdrop {
+    background-color: #171717;
+}

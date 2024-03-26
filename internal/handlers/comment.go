@@ -143,21 +143,18 @@ func (r *Routes) commentDeletePrivileged(w http.ResponseWriter, req *http.Reques
 
 	userRole := r.sesm.GetUserRole(req.Context())
 
-	notificationID, ok := getValidID(req.PostForm.Get("notificationID"))
-	if !ok {
-		r.logger.Print("promoteUser: invalid notificationID")
-		r.badRequest(w)
-		return
-	}
+	reportID, _ := getValidID(req.PostForm.Get("reportID"))
 
-	err := r.services.User.DeleteNotification(notificationID)
-	if err != nil {
-		if errors.Is(err, entity.ErrNotificationNotFound) {
-			r.notFound(w)
+	if reportID != 0 {
+		err := r.services.User.DeleteReport(reportID)
+		if err != nil {
+			if errors.Is(err, entity.ErrReportNotFound) {
+				r.notFound(w)
+				return
+			}
+			r.serverError(w, req, err)
 			return
 		}
-		r.serverError(w, req, err)
-		return
 	}
 
 	urls := strings.Split(req.URL.Path, "/")
@@ -177,7 +174,7 @@ func (r *Routes) commentDeletePrivileged(w http.ResponseWriter, req *http.Reques
 
 	userID := r.sesm.GetUserID(req.Context())
 
-	err = r.services.Comment.DeleteCommentPrivileged(commentID, userID, userRole)
+	err := r.services.Comment.DeleteCommentPrivileged(commentID, userID, userRole)
 	if err != nil {
 		if errors.Is(err, entity.ErrCommentNotFound) {
 			r.notFound(w)
@@ -204,7 +201,7 @@ func (r *Routes) commentReport(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	commentID, ok := getIdFromPath(req, 5)
+	commentID, ok := getIdFromPath(req, 6)
 	if !ok {
 		r.logger.Print("commentReport: invalid url path")
 		r.notFound(w)
@@ -250,7 +247,7 @@ func (r *Routes) commentReport(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.Redirect(w, req, "/user/notifications", http.StatusOK)
+	http.Redirect(w, req, fmt.Sprintf("/post/view/%d", postID), http.StatusSeeOther)
 }
 
 func (r *Routes) commentEdit(w http.ResponseWriter, req *http.Request) {

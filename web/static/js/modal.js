@@ -15,7 +15,6 @@ modalButtons.forEach(button => {
             } else {
                 modal.showModal();
             }
-
         }
     });
 });

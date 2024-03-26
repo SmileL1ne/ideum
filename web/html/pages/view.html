@@ -200,7 +200,7 @@
 
 <!-- COMMENT REPORT -->
 <dialog id="report-modal-comment" class="Mymodal">
-    <form action="/post/comment/report/" method="POST">
+    <form action="/post/comment/report/{{.Models.Post.ID}}/" method="POST">
         <div class="modal-frame-report">
             <span>Report</span>
             <div class="modal-list-frame">
