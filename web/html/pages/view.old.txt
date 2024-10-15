@@ -14,6 +14,7 @@
 
                     <div class="post-top-user"><img src="/static/img/ava/user.png" alt="user-ava">
                         <p>{{.Models.Post.Username}}</p>
+                        <p class="post-date">{{.Models.Post.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
                     </div>
 
                     <div class="likes-frame">
@@ -89,7 +90,7 @@
 
         <!-- Global variable for template data access inside comments iteration -->
         {{$root := .}}
-        
+
         <!-- comments -->
         {{range $root.Models.Post.Comments}}
             <div class="post">
@@ -98,6 +99,7 @@
 
                         <div class="post-top-user">
                             <p>{{.Username}}</p>
+                            <p class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</p>
                         </div>
 
                         <div class="likes-frame">

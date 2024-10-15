@@ -11,6 +11,7 @@
                         <div class="post-top-info">
                             <div class="post-top-user"><img src="/static/img/ava/user.png" alt="user-ava">
                                 <p>{{.Username}}</p>
+                                <p class="post-date">{{ .CreatedAt.Format "2006-01-02 15:04:05" }}</p>
                             </div>
                             <div class="likes-frame">
                                 <button class="disabled" id="like" disabled>
@@ -43,7 +44,7 @@
                             <div class="post-comments"><img src="/static/img/svg/comment-icon.svg" alt="comment-icon">
                                 {{.CommentsLen}}
                             </div>
-                        
+
                         </div>
 
                     </div>
