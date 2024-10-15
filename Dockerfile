@@ -9,8 +9,9 @@ RUN go build -o forum ./cmd/app/
 FROM alpine:3.16
 WORKDIR /app
 
-COPY --from=base /app/forum /app/forum
+COPY --from=base /app/ /app/
+COPY --from=base /app/.env /app/.env
 
 EXPOSE 7777
 
-CMD ["./forum"]
+CMD ["/bin/sh", "-c", "ls -la /app && ./forum"]
